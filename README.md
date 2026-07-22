@@ -22,12 +22,31 @@ Sigue estos pasos en orden. Solo hay que hacerlos la primera vez.
    contenido, pégalo en el editor y presiona **Run**.
 3. Debe decir "Success". Esto crea todas las tablas y la seguridad.
 
-### 3. Crear las cuentas de cada persona
+### 3. Crear las 4 cuentas (una por rol / código)
+El acceso es por **código de 4 dígitos** (sin usuario). Cada código está ligado a
+una cuenta de Supabase con un correo fijo. La contraseña de cada cuenta es
+**el código seguido de `kolors`** (ej: código `4729` → contraseña `4729kolors`).
+
 1. Menú lateral: **Authentication** → **Users** → **Add user** → **Create new user**.
-2. Escribe el correo y una contraseña para cada empleado que vaya a usar el sistema.
-   Marca "Auto Confirm User" para que pueda entrar de una vez.
-3. Repite por cada persona. (No hay registro público: solo entran las cuentas que
-   tú crees aquí.)
+2. Marca **"Auto Confirm User"** (para que pueda entrar de una vez).
+3. Crea estas 4 cuentas con EXACTAMENTE estos correos y estas contraseñas:
+
+   | Persona / rol                 | Email (fijo)          | Contraseña (código + `kolors`) |
+   |-------------------------------|-----------------------|--------------------------------|
+   | Admin general (tú)            | `admin@kolors.app`    | `<código admin>kolors`         |
+   | Jefe (solo lectura)           | `jefe@kolors.app`     | `<código jefe>kolors`          |
+   | María (edita todo)            | `maria@kolors.app`    | `<código maría>kolors`         |
+   | Mía (edita todo)              | `mia@kolors.app`      | `<código mía>kolors`           |
+
+   > Los correos son internos, no tienen que existir de verdad. Lo único que la
+   > gente escribe al entrar es su código de 4 dígitos.
+
+**¿Cómo cambio un código más adelante?** En Authentication → Users, abre esa
+cuenta, **Reset password** y pon la nueva contraseña = nuevo código + `kolors`.
+
+**¿Los roles?** El jefe (`jefe@kolors.app`) queda como **solo lectura** hasta a
+nivel de base de datos: aunque quisiera, no puede modificar nada. Admin, María y
+Mía pueden editar todo. Solo el admin ve los botones de "Importar" y "Borrar todo".
 
 ### 4. Pegar las credenciales en la app
 1. En Supabase: **Project Settings** (engranaje) → **API**.
@@ -65,7 +84,8 @@ archivo y se subirá todo a Supabase.
 
 ## Cómo se usa
 
-- **Entrar**: cada persona abre la URL e inicia sesión con su correo y contraseña.
+- **Entrar**: cada persona abre la URL y escribe su **código de 4 dígitos**. Según
+  el código entra con su rol (admin, editor o solo lectura).
 - **📋 Tablero**: pedidos de camisa por fase (Pedido → Impresión → Sublimación →
   Costura → Entregado). Filtro de "Deben / Pagados".
 - **🖨️ Sublimación**: impresiones para sublimar. El tipo "camisa" o "taller" solo

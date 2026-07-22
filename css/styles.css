@@ -649,5 +649,27 @@ label {
 
 .app-shell.hidden { display: none; }
 
+/* === PERMISOS POR ROL === */
+/* Jefe (solo lectura): se ocultan todos los controles de edición.
+   Además la base de datos rechaza cualquier escritura de esta cuenta. */
+body.rol-jefe .card-actions,
+body.rol-jefe .impresion-actions,
+body.rol-jefe #btnNuevoPedido,
+body.rol-jefe #btnNuevaImpresion,
+body.rol-jefe #btnNuevoEco,
+body.rol-jefe #btnNuevaPerdida,
+body.rol-jefe .fab-precios {
+  display: none !important;
+}
+
+/* Operaciones destructivas (importar respaldo / borrar todo): solo el admin.
+   Antes de iniciar sesión el body no tiene clase de rol, así que también
+   quedan ocultas hasta entrar. */
+body:not(.rol-admin) #btnImportar,
+body:not(.rol-admin) #inputImportar,
+body:not(.rol-admin) #btnBorrarTodo {
+  display: none !important;
+}
+
 ::-webkit-scrollbar { height: 8px; width: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 8px; opacity: .5; }

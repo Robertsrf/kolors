@@ -119,9 +119,14 @@ insert into precios_config (id, data) values (1, '{}'::jsonb)
   on conflict (id) do nothing;
 
 -- ============================================================
--- ROW LEVEL SECURITY
--- Herramienta interna de un solo taller: cualquier usuario que haya
--- iniciado sesión puede leer y escribir todo (no es multi-tenant).
+-- ROW LEVEL SECURITY (con roles por código)
+--
+-- Todos los que iniciaron sesión pueden LEER todo.
+-- Todos pueden ESCRIBIR (crear/editar/borrar) EXCEPTO la cuenta del
+-- jefe (jefe@kolors.app), que queda como "solo lectura" a nivel de
+-- base de datos (no depende solo de esconder botones en la pantalla).
+--
+-- Si cambias el correo del jefe, actualízalo también aquí abajo.
 -- ============================================================
 alter table pedidos enable row level security;
 alter table pedido_items enable row level security;
@@ -134,14 +139,25 @@ alter table precios_config enable row level security;
 do $$
 declare
   t text;
+  tablas text[] := array['pedidos','pedido_items','impresiones','eco_solvente','perdidas','pagos','precios_config'];
+  -- condición: el usuario NO es el jefe (solo lectura)
+  puede_escribir text := '((auth.jwt() ->> ''email'') is distinct from ''jefe@kolors.app'')';
 begin
-  foreach t in array array['pedidos','pedido_items','impresiones','eco_solvente','perdidas','pagos','precios_config']
+  foreach t in array tablas
   loop
+    -- limpiar políticas viejas (por si se corre el script más de una vez)
     execute format('drop policy if exists "usuarios autenticados acceso total" on %I', t);
-    execute format(
-      'create policy "usuarios autenticados acceso total" on %I for all to authenticated using (true) with check (true)',
-      t
-    );
+    execute format('drop policy if exists "leer_autenticados" on %I', t);
+    execute format('drop policy if exists "escribir_no_jefe_ins" on %I', t);
+    execute format('drop policy if exists "escribir_no_jefe_upd" on %I', t);
+    execute format('drop policy if exists "escribir_no_jefe_del" on %I', t);
+
+    -- leer: cualquier usuario autenticado
+    execute format('create policy "leer_autenticados" on %I for select to authenticated using (true)', t);
+    -- crear / editar / borrar: todos menos el jefe
+    execute format('create policy "escribir_no_jefe_ins" on %I for insert to authenticated with check %s', t, puede_escribir);
+    execute format('create policy "escribir_no_jefe_upd" on %I for update to authenticated using %s with check %s', t, puede_escribir, puede_escribir);
+    execute format('create policy "escribir_no_jefe_del" on %I for delete to authenticated using %s', t, puede_escribir);
   end loop;
 end $$;
 

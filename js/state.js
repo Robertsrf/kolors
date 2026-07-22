@@ -20,6 +20,17 @@ export const TIPO_IMPRESION_LABEL = { camisa: "👕 Camisa", taller: "🧵 Talle
 export const TIPO_PERDIDA_LABEL = { perdida: "🗑️ Pérdida", prueba: "🧪 Prueba" };
 export const REMATE_LABEL = { ninguno: "Sin remate", palos: "🪵 Palos", tubos: "🧵 Tubos" };
 
+// Tablero de Eco Solvente
+export const FASES_ECO = ["Pedido", "Diseño", "Impresión", "Acabado", "Entregado"];
+export const CLAVE_FECHA_ECO = { "Pedido": "pedido", "Diseño": "diseno", "Impresión": "impresion", "Acabado": "acabado", "Entregado": "entregado" };
+export const COLOR_FASE_ECO = {
+  "Pedido": "var(--c-pedido)",
+  "Diseño": "var(--c-sublimacion)",
+  "Impresión": "var(--c-impresion)",
+  "Acabado": "var(--c-costura)",
+  "Entregado": "var(--c-entregado)",
+};
+
 export function tallasPorGenero(genero) {
   return genero === "Niño" || genero === "Niña" ? TALLAS_JOVEN : TALLAS_ADULTO;
 }
@@ -145,6 +156,10 @@ export function historialPagosEco(eco) {
   }
   (eco.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono" }));
   return historial.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+}
+export function fechaFaseActualEco(eco) {
+  const fechas = eco.fechas || {};
+  return fechas[CLAVE_FECHA_ECO[eco.estado]] || eco.fecha;
 }
 
 // === CÁLCULOS DERIVADOS · PÉRDIDAS Y PRUEBAS ===

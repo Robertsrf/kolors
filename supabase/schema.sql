@@ -61,6 +61,14 @@ create table if not exists eco_solvente (
   descripcion text,
   abono numeric not null default 0,
 
+  -- flujo del tablero: Pedido -> Diseño -> Impresión -> Acabado -> Entregado
+  estado text not null default 'Pedido',
+  fecha_pedido timestamptz,
+  fecha_diseno timestamptz,
+  fecha_impresion timestamptz,
+  fecha_acabado timestamptz,
+  fecha_entregado timestamptz,
+
   remate text not null default 'ninguno',       -- 'ninguno' | 'palos' | 'tubos'
   remate_costo numeric not null default 0,
 

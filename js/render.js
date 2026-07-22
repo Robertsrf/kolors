@@ -2,7 +2,7 @@ import { state } from "./state.js";
 import { escapeHtml } from "./utils.js";
 import { renderBoard } from "./ui/tablero.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
-import { renderEcoList } from "./ui/ecoSolvente.js";
+import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
 import { renderClientesGrid, abrirDetalleCliente, getClienteSeleccionado } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
@@ -32,7 +32,7 @@ export function render() {
   const tab = activeTab ? activeTab.dataset.tab : "tablero";
   if (tab === "stats") renderStats();
   if (tab === "impresiones") renderImpresionesList();
-  if (tab === "ecosolvente") renderEcoList();
+  if (tab === "ecosolvente") renderEcoBoard();
   if (tab === "perdidas") renderPerdidasList();
   if (tab === "clientes") {
     const sel = getClienteSeleccionado();

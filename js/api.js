@@ -71,6 +71,14 @@ function ecoFromRow(row, pagos) {
     precioM2: Number(row.precio_m2 || 0),
     descripcion: row.descripcion || "",
     abono: Number(row.abono || 0),
+    estado: row.estado || "Pedido",
+    fechas: {
+      pedido: row.fecha_pedido,
+      diseno: row.fecha_diseno,
+      impresion: row.fecha_impresion,
+      acabado: row.fecha_acabado,
+      entregado: row.fecha_entregado,
+    },
     remate: row.remate || "ninguno",
     remateCosto: Number(row.remate_costo || 0),
     llevaDiseno: !!row.lleva_diseno,
@@ -333,6 +341,8 @@ export async function crearEco(datos) {
     precio_m2: datos.precioM2,
     descripcion: datos.descripcion,
     abono: datos.abono,
+    estado: "Pedido",
+    fecha_pedido: new Date().toISOString(),
     remate: datos.remate,
     remate_costo: datos.remateCosto,
     lleva_diseno: datos.llevaDiseno,
@@ -375,6 +385,14 @@ export async function actualizarEco(id, datos) {
       transfer_precio_m2: datos.transferPrecioM2,
     })
     .eq("id", id);
+  if (error) throw error;
+  await cargarEcoSolvente();
+}
+
+export async function actualizarFaseEco(id, estado, campoFecha, valorFecha) {
+  const cambios = { estado };
+  if (campoFecha) cambios[campoFecha] = valorFecha;
+  const { error } = await supabase.from("eco_solvente").update(cambios).eq("id", id);
   if (error) throw error;
   await cargarEcoSolvente();
 }

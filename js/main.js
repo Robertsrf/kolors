@@ -5,7 +5,7 @@ import { render } from "./render.js";
 import { setClienteSeleccionado, renderClientesGrid } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
-import { renderEcoList } from "./ui/ecoSolvente.js";
+import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
@@ -20,7 +20,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     document.getElementById("section-" + tab).classList.add("active");
     if (tab === "stats") renderStats();
     if (tab === "impresiones") renderImpresionesList();
-    if (tab === "ecosolvente") renderEcoList();
+    if (tab === "ecosolvente") renderEcoBoard();
     if (tab === "perdidas") renderPerdidasList();
     if (tab === "clientes") {
       setClienteSeleccionado(null);

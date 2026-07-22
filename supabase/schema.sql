@@ -18,6 +18,9 @@ create table if not exists pedidos (
   fecha_sublimacion timestamptz,
   fecha_costura timestamptz,
   fecha_entregado timestamptz,
+  fecha_inicio timestamptz,
+  fecha_entrega timestamptz,
+  aviso_dias int,
   abono numeric not null default 0,
   creado_at timestamptz not null default now()
 );
@@ -45,6 +48,9 @@ create table if not exists impresiones (
   precio_m2 numeric not null default 0,
   descripcion text,
   abono numeric not null default 0,
+  fecha_inicio timestamptz,
+  fecha_entrega timestamptz,
+  aviso_dias int,
   creado_at timestamptz not null default now()
 );
 
@@ -60,6 +66,7 @@ create table if not exists eco_solvente (
   precio_m2 numeric not null default 0,
   descripcion text,
   abono numeric not null default 0,
+  material text not null default 'banner',       -- 'vinil' | 'banner' | 'vinil_tornasol' | 'papel_bond' | 'clear'
 
   -- flujo del tablero: Pedido -> Diseño -> Impresión -> Acabado -> Entregado
   estado text not null default 'Pedido',
@@ -68,6 +75,9 @@ create table if not exists eco_solvente (
   fecha_impresion timestamptz,
   fecha_acabado timestamptz,
   fecha_entregado timestamptz,
+  fecha_inicio timestamptz,
+  fecha_entrega timestamptz,
+  aviso_dias int,
 
   remate text not null default 'ninguno',       -- 'ninguno' | 'palos' | 'tubos'
   remate_costo numeric not null default 0,
@@ -77,6 +87,9 @@ create table if not exists eco_solvente (
 
   lleva_estructura boolean not null default false,
   estructura_costo numeric not null default 0,
+
+  lleva_cuadro_madera boolean not null default false,
+  cuadro_madera_costo numeric not null default 0,
 
   clear_modo text not null default 'ninguno',   -- 'ninguno' | 'fijo' | 'm2'
   clear_costo numeric not null default 0,

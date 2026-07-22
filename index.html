@@ -274,6 +274,21 @@
         </div>
       </div>
 
+      <div class="form-row three">
+        <div>
+          <label for="pedidoFechaInicio">Fecha de inicio</label>
+          <input type="date" id="pedidoFechaInicio">
+        </div>
+        <div>
+          <label for="pedidoFechaEntrega">Fecha de entrega</label>
+          <input type="date" id="pedidoFechaEntrega">
+        </div>
+        <div>
+          <label for="pedidoAvisoDias">Avisar (días antes)</label>
+          <input type="number" id="pedidoAvisoDias" min="0" step="1" placeholder="3">
+        </div>
+      </div>
+
       <label>Líneas de camisa</label>
       <div id="itemsContainer"></div>
       <button type="button" class="neu-btn small" id="btnAgregarLinea">+ Agregar línea</button>
@@ -310,7 +325,7 @@
           <input type="text" id="impresionCliente" list="listaClientes" required>
         </div>
         <div>
-          <label for="impresionFecha">Fecha *</label>
+          <label for="impresionFecha">Fecha de inicio *</label>
           <input type="date" id="impresionFecha" required>
         </div>
         <div>
@@ -339,12 +354,23 @@
       </div>
       <div class="campo-nota" id="notaImpresionSinCobro" style="display:none">Este m² solo se registra como referencia: no se cobra aparte porque ya está incluido en el precio de la camisa / del artículo del taller.</div>
 
-      <div class="form-row">
+      <div class="form-row three">
+        <div>
+          <label for="impresionFechaEntrega">Fecha de entrega</label>
+          <input type="date" id="impresionFechaEntrega">
+        </div>
+        <div>
+          <label for="impresionAvisoDias">Avisar (días antes)</label>
+          <input type="number" id="impresionAvisoDias" min="0" step="1" placeholder="3">
+        </div>
         <div>
           <label for="impresionAbono">Abono inicial ($)</label>
           <input type="number" id="impresionAbono" min="0" step="0.01" value="0">
         </div>
-        <div>
+      </div>
+
+      <div class="form-row">
+        <div style="grid-column: 1 / -1;">
           <label for="impresionDescripcion">Descripción</label>
           <input type="text" id="impresionDescripcion" placeholder="Diseño, tela, notas...">
         </div>
@@ -382,12 +408,33 @@
           <input type="text" id="ecoCliente" list="listaClientes" required>
         </div>
         <div>
-          <label for="ecoFecha">Fecha *</label>
-          <input type="date" id="ecoFecha" required>
+          <label for="ecoMaterial">Material *</label>
+          <select id="ecoMaterial" required>
+            <option value="vinil">Vinil</option>
+            <option value="banner">Banner</option>
+            <option value="vinil_tornasol">Vinil Tornasol</option>
+            <option value="papel_bond">Papel Bond</option>
+            <option value="clear">Clear</option>
+          </select>
         </div>
         <div>
           <label for="ecoAbono">Abono inicial ($)</label>
           <input type="number" id="ecoAbono" min="0" step="0.01" value="0">
+        </div>
+      </div>
+
+      <div class="form-row three">
+        <div>
+          <label for="ecoFecha">Fecha de inicio *</label>
+          <input type="date" id="ecoFecha" required>
+        </div>
+        <div>
+          <label for="ecoFechaEntrega">Fecha de entrega</label>
+          <input type="date" id="ecoFechaEntrega">
+        </div>
+        <div>
+          <label for="ecoAvisoDias">Avisar (días antes)</label>
+          <input type="number" id="ecoAvisoDias" min="0" step="1" placeholder="3">
         </div>
       </div>
 
@@ -457,6 +504,19 @@
           <div>
             <label for="ecoEstructuraCosto">Costo de la estructura ($)</label>
             <input type="number" id="ecoEstructuraCosto" min="0" step="0.01" value="0" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <input type="checkbox" id="ecoLlevaCuadroMadera">
+          <label for="ecoLlevaCuadroMadera" style="margin:0">Lleva cuadro de madera</label>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoCuadroMaderaCosto">Costo del cuadro de madera ($)</label>
+            <input type="number" id="ecoCuadroMaderaCosto" min="0" step="0.01" value="0" disabled>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { state, GENEROS, tallasPorGenero, historialPagosPedido } from "../state.js";
-import { money, escapeHtml, toInputDate, renderHistorialAbonos } from "../utils.js";
+import { money, escapeHtml, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
 import { crearPedido, actualizarPedido } from "../api.js";
 import { render } from "../render.js";
 
@@ -108,6 +108,9 @@ export function abrirModalEditarPedido(id) {
   document.getElementById("clienteTelefono").value = p.cliente.telefono || "";
   document.getElementById("clienteNotas").value = p.cliente.notas || "";
   document.getElementById("pedidoDescripcion").value = p.descripcion || "";
+  document.getElementById("pedidoFechaInicio").value = toInputDate(p.fechaInicio || p.fechas.pedido);
+  document.getElementById("pedidoFechaEntrega").value = p.fechaEntrega ? toInputDate(p.fechaEntrega) : "";
+  document.getElementById("pedidoAvisoDias").value = p.avisoDias == null ? "" : p.avisoDias;
   document.getElementById("clienteAbono").value = p.abono;
   modalTitulo.textContent = "Editar pedido";
 
@@ -177,11 +180,19 @@ formPedido.addEventListener("submit", async function (e) {
     telefono: document.getElementById("clienteTelefono").value.trim(),
     notas: document.getElementById("clienteNotas").value.trim(),
   };
+  const fechaInicioInput = document.getElementById("pedidoFechaInicio").value;
+  const fechaEntregaInput = document.getElementById("pedidoFechaEntrega").value;
+  const avisoRaw = document.getElementById("pedidoAvisoDias").value;
+  const extra = {
+    fechaInicio: fechaInicioInput ? fechaInputToISO(fechaInicioInput) : null,
+    fechaEntrega: fechaEntregaInput ? fechaInputToISO(fechaEntregaInput) : null,
+    avisoDias: avisoRaw === "" ? null : Number(avisoRaw),
+  };
 
   if (pedidoExistente) {
-    await actualizarPedido(pedidoExistente.id, { cliente, descripcion, abono, items });
+    await actualizarPedido(pedidoExistente.id, { cliente, descripcion, abono, items, ...extra });
   } else {
-    await crearPedido({ cliente, descripcion, abono, items });
+    await crearPedido({ cliente, descripcion, abono, items, ...extra });
   }
 
   cerrarModal();

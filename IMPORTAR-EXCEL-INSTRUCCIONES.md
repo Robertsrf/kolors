@@ -113,6 +113,9 @@ Reglas:
 {
   "cliente": "Bodegón El Sol",
   "fecha": "2025-05-01T00:00:00.000Z",
+  "fechaEntrega": "2025-05-03T00:00:00.000Z",
+  "avisoDias": 2,
+  "material": "banner",
   "ancho": 3,
   "alto": 1,
   "precioM2": 10,
@@ -126,12 +129,14 @@ Reglas:
     "acabado":   null,
     "entregado": "2025-05-03T00:00:00.000Z"
   },
-  "remate": "tubos",
+  "remate": "palos",
   "remateCosto": 8,
   "llevaDiseno": true,
   "disenoCosto": 10,
   "llevaEstructura": false,
   "estructuraCosto": 0,
+  "llevaCuadroMadera": false,
+  "cuadroMaderaCosto": 0,
   "clearModo": "ninguno",
   "clearCosto": 0,
   "clearPrecioM2": 0,
@@ -143,16 +148,26 @@ Reglas:
 ```
 
 Reglas:
+- `material`: en qué se imprimió. Uno de exactamente: **`"vinil"`, `"banner"`,
+  `"vinil_tornasol"`, `"papel_bond"`, `"clear"`**. Si no sabes, usa `"banner"`.
+  (Mapea: "vinil tornasol"/"tornasol" → `vinil_tornasol`; "papel bond"/"bond" → `papel_bond`.)
 - El total = `ancho × alto × precioM2` (impresión) **más** los extras que apliquen:
   - `remate`: **`"ninguno"`, `"palos"`** o **`"tubos"`**; su costo en `remateCosto`.
+    ⚠️ Si el Excel dice **"madera"**, "palo", "listón" o similar como remate/soporte,
+    tómalo como **`"palos"`**.
   - `llevaDiseno` (true/false) + `disenoCosto`.
   - `llevaEstructura` (true/false) + `estructuraCosto`.
+  - `llevaCuadroMadera` (true/false) + `cuadroMaderaCosto`: úsalo cuando el Excel
+    mencione **"cuadro de madera"**, "marco", "bastidor" o "cuadro" (un pendón/lienzo
+    montado en un marco de madera). Es DISTINTO de `remate: palos`.
   - `clearModo`: **`"ninguno"`** (no lleva), **`"fijo"`** (usa `clearCosto`) o
     **`"m2"`** (usa `clearPrecioM2`, se multiplica por ancho×alto).
   - `transferModo`: igual que clear (`"ninguno"`/`"fijo"`/`"m2"`).
 - Si un extra no aplica, deja sus valores por defecto (`"ninguno"`, `false`, `0`).
 - `estado`: **`"Pedido"`, `"Diseño"`, `"Impresión"`, `"Acabado"`, `"Entregado"`**.
   Si no sabes, usa `"Pedido"` (o `"Entregado"` si ya se cerró).
+- `fechaEntrega` (opcional): fecha prometida de entrega, formato ISO. `avisoDias`
+  (opcional): número de días antes de la entrega para avisar (ej. 3). Si no hay, omítelos.
 - Si solo hay un precio total y no medidas, usa `ancho: 1`, `alto: 1`,
   `precioM2: <total de impresión>` y pon los extras aparte si los conoces.
 
@@ -186,6 +201,10 @@ Reglas:
   miles. Usa **punto** como decimal (`1234.50`, no `1.234,50`).
 - **Cliente sin nombre:** si una fila no tiene cliente, ponle `"Sin nombre"` (no la descartes)
   salvo que esté completamente vacía.
+- **Fecha de entrega y aviso (opcionales, para camisas, sublimación y eco solvente):**
+  si el Excel tiene una fecha de entrega/prometida, ponla en `fechaEntrega` (ISO). Si
+  además hay un dato de "avisar con N días", ponlo en `avisoDias` (número). Si no
+  existen, simplemente omite esos campos. La `fecha`/fecha de inicio sigue siendo la del pedido.
 - **Deudas:** el sistema calcula la deuda como `total − abono`. Entonces:
   - Si el Excel tiene columnas tipo "Total" y "Abonado/Pagado" → el total va en los
     `items`/`precioM2` y lo pagado va en `abono`.

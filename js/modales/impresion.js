@@ -39,6 +39,8 @@ export function abrirModalNuevaImpresion() {
   formImpresion.reset();
   document.getElementById("impresionId").value = "";
   document.getElementById("impresionFecha").value = toInputDate();
+  document.getElementById("impresionFechaEntrega").value = "";
+  document.getElementById("impresionAvisoDias").value = "";
   document.getElementById("impresionTipo").value = "otros";
   document.getElementById("impresionAbono").value = 0;
   document.getElementById("historialAbonosImpresion").innerHTML = "";
@@ -53,7 +55,9 @@ export function abrirModalEditarImpresion(id) {
   formImpresion.reset();
   document.getElementById("impresionId").value = imp.id;
   document.getElementById("impresionCliente").value = imp.cliente;
-  document.getElementById("impresionFecha").value = toInputDate(imp.fecha);
+  document.getElementById("impresionFecha").value = toInputDate(imp.fechaInicio || imp.fecha);
+  document.getElementById("impresionFechaEntrega").value = imp.fechaEntrega ? toInputDate(imp.fechaEntrega) : "";
+  document.getElementById("impresionAvisoDias").value = imp.avisoDias == null ? "" : imp.avisoDias;
   document.getElementById("impresionTipo").value = imp.tipo || "otros";
   document.getElementById("impresionAbono").value = imp.abono || 0;
   document.getElementById("impresionAncho").value = imp.ancho;
@@ -106,7 +110,21 @@ formImpresion.addEventListener("submit", async function (e) {
   }
 
   const fechaISO = fechaInputToISO(fechaInput);
-  const datos = { cliente, fecha: fechaISO, tipo, ancho, alto, precioM2, descripcion, abono };
+  const fechaEntregaInput = document.getElementById("impresionFechaEntrega").value;
+  const avisoRaw = document.getElementById("impresionAvisoDias").value;
+  const datos = {
+    cliente,
+    fecha: fechaISO,
+    fechaInicio: fechaISO,
+    fechaEntrega: fechaEntregaInput ? fechaInputToISO(fechaEntregaInput) : null,
+    avisoDias: avisoRaw === "" ? null : Number(avisoRaw),
+    tipo,
+    ancho,
+    alto,
+    precioM2,
+    descripcion,
+    abono,
+  };
 
   if (impExistente) {
     await actualizarImpresion(impExistente.id, datos);

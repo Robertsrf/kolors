@@ -4,6 +4,7 @@ import {
   CLAVE_FECHA_ECO,
   COLOR_FASE_ECO,
   REMATE_LABEL,
+  MATERIAL_ECO_LABEL,
   m2Eco,
   totalExtrasEco,
   totalEco,
@@ -22,12 +23,13 @@ let filtroPagoEco = "todos";
 
 function badgesExtras(eco) {
   const badges = [];
+  badges.push(`📄 ${MATERIAL_ECO_LABEL[eco.material] || "Banner"}`);
   if (eco.remate && eco.remate !== "ninguno") badges.push(REMATE_LABEL[eco.remate] || eco.remate);
   if (eco.llevaDiseno) badges.push("🎨 Diseño");
   if (eco.llevaEstructura) badges.push("🏗️ Estructura");
+  if (eco.llevaCuadroMadera) badges.push("🖼️ Cuadro madera");
   if (eco.clearModo && eco.clearModo !== "ninguno") badges.push("🧴 Clear");
   if (eco.transferModo && eco.transferModo !== "ninguno") badges.push("🔁 Transfer");
-  if (!badges.length) return "";
   return `<div class="impresion-extras">${badges.map((b) => `<span class="badge">${b}</span>`).join("")}</div>`;
 }
 

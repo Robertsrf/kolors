@@ -19,6 +19,13 @@ export const NIVELES_PRECIO = [1, 2, 3, 4, 5, 6, 12];
 export const TIPO_IMPRESION_LABEL = { camisa: "👕 Camisa", taller: "🧵 Taller", otros: "💵 Otros" };
 export const TIPO_PERDIDA_LABEL = { perdida: "🗑️ Pérdida", prueba: "🧪 Prueba" };
 export const REMATE_LABEL = { ninguno: "Sin remate", palos: "🪵 Palos", tubos: "🧵 Tubos" };
+export const MATERIAL_ECO_LABEL = {
+  vinil: "Vinil",
+  banner: "Banner",
+  vinil_tornasol: "Vinil Tornasol",
+  papel_bond: "Papel Bond",
+  clear: "Clear",
+};
 
 // Tablero de Eco Solvente
 export const FASES_ECO = ["Pedido", "Diseño", "Impresión", "Acabado", "Entregado"];
@@ -132,9 +139,17 @@ export function costoDisenoEco(eco) {
 export function costoEstructuraEco(eco) {
   return eco.llevaEstructura ? redondear2(Number(eco.estructuraCosto || 0)) : 0;
 }
+export function costoCuadroMaderaEco(eco) {
+  return eco.llevaCuadroMadera ? redondear2(Number(eco.cuadroMaderaCosto || 0)) : 0;
+}
 export function totalExtrasEco(eco) {
   return redondear2(
-    costoRemateEco(eco) + costoDisenoEco(eco) + costoEstructuraEco(eco) + costoClearEco(eco) + costoTransferEco(eco)
+    costoRemateEco(eco) +
+      costoDisenoEco(eco) +
+      costoEstructuraEco(eco) +
+      costoCuadroMaderaEco(eco) +
+      costoClearEco(eco) +
+      costoTransferEco(eco)
   );
 }
 export function totalEco(eco) {

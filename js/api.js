@@ -40,6 +40,9 @@ function pedidoFromRow(row, items, pagos) {
       entregado: row.fecha_entregado,
     },
     abono: Number(row.abono || 0),
+    fechaInicio: row.fecha_inicio || null,
+    fechaEntrega: row.fecha_entrega || null,
+    avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -56,6 +59,9 @@ function impresionFromRow(row, pagos) {
     precioM2: Number(row.precio_m2 || 0),
     descripcion: row.descripcion || "",
     abono: Number(row.abono || 0),
+    fechaInicio: row.fecha_inicio || null,
+    fechaEntrega: row.fecha_entrega || null,
+    avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -71,6 +77,7 @@ function ecoFromRow(row, pagos) {
     precioM2: Number(row.precio_m2 || 0),
     descripcion: row.descripcion || "",
     abono: Number(row.abono || 0),
+    material: row.material || "banner",
     estado: row.estado || "Pedido",
     fechas: {
       pedido: row.fecha_pedido,
@@ -79,12 +86,17 @@ function ecoFromRow(row, pagos) {
       acabado: row.fecha_acabado,
       entregado: row.fecha_entregado,
     },
+    fechaInicio: row.fecha_inicio || null,
+    fechaEntrega: row.fecha_entrega || null,
+    avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
     remate: row.remate || "ninguno",
     remateCosto: Number(row.remate_costo || 0),
     llevaDiseno: !!row.lleva_diseno,
     disenoCosto: Number(row.diseno_costo || 0),
     llevaEstructura: !!row.lleva_estructura,
     estructuraCosto: Number(row.estructura_costo || 0),
+    llevaCuadroMadera: !!row.lleva_cuadro_madera,
+    cuadroMaderaCosto: Number(row.cuadro_madera_costo || 0),
     clearModo: row.clear_modo || "ninguno",
     clearCosto: Number(row.clear_costo || 0),
     clearPrecioM2: Number(row.clear_precio_m2 || 0),
@@ -209,7 +221,8 @@ export function suscribirRealtime(onCambio) {
 // ============================================================
 // PEDIDOS DE CAMISA
 // ============================================================
-export async function crearPedido({ cliente, descripcion, items, abono }) {
+export async function crearPedido({ cliente, descripcion, items, abono, fechaInicio, fechaEntrega, avisoDias }) {
+  const ahora = new Date().toISOString();
   const { data: row, error } = await supabase
     .from("pedidos")
     .insert({
@@ -218,7 +231,10 @@ export async function crearPedido({ cliente, descripcion, items, abono }) {
       cliente_notas: cliente.notas,
       descripcion,
       estado: "Pedido",
-      fecha_pedido: new Date().toISOString(),
+      fecha_pedido: fechaInicio || ahora,
+      fecha_inicio: fechaInicio || ahora,
+      fecha_entrega: fechaEntrega || null,
+      aviso_dias: avisoDias == null ? null : avisoDias,
       abono,
     })
     .select()
@@ -240,17 +256,21 @@ export async function crearPedido({ cliente, descripcion, items, abono }) {
   await cargarPedidos();
 }
 
-export async function actualizarPedido(id, { cliente, descripcion, abono, items }) {
-  const { error } = await supabase
-    .from("pedidos")
-    .update({
-      cliente_nombre: cliente.nombre,
-      cliente_telefono: cliente.telefono,
-      cliente_notas: cliente.notas,
-      descripcion,
-      abono,
-    })
-    .eq("id", id);
+export async function actualizarPedido(id, { cliente, descripcion, abono, items, fechaInicio, fechaEntrega, avisoDias }) {
+  const cambios = {
+    cliente_nombre: cliente.nombre,
+    cliente_telefono: cliente.telefono,
+    cliente_notas: cliente.notas,
+    descripcion,
+    abono,
+    fecha_entrega: fechaEntrega || null,
+    aviso_dias: avisoDias == null ? null : avisoDias,
+  };
+  if (fechaInicio) {
+    cambios.fecha_inicio = fechaInicio;
+    cambios.fecha_pedido = fechaInicio;
+  }
+  const { error } = await supabase.from("pedidos").update(cambios).eq("id", id);
   if (error) throw error;
 
   const { error: errDel } = await supabase.from("pedido_items").delete().eq("pedido_id", id);
@@ -299,6 +319,9 @@ export async function crearImpresion(datos) {
     precio_m2: datos.precioM2,
     descripcion: datos.descripcion,
     abono: datos.abono,
+    fecha_inicio: datos.fechaInicio || datos.fecha || null,
+    fecha_entrega: datos.fechaEntrega || null,
+    aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
   });
   if (error) throw error;
   await cargarImpresiones();
@@ -316,6 +339,9 @@ export async function actualizarImpresion(id, datos) {
       precio_m2: datos.precioM2,
       descripcion: datos.descripcion,
       abono: datos.abono,
+      fecha_inicio: datos.fechaInicio || datos.fecha || null,
+      fecha_entrega: datos.fechaEntrega || null,
+      aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
     })
     .eq("id", id);
   if (error) throw error;
@@ -341,14 +367,20 @@ export async function crearEco(datos) {
     precio_m2: datos.precioM2,
     descripcion: datos.descripcion,
     abono: datos.abono,
+    material: datos.material || "banner",
     estado: "Pedido",
-    fecha_pedido: new Date().toISOString(),
+    fecha_pedido: datos.fechaInicio || new Date().toISOString(),
+    fecha_inicio: datos.fechaInicio || datos.fecha || new Date().toISOString(),
+    fecha_entrega: datos.fechaEntrega || null,
+    aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
     remate: datos.remate,
     remate_costo: datos.remateCosto,
     lleva_diseno: datos.llevaDiseno,
     diseno_costo: datos.disenoCosto,
     lleva_estructura: datos.llevaEstructura,
     estructura_costo: datos.estructuraCosto,
+    lleva_cuadro_madera: datos.llevaCuadroMadera,
+    cuadro_madera_costo: datos.cuadroMaderaCosto,
     clear_modo: datos.clearModo,
     clear_costo: datos.clearCosto,
     clear_precio_m2: datos.clearPrecioM2,
@@ -371,12 +403,18 @@ export async function actualizarEco(id, datos) {
       precio_m2: datos.precioM2,
       descripcion: datos.descripcion,
       abono: datos.abono,
+      material: datos.material || "banner",
+      fecha_inicio: datos.fechaInicio || datos.fecha || null,
+      fecha_entrega: datos.fechaEntrega || null,
+      aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
       remate: datos.remate,
       remate_costo: datos.remateCosto,
       lleva_diseno: datos.llevaDiseno,
       diseno_costo: datos.disenoCosto,
       lleva_estructura: datos.llevaEstructura,
       estructura_costo: datos.estructuraCosto,
+      lleva_cuadro_madera: datos.llevaCuadroMadera,
+      cuadro_madera_costo: datos.cuadroMaderaCosto,
       clear_modo: datos.clearModo,
       clear_costo: datos.clearCosto,
       clear_precio_m2: datos.clearPrecioM2,
@@ -483,6 +521,9 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         fecha_sublimacion: p.fechas.sublimacion,
         fecha_costura: p.fechas.costura,
         fecha_entregado: p.fechas.entregado,
+        fecha_inicio: p.fechaInicio || p.fechas.pedido || null,
+        fecha_entrega: p.fechaEntrega || null,
+        aviso_dias: p.avisoDias == null ? null : p.avisoDias,
         abono: p.abono || 0,
         creado_at: p.creado || new Date().toISOString(),
       })
@@ -520,6 +561,9 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         precio_m2: imp.precioM2,
         descripcion: imp.descripcion || null,
         abono: imp.abono || 0,
+        fecha_inicio: imp.fechaInicio || imp.fecha || null,
+        fecha_entrega: imp.fechaEntrega || null,
+        aviso_dias: imp.avisoDias == null ? null : imp.avisoDias,
         creado_at: imp.creado || new Date().toISOString(),
       })
       .select()
@@ -543,18 +587,24 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         precio_m2: eco.precioM2 || 0,
         descripcion: eco.descripcion || null,
         abono: eco.abono || 0,
+        material: eco.material || "banner",
         estado: eco.estado || "Pedido",
         fecha_pedido: (eco.fechas && eco.fechas.pedido) || eco.fecha || eco.creado || new Date().toISOString(),
         fecha_diseno: (eco.fechas && eco.fechas.diseno) || null,
         fecha_impresion: (eco.fechas && eco.fechas.impresion) || null,
         fecha_acabado: (eco.fechas && eco.fechas.acabado) || null,
         fecha_entregado: (eco.fechas && eco.fechas.entregado) || null,
+        fecha_inicio: eco.fechaInicio || eco.fecha || null,
+        fecha_entrega: eco.fechaEntrega || null,
+        aviso_dias: eco.avisoDias == null ? null : eco.avisoDias,
         remate: eco.remate || "ninguno",
         remate_costo: eco.remateCosto || 0,
         lleva_diseno: !!eco.llevaDiseno,
         diseno_costo: eco.disenoCosto || 0,
         lleva_estructura: !!eco.llevaEstructura,
         estructura_costo: eco.estructuraCosto || 0,
+        lleva_cuadro_madera: !!eco.llevaCuadroMadera,
+        cuadro_madera_costo: eco.cuadroMaderaCosto || 0,
         clear_modo: eco.clearModo || "ninguno",
         clear_costo: eco.clearCosto || 0,
         clear_precio_m2: eco.clearPrecioM2 || 0,

@@ -22,6 +22,8 @@ const campoLlevaDiseno = document.getElementById("ecoLlevaDiseno");
 const campoDisenoCosto = document.getElementById("ecoDisenoCosto");
 const campoLlevaEstructura = document.getElementById("ecoLlevaEstructura");
 const campoEstructuraCosto = document.getElementById("ecoEstructuraCosto");
+const campoLlevaCuadroMadera = document.getElementById("ecoLlevaCuadroMadera");
+const campoCuadroMaderaCosto = document.getElementById("ecoCuadroMaderaCosto");
 const campoClearModo = document.getElementById("ecoClearModo");
 const campoClearCosto = document.getElementById("ecoClearCosto");
 const campoClearPrecioM2 = document.getElementById("ecoClearPrecioM2");
@@ -31,6 +33,7 @@ const campoTransferPrecioM2 = document.getElementById("ecoTransferPrecioM2");
 
 function leerFormComoEco() {
   return {
+    material: document.getElementById("ecoMaterial").value,
     ancho: Number(document.getElementById("ecoAncho").value) || 0,
     alto: Number(document.getElementById("ecoAlto").value) || 0,
     precioM2: Number(document.getElementById("ecoPrecioM2").value) || 0,
@@ -40,6 +43,8 @@ function leerFormComoEco() {
     disenoCosto: Number(campoDisenoCosto.value) || 0,
     llevaEstructura: campoLlevaEstructura.checked,
     estructuraCosto: Number(campoEstructuraCosto.value) || 0,
+    llevaCuadroMadera: campoLlevaCuadroMadera.checked,
+    cuadroMaderaCosto: Number(campoCuadroMaderaCosto.value) || 0,
     clearModo: campoClearModo.value,
     clearCosto: Number(campoClearCosto.value) || 0,
     clearPrecioM2: Number(campoClearPrecioM2.value) || 0,
@@ -53,6 +58,8 @@ function actualizarUIExtras() {
   campoRemateCosto.disabled = campoRemate.value === "ninguno";
   campoDisenoCosto.disabled = !campoLlevaDiseno.checked;
   campoEstructuraCosto.disabled = !campoLlevaEstructura.checked;
+  campoCuadroMaderaCosto.disabled = !campoLlevaCuadroMadera.checked;
+  if (!campoLlevaCuadroMadera.checked) campoCuadroMaderaCosto.value = 0;
   campoClearCosto.disabled = campoClearModo.value !== "fijo";
   campoClearPrecioM2.disabled = campoClearModo.value !== "m2";
   campoTransferCosto.disabled = campoTransferModo.value !== "fijo";
@@ -78,13 +85,16 @@ function actualizarResumenEco() {
 }
 
 [campoRemate, campoClearModo, campoTransferModo].forEach((el) => el.addEventListener("change", actualizarUIExtras));
-[campoLlevaDiseno, campoLlevaEstructura].forEach((el) => el.addEventListener("change", actualizarUIExtras));
+[campoLlevaDiseno, campoLlevaEstructura, campoLlevaCuadroMadera].forEach((el) => el.addEventListener("change", actualizarUIExtras));
 formEco.addEventListener("input", actualizarResumenEco);
 
 export function abrirModalNuevoEco() {
   formEco.reset();
   document.getElementById("ecoId").value = "";
   document.getElementById("ecoFecha").value = toInputDate();
+  document.getElementById("ecoFechaEntrega").value = "";
+  document.getElementById("ecoAvisoDias").value = "";
+  document.getElementById("ecoMaterial").value = "banner";
   campoRemate.value = "ninguno";
   campoClearModo.value = "ninguno";
   campoTransferModo.value = "ninguno";
@@ -100,7 +110,10 @@ export function abrirModalEditarEco(id) {
   formEco.reset();
   document.getElementById("ecoId").value = eco.id;
   document.getElementById("ecoCliente").value = eco.cliente;
-  document.getElementById("ecoFecha").value = toInputDate(eco.fecha);
+  document.getElementById("ecoFecha").value = toInputDate(eco.fechaInicio || eco.fecha);
+  document.getElementById("ecoFechaEntrega").value = eco.fechaEntrega ? toInputDate(eco.fechaEntrega) : "";
+  document.getElementById("ecoAvisoDias").value = eco.avisoDias == null ? "" : eco.avisoDias;
+  document.getElementById("ecoMaterial").value = eco.material || "banner";
   document.getElementById("ecoAbono").value = eco.abono || 0;
   document.getElementById("ecoAncho").value = eco.ancho;
   document.getElementById("ecoAlto").value = eco.alto;
@@ -112,6 +125,8 @@ export function abrirModalEditarEco(id) {
   campoDisenoCosto.value = eco.disenoCosto || 0;
   campoLlevaEstructura.checked = !!eco.llevaEstructura;
   campoEstructuraCosto.value = eco.estructuraCosto || 0;
+  campoLlevaCuadroMadera.checked = !!eco.llevaCuadroMadera;
+  campoCuadroMaderaCosto.value = eco.cuadroMaderaCosto || 0;
   campoClearModo.value = eco.clearModo || "ninguno";
   campoClearCosto.value = eco.clearCosto || 0;
   campoClearPrecioM2.value = eco.clearPrecioM2 || 0;
@@ -151,6 +166,8 @@ formEco.addEventListener("submit", async function (e) {
 
   const borrador = leerFormComoEco();
   const descripcion = document.getElementById("ecoDescripcion").value.trim();
+  const fechaEntregaInput = document.getElementById("ecoFechaEntrega").value;
+  const avisoRaw = document.getElementById("ecoAvisoDias").value;
   const totalPedido = totalEco(borrador);
   let abono = Number(document.getElementById("ecoAbono").value) || 0;
 
@@ -163,7 +180,16 @@ formEco.addEventListener("submit", async function (e) {
     }
   }
 
-  const datos = { cliente, fecha: fechaInputToISO(fechaInput), descripcion, abono, ...borrador };
+  const datos = {
+    cliente,
+    fecha: fechaInputToISO(fechaInput),
+    fechaInicio: fechaInputToISO(fechaInput),
+    fechaEntrega: fechaEntregaInput ? fechaInputToISO(fechaEntregaInput) : null,
+    avisoDias: avisoRaw === "" ? null : Number(avisoRaw),
+    descripcion,
+    abono,
+    ...borrador,
+  };
 
   if (ecoExistente) {
     await actualizarEco(ecoExistente.id, datos);

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="es-VE">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kolors · Gestor de Pedidos</title>
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- === LOGIN === -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box neu-raised">
+    <div class="brand">
+      <span class="logo">Kolors</span>
+      <span class="sub">Gestor de pedidos</span>
+    </div>
+    <form id="formLogin">
+      <div style="margin-bottom:12px">
+        <label for="loginEmail">Correo</label>
+        <input type="email" id="loginEmail" required autocomplete="username">
+      </div>
+      <div style="margin-bottom:12px">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="neu-btn primary" style="width:100%">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- === APP === -->
+<div class="app-shell hidden" id="appShell">
+
+<header class="app-header">
+  <div class="brand">
+    <span class="logo">Kolors</span>
+    <span class="sub">Gestor de pedidos</span>
+  </div>
+  <nav class="tabs">
+    <button class="neu-btn tab-btn active" data-tab="tablero">📋 Tablero</button>
+    <button class="neu-btn tab-btn" data-tab="impresiones">🖨️ Sublimación</button>
+    <button class="neu-btn tab-btn" data-tab="ecosolvente">🏳️ Eco Solvente</button>
+    <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
+    <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
+    <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
+    <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
+    <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
+  </nav>
+  <div class="header-actions">
+    <span class="usuario-actual" id="usuarioActual"></span>
+    <button class="neu-btn" id="btnLogout">Cerrar sesión</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- === TABLERO === -->
+  <section class="section active" id="section-tablero">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscador" placeholder="🔎 Buscar por cliente...">
+      </div>
+      <div class="filtro-pago-group" id="filtroPagoPedidos">
+        <button type="button" class="neu-btn filtro-pago-btn active" data-filtro="todos">Todos</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="debe">⚠️ Deben</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <!-- === SUBLIMACIÓN (impresiones) === -->
+  <section class="section" id="section-impresiones">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscadorImpresiones" placeholder="🔎 Buscar por cliente...">
+      </div>
+      <div class="filtro-pago-group" id="filtroPagoImpresiones">
+        <button type="button" class="neu-btn filtro-pago-btn active" data-filtro="todos">Todos</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="debe">⚠️ Deben</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
+      </div>
+      <button class="neu-btn primary" id="btnNuevaImpresion">➕ Nueva impresión</button>
+    </div>
+    <div class="impresiones-list" id="impresionesList"></div>
+  </section>
+
+  <!-- === ECO SOLVENTE === -->
+  <section class="section" id="section-ecosolvente">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscadorEco" placeholder="🔎 Buscar por cliente...">
+      </div>
+      <div class="filtro-pago-group" id="filtroPagoEco">
+        <button type="button" class="neu-btn filtro-pago-btn active" data-filtro="todos">Todos</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="debe">⚠️ Deben</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
+      </div>
+      <button class="neu-btn primary" id="btnNuevoEco">➕ Nuevo pedido eco solvente</button>
+    </div>
+    <div class="impresiones-list" id="ecoList"></div>
+  </section>
+
+  <!-- === PÉRDIDAS Y PRUEBAS DE IMPRESIÓN === -->
+  <section class="section" id="section-perdidas">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscadorPerdidas" placeholder="🔎 Buscar por descripción...">
+      </div>
+      <button class="neu-btn primary" id="btnNuevaPerdida">➕ Registrar pérdida / prueba</button>
+    </div>
+    <div class="impresiones-list" id="perdidasList"></div>
+  </section>
+
+  <!-- === CLIENTES / HISTORIAL === -->
+  <section class="section" id="section-clientes">
+    <div id="clientesListaVista">
+      <div class="board-toolbar">
+        <div class="search-wrap">
+          <input type="text" id="buscadorClientes" placeholder="🔎 Buscar cliente...">
+        </div>
+      </div>
+      <div class="clientes-grid" id="clientesGrid"></div>
+    </div>
+    <div id="clienteDetalleVista" style="display:none">
+      <button class="neu-btn" id="btnVolverClientes">← Volver a clientes</button>
+      <div id="clienteDetalleContenido"></div>
+    </div>
+  </section>
+
+  <!-- === ESTADÍSTICAS === -->
+  <section class="section" id="section-stats">
+    <div class="stats-grid" id="statsMoney"></div>
+    <div class="stats-grid" id="statsCantidad"></div>
+
+    <div class="charts-grid">
+      <div class="stats-block neu-raised">
+        <h3>👕 Camisas y pedidos por estado</h3>
+        <div class="chart-wrap"><canvas id="chartEstado"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>🧑‍🤝‍🧑 Camisas por género</h3>
+        <div class="chart-wrap"><canvas id="chartGenero"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>📏 Top tallas más pedidas</h3>
+        <div class="chart-wrap"><canvas id="chartTallas"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>💵 Dinero: cobrado vs. por cobrar</h3>
+        <div class="chart-wrap"><canvas id="chartDinero"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="stats-subtitle">🖨️ Sublimación</h2>
+    <div class="stats-grid" id="statsImpresiones"></div>
+    <div class="stats-grid" id="statsImpresionesTipo"></div>
+    <div class="charts-grid">
+      <div class="stats-block neu-raised">
+        <h3>📐 m² impresos por cliente (top 8)</h3>
+        <div class="chart-wrap"><canvas id="chartImpresionesCliente"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="stats-subtitle">🏳️ Eco Solvente</h2>
+    <div class="stats-grid" id="statsEco"></div>
+    <div class="stats-grid" id="statsEcoExtras"></div>
+    <div class="charts-grid">
+      <div class="stats-block neu-raised">
+        <h3>📐 m² eco solvente por cliente (top 8)</h3>
+        <div class="chart-wrap"><canvas id="chartEcoCliente"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>🪧 Pedidos por remate (palos / tubos)</h3>
+        <div class="chart-wrap"><canvas id="chartEcoRemate"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="stats-subtitle">🗑️ Pérdidas y pruebas de impresión</h2>
+    <div class="stats-grid" id="statsPerdidas"></div>
+  </section>
+
+  <!-- === DATOS === -->
+  <section class="section" id="section-datos">
+    <div class="datos-grid">
+      <div class="datos-card neu-raised">
+        <h3>📤 Exportar respaldo</h3>
+        <p>Descarga un archivo JSON con todos los pedidos, impresiones, eco solvente y pérdidas actuales.</p>
+        <button class="neu-btn primary" id="btnExportar">Exportar JSON</button>
+      </div>
+      <div class="datos-card neu-raised">
+        <h3>📥 Importar respaldo antiguo (localStorage)</h3>
+        <p>Carga el JSON exportado de la versión anterior (un solo archivo) y lo sube a Supabase, sumándolo a lo que ya exista.</p>
+        <input type="file" id="inputImportar" accept="application/json">
+        <button class="neu-btn primary" id="btnImportar">Importar a Supabase</button>
+      </div>
+      <div class="datos-card neu-raised">
+        <h3>🗑️ Borrar todo</h3>
+        <p>Elimina permanentemente todos los pedidos, impresiones, eco solvente y pérdidas guardados para todos los usuarios.</p>
+        <button class="neu-btn danger" id="btnBorrarTodo">Borrar todo</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- === TARJETA FLOTANTE DE PRECIOS === -->
+<button type="button" class="fab-precios" id="btnPrecios" title="Configurar precios">💲</button>
+
+<div class="modal-overlay" id="modalPreciosOverlay">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2>💲 Precios</h2>
+      <button class="neu-btn icon" id="btnCerrarModalPrecios">✕</button>
+    </div>
+    <p class="abono-contexto">Organiza tus precios en secciones (camisas por cantidad, impresiones, extras...). Agrega o quita secciones y precios cuando quieras. Solo queda guardado como referencia.</p>
+    <form id="formPrecios">
+      <div id="preciosSecciones"></div>
+      <button type="button" class="neu-btn small" id="btnAgregarSeccion">+ Agregar sección</button>
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalPrecios">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar precios</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL NUEVO/EDITAR PEDIDO === -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitulo">Nuevo pedido</h2>
+      <button class="neu-btn icon" id="btnCerrarModal">✕</button>
+    </div>
+
+    <form id="formPedido">
+      <input type="hidden" id="pedidoId">
+
+      <div class="form-row three">
+        <div>
+          <label for="clienteNombre">Nombre del cliente *</label>
+          <input type="text" id="clienteNombre" list="listaClientes" required>
+        </div>
+        <div>
+          <label for="clienteTelefono">Teléfono</label>
+          <input type="text" id="clienteTelefono">
+        </div>
+        <div>
+          <label for="clienteAbono">Abono inicial ($)</label>
+          <input type="number" id="clienteAbono" min="0" step="0.01" value="0">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="clienteNotas">Notas</label>
+          <input type="text" id="clienteNotas" placeholder="Dirección, referencia, etc.">
+        </div>
+        <div>
+          <label for="pedidoDescripcion">Descripción</label>
+          <input type="text" id="pedidoDescripcion" placeholder="Diseño, modelo, detalles del pedido...">
+        </div>
+      </div>
+
+      <label>Líneas de camisa</label>
+      <div id="itemsContainer"></div>
+      <button type="button" class="neu-btn small" id="btnAgregarLinea">+ Agregar línea</button>
+
+      <div class="items-summary neu-inset">
+        <span>Total camisas: <b id="resumenCantidad">0</b></span>
+        <span>Total pedido: <b id="resumenTotal">$0,00</b></span>
+      </div>
+
+      <div id="historialAbonosPedido"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModal">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar pedido</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL NUEVA/EDITAR IMPRESIÓN (SUBLIMACIÓN) === -->
+<div class="modal-overlay" id="modalImpresionOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalImpresionTitulo">Nueva impresión</h2>
+      <button class="neu-btn icon" id="btnCerrarModalImpresion">✕</button>
+    </div>
+
+    <form id="formImpresion">
+      <input type="hidden" id="impresionId">
+
+      <div class="form-row three">
+        <div>
+          <label for="impresionCliente">Cliente *</label>
+          <input type="text" id="impresionCliente" list="listaClientes" required>
+        </div>
+        <div>
+          <label for="impresionFecha">Fecha *</label>
+          <input type="date" id="impresionFecha" required>
+        </div>
+        <div>
+          <label for="impresionTipo">Tipo de impresión *</label>
+          <select id="impresionTipo" required>
+            <option value="camisa">👕 Camisa</option>
+            <option value="taller">🧵 Artículo del taller</option>
+            <option value="otros">💵 Otros (se cobra aparte)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row three">
+        <div>
+          <label for="impresionAncho">Ancho (m) *</label>
+          <input type="number" id="impresionAncho" min="0.01" step="0.01" required>
+        </div>
+        <div>
+          <label for="impresionAlto">Alto (m) *</label>
+          <input type="number" id="impresionAlto" min="0.01" step="0.01" required>
+        </div>
+        <div>
+          <label for="impresionPrecioM2">Precio por m² ($) *</label>
+          <input type="number" id="impresionPrecioM2" min="0" step="0.01" required>
+        </div>
+      </div>
+      <div class="campo-nota" id="notaImpresionSinCobro" style="display:none">Este m² solo se registra como referencia: no se cobra aparte porque ya está incluido en el precio de la camisa / del artículo del taller.</div>
+
+      <div class="form-row">
+        <div>
+          <label for="impresionAbono">Abono inicial ($)</label>
+          <input type="number" id="impresionAbono" min="0" step="0.01" value="0">
+        </div>
+        <div>
+          <label for="impresionDescripcion">Descripción</label>
+          <input type="text" id="impresionDescripcion" placeholder="Diseño, tela, notas...">
+        </div>
+      </div>
+
+      <div class="items-summary neu-inset">
+        <span>m²: <b id="resumenM2">0.00</b></span>
+        <span>Total: <b id="resumenTotalImpresion">$0,00</b></span>
+      </div>
+
+      <div id="historialAbonosImpresion"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalImpresion">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar impresión</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL NUEVO/EDITAR PEDIDO ECO SOLVENTE === -->
+<div class="modal-overlay" id="modalEcoOverlay">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-header">
+      <h2 id="modalEcoTitulo">Nuevo pedido eco solvente</h2>
+      <button class="neu-btn icon" id="btnCerrarModalEco">✕</button>
+    </div>
+
+    <form id="formEco">
+      <input type="hidden" id="ecoId">
+
+      <div class="form-row three">
+        <div>
+          <label for="ecoCliente">Cliente *</label>
+          <input type="text" id="ecoCliente" list="listaClientes" required>
+        </div>
+        <div>
+          <label for="ecoFecha">Fecha *</label>
+          <input type="date" id="ecoFecha" required>
+        </div>
+        <div>
+          <label for="ecoAbono">Abono inicial ($)</label>
+          <input type="number" id="ecoAbono" min="0" step="0.01" value="0">
+        </div>
+      </div>
+
+      <div class="form-row three">
+        <div>
+          <label for="ecoAncho">Ancho (m) *</label>
+          <input type="number" id="ecoAncho" min="0.01" step="0.01" required>
+        </div>
+        <div>
+          <label for="ecoAlto">Alto (m) *</label>
+          <input type="number" id="ecoAlto" min="0.01" step="0.01" required>
+        </div>
+        <div>
+          <label for="ecoPrecioM2">Precio impresión por m² ($) *</label>
+          <input type="number" id="ecoPrecioM2" min="0" step="0.01" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div style="grid-column: 1 / -1;">
+          <label for="ecoDescripcion">Descripción</label>
+          <input type="text" id="ecoDescripcion" placeholder="Diseño, ubicación, notas...">
+        </div>
+      </div>
+
+      <label>Extras del pendón</label>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <span>Remate</span>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoRemate">Tipo de remate</label>
+            <select id="ecoRemate">
+              <option value="ninguno">Ninguno</option>
+              <option value="palos">Palos</option>
+              <option value="tubos">Tubos</option>
+            </select>
+          </div>
+          <div>
+            <label for="ecoRemateCosto">Costo del remate ($)</label>
+            <input type="number" id="ecoRemateCosto" min="0" step="0.01" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <input type="checkbox" id="ecoLlevaDiseno">
+          <label for="ecoLlevaDiseno" style="margin:0">Lleva diseño</label>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoDisenoCosto">Costo del diseño ($)</label>
+            <input type="number" id="ecoDisenoCosto" min="0" step="0.01" value="0" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <input type="checkbox" id="ecoLlevaEstructura">
+          <label for="ecoLlevaEstructura" style="margin:0">Lleva estructura</label>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoEstructuraCosto">Costo de la estructura ($)</label>
+            <input type="number" id="ecoEstructuraCosto" min="0" step="0.01" value="0" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <span>Clear (protección)</span>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoClearModo">Cómo se cobra</label>
+            <select id="ecoClearModo">
+              <option value="ninguno">No lleva clear</option>
+              <option value="fijo">Costo fijo</option>
+              <option value="m2">Por m² (usa el ancho×alto de arriba)</option>
+            </select>
+          </div>
+          <div>
+            <label for="ecoClearCosto">Costo fijo ($)</label>
+            <input type="number" id="ecoClearCosto" min="0" step="0.01" value="0" disabled>
+          </div>
+          <div>
+            <label for="ecoClearPrecioM2">Precio por m² ($)</label>
+            <input type="number" id="ecoClearPrecioM2" min="0" step="0.01" value="0" disabled>
+          </div>
+        </div>
+        <div class="extra-total-line">Costo clear: <b id="resumenClearCosto">$0,00</b></div>
+      </div>
+
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <span>Transfer</span>
+        </div>
+        <div class="extra-box-campos">
+          <div>
+            <label for="ecoTransferModo">Cómo se cobra</label>
+            <select id="ecoTransferModo">
+              <option value="ninguno">No lleva transfer</option>
+              <option value="fijo">Costo fijo</option>
+              <option value="m2">Por m² (usa el ancho×alto de arriba)</option>
+            </select>
+          </div>
+          <div>
+            <label for="ecoTransferCosto">Costo fijo ($)</label>
+            <input type="number" id="ecoTransferCosto" min="0" step="0.01" value="0" disabled>
+          </div>
+          <div>
+            <label for="ecoTransferPrecioM2">Precio por m² ($)</label>
+            <input type="number" id="ecoTransferPrecioM2" min="0" step="0.01" value="0" disabled>
+          </div>
+        </div>
+        <div class="extra-total-line">Costo transfer: <b id="resumenTransferCosto">$0,00</b></div>
+      </div>
+
+      <div class="items-summary neu-inset">
+        <span>m²: <b id="resumenM2Eco">0.00</b></span>
+        <span>Impresión base: <b id="resumenBaseEco">$0,00</b></span>
+        <span>Extras: <b id="resumenExtrasEco">$0,00</b></span>
+        <span>Total: <b id="resumenTotalEco">$0,00</b></span>
+      </div>
+
+      <div id="historialAbonosEco"></div>
+
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalEco">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar pedido eco solvente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL NUEVA/EDITAR PÉRDIDA O PRUEBA DE IMPRESIÓN === -->
+<div class="modal-overlay" id="modalPerdidaOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalPerdidaTitulo">Nueva pérdida / prueba</h2>
+      <button class="neu-btn icon" id="btnCerrarModalPerdida">✕</button>
+    </div>
+
+    <form id="formPerdida">
+      <input type="hidden" id="perdidaId">
+
+      <div class="form-row three">
+        <div>
+          <label for="perdidaFecha">Fecha *</label>
+          <input type="date" id="perdidaFecha" required>
+        </div>
+        <div>
+          <label for="perdidaTipo">Tipo *</label>
+          <select id="perdidaTipo" required>
+            <option value="perdida">🗑️ Pérdida de material</option>
+            <option value="prueba">🧪 Prueba de impresión</option>
+          </select>
+        </div>
+        <div>
+          <label for="perdidaPrecioM2">Precio por m² ($) *</label>
+          <input type="number" id="perdidaPrecioM2" min="0" step="0.01" required>
+        </div>
+      </div>
+
+      <div class="form-row three">
+        <div>
+          <label for="perdidaAncho">Ancho (m) *</label>
+          <input type="number" id="perdidaAncho" min="0.01" step="0.01" required>
+        </div>
+        <div>
+          <label for="perdidaAlto">Alto (m) *</label>
+          <input type="number" id="perdidaAlto" min="0.01" step="0.01" required>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="form-row">
+        <div style="grid-column: 1 / -1;">
+          <label for="perdidaDescripcion">Motivo / descripción</label>
+          <input type="text" id="perdidaDescripcion" placeholder="Ej: prueba de color, tela mal calibrada, error de diseño...">
+        </div>
+      </div>
+
+      <div class="items-summary neu-inset">
+        <span>m²: <b id="resumenM2Perdida">0.00</b></span>
+        <span>Total perdido: <b id="resumenTotalPerdida">$0,00</b></span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalPerdida">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL REGISTRAR ABONO (pedidos, impresiones y eco solvente) === -->
+<div class="modal-overlay" id="modalAbonoOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2>💰 Registrar abono</h2>
+      <button class="neu-btn icon" id="btnCerrarModalAbono">✕</button>
+    </div>
+    <form id="formAbono">
+      <input type="hidden" id="abonoTipo">
+      <input type="hidden" id="abonoTargetId">
+      <p class="abono-contexto" id="abonoContexto"></p>
+      <div class="form-row">
+        <div>
+          <label for="abonoFecha">Fecha *</label>
+          <input type="date" id="abonoFecha" required>
+        </div>
+        <div>
+          <label for="abonoMonto">Monto ($) *</label>
+          <input type="number" id="abonoMonto" min="0.01" step="0.01" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalAbono">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar abono</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<datalist id="listaClientes"></datalist>
+
+</div><!-- /appShell -->
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

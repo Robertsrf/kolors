@@ -1,14 +1,11 @@
 // Kolors · configuración de conexión a Supabase
 //
-// Cómo obtener estos dos valores:
-// 1. Entra a https://supabase.com y crea un proyecto (gratis).
-// 2. En el panel del proyecto: Project Settings → API.
-// 3. Copia "Project URL" en SUPABASE_URL.
-// 4. Copia la clave "anon public" en SUPABASE_ANON_KEY.
+// Estos dos valores son PÚBLICOS por diseño (van en el navegador de cada
+// persona). La seguridad real la dan: (1) el login por código, y (2) las
+// políticas RLS de la base de datos (supabase/schema.sql). La clave secreta
+// (sb_secret_...) NUNCA va aquí.
 //
-// La anon key es segura de dejar en el código del frontend: Supabase está
-// diseñado para eso. La seguridad real la dan las políticas RLS definidas en
-// supabase/schema.sql (sólo usuarios que iniciaron sesión pueden leer/escribir).
+// Para obtenerlos: Supabase → Project Settings → API.
 
-export const SUPABASE_URL = "https://TU-PROYECTO.supabase.co";
-export const SUPABASE_ANON_KEY = "TU-ANON-KEY-AQUI";
+export const SUPABASE_URL = "https://gcnnalrjtpsysenpkoxk.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_cvKgh8_ZWrYGvnMO_yef3w_pZo_8w51";

@@ -189,10 +189,22 @@
         <button class="neu-btn primary" id="btnExportar">Exportar JSON</button>
       </div>
       <div class="datos-card neu-raised">
-        <h3>📥 Importar respaldo antiguo (localStorage)</h3>
-        <p>Carga el JSON exportado de la versión anterior (un solo archivo) y lo sube a Supabase, sumándolo a lo que ya exista.</p>
+        <h3>📥 Importar respaldo completo</h3>
+        <p>Carga un JSON completo (pedidos, sublimación, eco solvente y pérdidas juntos) y lo sube a Supabase, sumándolo a lo que ya exista.</p>
         <input type="file" id="inputImportar" accept="application/json">
         <button class="neu-btn primary" id="btnImportar">Importar a Supabase</button>
+      </div>
+      <div class="datos-card neu-raised">
+        <h3>🖨️ Importar solo Sublimación</h3>
+        <p>Para la migración inicial desde Excel: carga un JSON con solo los trabajos de sublimación.</p>
+        <input type="file" id="inputImportarSublimacion" accept="application/json">
+        <button class="neu-btn primary" id="btnImportarSublimacion">Importar sublimación</button>
+      </div>
+      <div class="datos-card neu-raised">
+        <h3>🏳️ Importar solo Eco Solvente</h3>
+        <p>Para la migración inicial desde Excel: carga un JSON con solo los pedidos de eco solvente.</p>
+        <input type="file" id="inputImportarEco" accept="application/json">
+        <button class="neu-btn primary" id="btnImportarEco">Importar eco solvente</button>
       </div>
       <div class="datos-card neu-raised">
         <h3>🗑️ Borrar todo</h3>

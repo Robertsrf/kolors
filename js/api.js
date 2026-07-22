@@ -468,7 +468,7 @@ export async function guardarPrecios(precios) {
 // ============================================================
 // IMPORTAR RESPALDO ANTIGUO (localStorage JSON) A SUPABASE
 // ============================================================
-export async function importarRespaldoAntiguo({ pedidos, impresiones, perdidas }) {
+export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvente, perdidas }) {
   for (const p of pedidos || []) {
     const { data: row, error } = await supabase
       .from("pedidos")
@@ -528,6 +528,47 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, perdidas }
     if (imp.pagos && imp.pagos.length) {
       await supabase.from("pagos").insert(
         imp.pagos.map((pg) => ({ entidad_tipo: "impresion", entidad_id: row.id, fecha: pg.fecha, monto: pg.monto }))
+      );
+    }
+  }
+
+  for (const eco of ecoSolvente || []) {
+    const { data: row, error } = await supabase
+      .from("eco_solvente")
+      .insert({
+        cliente: eco.cliente,
+        fecha: eco.fecha,
+        ancho: eco.ancho,
+        alto: eco.alto,
+        precio_m2: eco.precioM2 || 0,
+        descripcion: eco.descripcion || null,
+        abono: eco.abono || 0,
+        estado: eco.estado || "Pedido",
+        fecha_pedido: (eco.fechas && eco.fechas.pedido) || eco.fecha || eco.creado || new Date().toISOString(),
+        fecha_diseno: (eco.fechas && eco.fechas.diseno) || null,
+        fecha_impresion: (eco.fechas && eco.fechas.impresion) || null,
+        fecha_acabado: (eco.fechas && eco.fechas.acabado) || null,
+        fecha_entregado: (eco.fechas && eco.fechas.entregado) || null,
+        remate: eco.remate || "ninguno",
+        remate_costo: eco.remateCosto || 0,
+        lleva_diseno: !!eco.llevaDiseno,
+        diseno_costo: eco.disenoCosto || 0,
+        lleva_estructura: !!eco.llevaEstructura,
+        estructura_costo: eco.estructuraCosto || 0,
+        clear_modo: eco.clearModo || "ninguno",
+        clear_costo: eco.clearCosto || 0,
+        clear_precio_m2: eco.clearPrecioM2 || 0,
+        transfer_modo: eco.transferModo || "ninguno",
+        transfer_costo: eco.transferCosto || 0,
+        transfer_precio_m2: eco.transferPrecioM2 || 0,
+        creado_at: eco.creado || new Date().toISOString(),
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    if (eco.pagos && eco.pagos.length) {
+      await supabase.from("pagos").insert(
+        eco.pagos.map((pg) => ({ entidad_tipo: "eco_solvente", entidad_id: row.id, fecha: pg.fecha, monto: pg.monto }))
       );
     }
   }

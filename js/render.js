@@ -6,6 +6,7 @@ import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
 import { renderClientesGrid, abrirDetalleCliente, getClienteSeleccionado } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
+import { refrescarNotificaciones } from "./ui/notificaciones.js";
 
 function actualizarListaClientes() {
   const nombres = new Set();
@@ -28,6 +29,7 @@ function actualizarListaClientes() {
 export function render() {
   renderBoard();
   actualizarListaClientes();
+  refrescarNotificaciones();
   const activeTab = document.querySelector(".tab-btn.active");
   const tab = activeTab ? activeTab.dataset.tab : "tablero";
   if (tab === "stats") renderStats();

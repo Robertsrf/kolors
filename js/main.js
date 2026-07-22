@@ -9,6 +9,11 @@ import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
+import "./ui/notificaciones.js";
+import "./ui/calendario.js";
+import "./ui/calculadora.js";
+import { initNotas } from "./ui/notas.js";
+import { initChat } from "./ui/chat.js";
 
 // === TABS ===
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -38,6 +43,8 @@ initAuth({
     render();
     if (canalRealtime) supabase.removeChannel(canalRealtime);
     canalRealtime = suscribirRealtime(render);
+    initNotas();
+    initChat();
   },
   onLogout: () => {
     if (canalRealtime) {

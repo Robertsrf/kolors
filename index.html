@@ -47,6 +47,10 @@
     <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
   </nav>
   <div class="header-actions">
+    <div class="notif-wrap">
+      <button class="neu-btn icon" id="btnNotificaciones" title="Entregas próximas">🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+      <div class="notif-dropdown" id="notifDropdown"></div>
+    </div>
     <span class="usuario-actual" id="usuarioActual"></span>
     <button class="neu-btn" id="btnLogout">Cerrar sesión</button>
   </div>
@@ -215,6 +219,71 @@
   </section>
 
 </main>
+
+<!-- === HERRAMIENTAS (launcher izquierdo) === -->
+<div class="tools-launcher">
+  <button type="button" class="fab-tool" id="btnCalendario" title="Calendario de entregas">📅</button>
+  <button type="button" class="fab-tool" id="btnCalculadora" title="Calculadora">🧮</button>
+  <button type="button" class="fab-tool" id="btnNotas" title="Notas compartidas">📝</button>
+  <button type="button" class="fab-tool" id="btnChat" title="Chat del equipo">💬<span class="notif-badge" id="chatBadge" style="display:none">0</span></button>
+</div>
+
+<!-- === MODAL CALENDARIO === -->
+<div class="modal-overlay panel-izq" id="modalCalendarioOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>📅 Calendario de entregas</h2>
+      <button class="neu-btn icon" id="btnCerrarCalendario">✕</button>
+    </div>
+    <div class="cal-nav">
+      <button type="button" class="neu-btn icon" id="calPrev">◀</button>
+      <span id="calMesAnio"></span>
+      <button type="button" class="neu-btn icon" id="calNext">▶</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-dia-detalle" id="calDiaDetalle"></div>
+  </div>
+</div>
+
+<!-- === MODAL CALCULADORA === -->
+<div class="modal-overlay panel-izq" id="modalCalculadoraOverlay">
+  <div class="modal panel-modal" style="max-width:320px">
+    <div class="modal-header">
+      <h2>🧮 Calculadora</h2>
+      <button class="neu-btn icon" id="btnCerrarCalculadora">✕</button>
+    </div>
+    <input type="text" id="calcDisplay" class="calc-display" readonly value="0">
+    <div class="calc-grid" id="calcGrid"></div>
+  </div>
+</div>
+
+<!-- === MODAL NOTAS COMPARTIDAS === -->
+<div class="modal-overlay panel-izq" id="modalNotasOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>📝 Notas compartidas</h2>
+      <button class="neu-btn icon" id="btnCerrarNotas">✕</button>
+    </div>
+    <p class="abono-contexto">Bloc de notas del equipo. Todos ven y editan lo mismo; se guarda solo.</p>
+    <textarea id="notasTexto" class="notas-texto" placeholder="Escribe aquí recados, pendientes, lista de compras..."></textarea>
+    <div class="notas-estado" id="notasEstado"></div>
+  </div>
+</div>
+
+<!-- === MODAL CHAT === -->
+<div class="modal-overlay panel-izq" id="modalChatOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>💬 Chat del equipo</h2>
+      <button class="neu-btn icon" id="btnCerrarChat">✕</button>
+    </div>
+    <div class="chat-mensajes" id="chatMensajes"></div>
+    <form id="formChat" class="chat-form">
+      <input type="text" id="chatInput" placeholder="Escribe un mensaje..." autocomplete="off">
+      <button type="submit" class="neu-btn primary">Enviar</button>
+    </form>
+  </div>
+</div>
 
 <!-- === TARJETA FLOTANTE DE PRECIOS === -->
 <button type="button" class="fab-precios" id="btnPrecios" title="Configurar precios">💲</button>

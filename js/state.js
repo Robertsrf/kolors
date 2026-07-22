@@ -49,6 +49,8 @@ export const state = {
   ecoSolvente: [],
   perdidas: [],
   precios: { secciones: [{ titulo: "Precios", filas: [] }] },
+  notas: "",
+  mensajes: [],
 };
 
 // === CÁLCULOS DERIVADOS · PEDIDOS DE CAMISA ===
@@ -175,6 +177,76 @@ export function historialPagosEco(eco) {
 export function fechaFaseActualEco(eco) {
   const fechas = eco.fechas || {};
   return fechas[CLAVE_FECHA_ECO[eco.estado]] || eco.fecha;
+}
+
+// === AGENDA / ENTREGAS (para calendario y notificaciones) ===
+export const AVISO_DIAS_DEFECTO = 3;
+
+// Lista unificada de pedidos PENDIENTES que tienen fecha de entrega.
+export function agendaItems() {
+  const items = [];
+  state.pedidos.forEach((p) => {
+    if (p.fechaEntrega && p.estado !== "Entregado") {
+      items.push({
+        tipo: "camisa",
+        icono: "👕",
+        seccion: "Camisas",
+        id: p.id,
+        cliente: p.cliente.nombre,
+        fechaEntrega: p.fechaEntrega,
+        avisoDias: p.avisoDias == null ? AVISO_DIAS_DEFECTO : p.avisoDias,
+        saldo: Math.max(saldoPendiente(p), 0),
+        estado: p.estado,
+      });
+    }
+  });
+  state.impresiones.forEach((i) => {
+    if (i.fechaEntrega && !estaPagadaImpresion(i)) {
+      items.push({
+        tipo: "sublimacion",
+        icono: "🖨️",
+        seccion: "Sublimación",
+        id: i.id,
+        cliente: i.cliente,
+        fechaEntrega: i.fechaEntrega,
+        avisoDias: i.avisoDias == null ? AVISO_DIAS_DEFECTO : i.avisoDias,
+        saldo: Math.max(saldoImpresion(i), 0),
+        estado: "",
+      });
+    }
+  });
+  state.ecoSolvente.forEach((e) => {
+    if (e.fechaEntrega && e.estado !== "Entregado") {
+      items.push({
+        tipo: "eco",
+        icono: "🏳️",
+        seccion: "Eco Solvente",
+        id: e.id,
+        cliente: e.cliente,
+        fechaEntrega: e.fechaEntrega,
+        avisoDias: e.avisoDias == null ? AVISO_DIAS_DEFECTO : e.avisoDias,
+        saldo: Math.max(saldoEco(e), 0),
+        estado: e.estado,
+      });
+    }
+  });
+  return items;
+}
+
+// Días de calendario entre hoy (00:00) y la fecha dada (00:00). Negativo = vencido.
+export function diasHastaEntrega(fechaISO, hoy = new Date()) {
+  const h = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  const f = new Date(fechaISO);
+  const fd = new Date(f.getFullYear(), f.getMonth(), f.getDate());
+  return Math.round((fd - h) / 86400000);
+}
+
+// Pedidos cuya entrega está dentro de su ventana de aviso (o ya vencidos).
+export function notificacionesEntrega(hoy = new Date()) {
+  return agendaItems()
+    .map((it) => ({ ...it, dias: diasHastaEntrega(it.fechaEntrega, hoy) }))
+    .filter((it) => it.dias <= it.avisoDias)
+    .sort((a, b) => a.dias - b.dias);
 }
 
 // === CÁLCULOS DERIVADOS · PÉRDIDAS Y PRUEBAS ===

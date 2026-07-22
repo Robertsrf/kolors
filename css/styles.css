@@ -671,5 +671,195 @@ body:not(.rol-admin) #btnBorrarTodo {
   display: none !important;
 }
 
+/* === NOTIFICACIONES (campana) === */
+.notif-wrap { position: relative; }
+.notif-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4770;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239,71,112,.5);
+}
+.notif-dropdown {
+  display: none;
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 340px;
+  max-width: 88vw;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 44px rgba(51,58,77,.22);
+  padding: 10px;
+  z-index: 60;
+}
+.notif-dropdown.visible { display: block; }
+.notif-titulo { font-size: 13px; font-weight: 800; margin: 4px 6px 10px; }
+.notif-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.notif-item:hover { background: var(--surface-alt); }
+.notif-item .ic { font-size: 18px; }
+.notif-item .info { flex: 1; min-width: 0; }
+.notif-item .cli { font-weight: 700; font-size: 13px; }
+.notif-item .sub { font-size: 11px; color: var(--text-soft); }
+.notif-item .dias { font-size: 11px; font-weight: 800; white-space: nowrap; }
+.notif-item .dias.vencido { color: #d6285a; }
+.notif-item .dias.hoy { color: #b45309; }
+.notif-item .dias.pronto { color: #178a43; }
+.notif-vacio { font-size: 12.5px; color: var(--text-soft); text-align: center; padding: 18px; }
+
+/* === LAUNCHER DE HERRAMIENTAS (izquierda) === */
+.tools-launcher {
+  position: fixed;
+  left: 18px;
+  bottom: 20px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fab-tool {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(51,58,77,.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.fab-tool:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 12px 26px rgba(51,58,77,.24); }
+.fab-tool:active { transform: scale(.94); }
+
+/* === PANELES LATERALES (calendario, calc, notas, chat) === */
+.modal-overlay.panel-izq { justify-content: flex-start; align-items: stretch; padding: 0; }
+.panel-modal {
+  max-width: 440px;
+  width: 94vw;
+  height: 100vh;
+  margin: 0;
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* === CALENDARIO === */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cal-nav span { font-weight: 800; font-size: 15px; text-transform: capitalize; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-dow { text-align: center; font-size: 10px; font-weight: 800; color: var(--text-soft); padding: 4px 0; }
+.cal-dia {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-alt);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: default;
+  position: relative;
+}
+.cal-dia.vacio { background: transparent; border: none; }
+.cal-dia.hoy { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255,92,138,.25); }
+.cal-dia.con-entregas { cursor: pointer; background: #eef0ff; }
+.cal-dia.con-entregas:hover { background: #e2e6ff; }
+.cal-dia .cuenta {
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; background: var(--accent-2); color: #fff;
+  font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-dia.tiene-vencido .cuenta { background: #ef4770; }
+.cal-dia-detalle { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cal-dia-detalle h4 { margin: 0; font-size: 13px; }
+
+/* === CALCULADORA === */
+.calc-display {
+  text-align: right;
+  font-size: 26px;
+  font-weight: 800;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--surface-alt);
+}
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.calc-btn {
+  padding: 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background .1s ease, transform .05s ease;
+}
+.calc-btn:active { transform: scale(.95); }
+.calc-btn.op { background: #ede9fe; color: var(--accent-2); }
+.calc-btn.eq { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.calc-btn.clear { background: #ffe1e6; color: #d6285a; }
+.calc-btn.wide { grid-column: span 2; }
+
+/* === NOTAS === */
+.notas-texto {
+  flex: 1;
+  min-height: 300px;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+.notas-estado { font-size: 11px; color: var(--text-soft); margin-top: 8px; min-height: 16px; }
+
+/* === CHAT === */
+.chat-mensajes {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 2px;
+  margin-bottom: 10px;
+}
+.chat-msg { max-width: 82%; padding: 8px 12px; border-radius: 14px; font-size: 13px; }
+.chat-msg .autor { font-size: 10.5px; font-weight: 800; color: var(--text-soft); margin-bottom: 2px; }
+.chat-msg .hora { font-size: 10px; color: var(--text-soft); margin-top: 3px; text-align: right; }
+.chat-msg.propio { align-self: flex-end; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+.chat-msg.propio .autor, .chat-msg.propio .hora { color: rgba(255,255,255,.8); }
+.chat-msg.ajeno { align-self: flex-start; background: var(--surface-alt); border: 1px solid var(--border); }
+.chat-form { display: flex; gap: 8px; }
+.chat-form input { flex: 1; }
+.chat-vacio { font-size: 12.5px; color: var(--text-soft); text-align: center; padding: 30px 10px; }
+
 ::-webkit-scrollbar { height: 8px; width: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 8px; opacity: .5; }

@@ -140,6 +140,32 @@ insert into precios_config (id, data) values (1, '{}'::jsonb)
   on conflict (id) do nothing;
 
 -- ============================================================
+-- NOTAS COMPARTIDAS + CHAT DEL EQUIPO
+-- ============================================================
+create table if not exists notas_config (
+  id int primary key default 1,
+  contenido text not null default '',
+  actualizado_at timestamptz,
+  actualizado_por text,
+  constraint notas_singleton check (id = 1)
+);
+insert into notas_config (id, contenido) values (1, '') on conflict (id) do nothing;
+
+create table if not exists mensajes (
+  id uuid primary key default gen_random_uuid(),
+  autor text not null,
+  texto text not null,
+  creado_at timestamptz not null default now()
+);
+
+alter table notas_config enable row level security;
+alter table mensajes enable row level security;
+drop policy if exists "notas_todos" on notas_config;
+drop policy if exists "mensajes_todos" on mensajes;
+create policy "notas_todos" on notas_config for all to authenticated using (true) with check (true);
+create policy "mensajes_todos" on mensajes for all to authenticated using (true) with check (true);
+
+-- ============================================================
 -- ROW LEVEL SECURITY (con roles por código)
 --
 -- Todos los que iniciaron sesión pueden LEER todo.
@@ -189,7 +215,7 @@ end $$;
 do $$
 begin
   begin
-    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config;
+    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, notas_config, mensajes;
   exception when duplicate_object then
     null;
   end;

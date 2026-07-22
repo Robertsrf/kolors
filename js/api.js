@@ -191,6 +191,61 @@ export async function cargarTodo() {
 }
 
 // ============================================================
+// NOTAS COMPARTIDAS
+// ============================================================
+export async function cargarNotas() {
+  const { data, error } = await supabase.from("notas_config").select("*").eq("id", 1).maybeSingle();
+  if (error) throw error;
+  state.notas = data ? data.contenido || "" : "";
+  return state.notas;
+}
+export async function guardarNotas(texto, autor) {
+  const { error } = await supabase
+    .from("notas_config")
+    .upsert({ id: 1, contenido: texto, actualizado_at: new Date().toISOString(), actualizado_por: autor });
+  if (error) throw error;
+  state.notas = texto;
+}
+export function suscribirNotas(cb) {
+  const canal = supabase.channel("kolors-notas");
+  canal.on("postgres_changes", { event: "*", schema: "public", table: "notas_config" }, (payload) => {
+    if (payload.new) state.notas = payload.new.contenido || "";
+    cb(payload.new || {});
+  });
+  canal.subscribe();
+  return canal;
+}
+
+// ============================================================
+// CHAT DEL EQUIPO
+// ============================================================
+export async function cargarMensajes() {
+  const { data, error } = await supabase
+    .from("mensajes")
+    .select("*")
+    .order("creado_at", { ascending: true })
+    .limit(300);
+  if (error) throw error;
+  state.mensajes = data || [];
+  return state.mensajes;
+}
+export async function enviarMensaje(autor, texto) {
+  const { error } = await supabase.from("mensajes").insert({ autor, texto });
+  if (error) throw error;
+}
+export function suscribirChat(cb) {
+  const canal = supabase.channel("kolors-chat");
+  canal.on("postgres_changes", { event: "INSERT", schema: "public", table: "mensajes" }, (payload) => {
+    if (payload.new) {
+      state.mensajes.push(payload.new);
+      cb(payload.new);
+    }
+  });
+  canal.subscribe();
+  return canal;
+}
+
+// ============================================================
 // TIEMPO REAL: cualquier cambio en cualquier tabla recarga esa
 // entidad y notifica para volver a pintar la pantalla.
 // ============================================================

@@ -27,6 +27,18 @@ function rolPorEmail(email) {
   return c ? c.rol : "editor";
 }
 
+const NOMBRE_POR_EMAIL = {
+  "admin@kolors.app": "Admin",
+  "jefe@kolors.app": "Jefe",
+  "maria@kolors.app": "María",
+  "mia@kolors.app": "Mía",
+};
+
+let usuarioSesion = null;
+export function getUsuarioActual() {
+  return usuarioSesion;
+}
+
 const loginOverlay = document.getElementById("loginOverlay");
 const appShell = document.getElementById("appShell");
 const formLogin = document.getElementById("formLogin");
@@ -123,6 +135,7 @@ export function initAuth({ onLogin, onLogout }) {
   supabase.auth.onAuthStateChange((_event, session) => {
     if (session && session.user) {
       const rol = rolPorEmail(session.user.email);
+      usuarioSesion = { email: session.user.email, rol, nombre: NOMBRE_POR_EMAIL[session.user.email] || session.user.email };
       if (sesionActivaId !== session.user.id) {
         sesionActivaId = session.user.id;
         mostrarApp(rol);
@@ -132,6 +145,7 @@ export function initAuth({ onLogin, onLogout }) {
       }
     } else {
       sesionActivaId = null;
+      usuarioSesion = null;
       document.body.classList.remove("rol-admin", "rol-editor", "rol-jefe");
       mostrarLogin();
       onLogout();

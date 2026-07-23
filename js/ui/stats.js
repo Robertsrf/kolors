@@ -4,6 +4,7 @@ import {
   GENEROS,
   PALETA_GENERO,
   REMATE_LABEL,
+  MATERIAL_ECO_LABEL,
   totalCamisas,
   totalPedidoMonto,
   totalAbonadoPedido,
@@ -20,8 +21,10 @@ import {
   costoRemateEco,
   costoDisenoEco,
   costoEstructuraEco,
+  costoCuadroMaderaEco,
   costoClearEco,
   costoTransferEco,
+  costoPvcEco,
   m2Perdida,
   totalPerdida,
 } from "../state.js";
@@ -150,8 +153,10 @@ export function renderStats() {
   const totalRemates = state.ecoSolvente.reduce((s, e) => s + costoRemateEco(e), 0);
   const totalDisenos = state.ecoSolvente.reduce((s, e) => s + costoDisenoEco(e), 0);
   const totalEstructuras = state.ecoSolvente.reduce((s, e) => s + costoEstructuraEco(e), 0);
+  const totalCuadros = state.ecoSolvente.reduce((s, e) => s + costoCuadroMaderaEco(e), 0);
   const totalClear = state.ecoSolvente.reduce((s, e) => s + costoClearEco(e), 0);
   const totalTransfer = state.ecoSolvente.reduce((s, e) => s + costoTransferEco(e), 0);
+  const totalPvc = state.ecoSolvente.reduce((s, e) => s + costoPvcEco(e), 0);
 
   const statsEcoExtras = document.getElementById("statsEcoExtras");
   statsEcoExtras.innerHTML = "";
@@ -159,8 +164,10 @@ export function renderStats() {
     ["🪧 Generado por remates", money(totalRemates)],
     ["🎨 Generado por diseño", money(totalDisenos)],
     ["🏗️ Generado por estructura", money(totalEstructuras)],
+    ["🖼️ Generado por cuadro de madera", money(totalCuadros)],
     ["🧴 Generado por clear", money(totalClear)],
     ["🔁 Generado por transfer", money(totalTransfer)],
+    ["🧱 Generado por PVC", money(totalPvc)],
   ].forEach(([label, value]) => statsEcoExtras.appendChild(statCard(label, value)));
 
   const m2PorClienteEco = {};
@@ -183,6 +190,25 @@ export function renderStats() {
     ["ninguno", "palos", "tubos"].map((r) => REMATE_LABEL[r]),
     ["ninguno", "palos", "tubos"].map((r) => pedidosPorRemate[r])
   );
+
+  // m² por material (solo impresión; los stickers no tienen material)
+  const MATERIALES = ["vinil", "banner", "vinil_tornasol", "papel_bond", "clear"];
+  const m2PorMaterial = {};
+  MATERIALES.forEach((m) => (m2PorMaterial[m] = 0));
+  state.ecoSolvente.forEach((e) => {
+    if ((e.tipoTrabajo || "impresion") === "stickers") return;
+    const m = e.material || "banner";
+    m2PorMaterial[m] = (m2PorMaterial[m] || 0) + m2Eco(e);
+  });
+  renderChartEcoMaterial(
+    MATERIALES.map((m) => MATERIAL_ECO_LABEL[m]),
+    MATERIALES.map((m) => Number(m2PorMaterial[m].toFixed(2)))
+  );
+
+  // Impresión vs Stickers (m²)
+  const m2Impresiones = state.ecoSolvente.filter((e) => (e.tipoTrabajo || "impresion") !== "stickers").reduce((s, e) => s + m2Eco(e), 0);
+  const m2Stickers = state.ecoSolvente.filter((e) => e.tipoTrabajo === "stickers").reduce((s, e) => s + m2Eco(e), 0);
+  renderChartEcoTipoTrabajo(["🖨️ Impresión", "🏷️ Stickers"], [Number(m2Impresiones.toFixed(2)), Number(m2Stickers.toFixed(2))]);
 
   // === Pérdidas y pruebas ===
   const m2TotalPerdidas = state.perdidas.reduce((s, p) => s + m2Perdida(p), 0);
@@ -326,6 +352,41 @@ function renderChartEcoRemate(labels, data) {
       maintainAspectRatio: false,
       cutout: "62%",
       plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, padding: 14 } } },
+    },
+  });
+}
+
+function renderChartEcoMaterial(labels, data) {
+  pintarChart("chartEcoMaterial", {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: ["#38bdf8", "#7c5cff", "#f472b6", "#fbbf24", "#34d399"], borderColor: "#ffffff", borderWidth: 3 }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, padding: 12 } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.raw)} m²` } },
+      },
+    },
+  });
+}
+
+function renderChartEcoTipoTrabajo(labels, data) {
+  pintarChart("chartEcoTipoTrabajo", {
+    type: "doughnut",
+    data: { labels, datasets: [{ data, backgroundColor: ["#14b8a6", "#ff5c8a"], borderColor: "#ffffff", borderWidth: 3 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, padding: 14 } },
+        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.raw)} m²` } },
+      },
     },
   });
 }

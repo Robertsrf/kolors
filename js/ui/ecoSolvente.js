@@ -100,7 +100,7 @@ function renderEcoCard(eco) {
     <div class="card-top">
       <div>
         <div class="card-cliente">${escapeHtml(eco.cliente)}</div>
-        <div class="card-tel">📐 ${fmt(m2)} m² (${fmt(eco.ancho)}×${fmt(eco.alto)} m)</div>
+        <div class="card-tel">📐 ${fmt(m2)} m²${eco.tipoTrabajo === "stickers" ? "" : ` (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`}</div>
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>

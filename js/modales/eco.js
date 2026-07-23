@@ -5,6 +5,7 @@ import {
   baseEco,
   costoClearEco,
   costoTransferEco,
+  costoPvcEco,
   totalExtrasEco,
   totalEco,
 } from "../state.js";
@@ -30,12 +31,22 @@ const campoClearPrecioM2 = document.getElementById("ecoClearPrecioM2");
 const campoTransferModo = document.getElementById("ecoTransferModo");
 const campoTransferCosto = document.getElementById("ecoTransferCosto");
 const campoTransferPrecioM2 = document.getElementById("ecoTransferPrecioM2");
+const campoTipoTrabajo = document.getElementById("ecoTipoTrabajo");
+const campoM2Manual = document.getElementById("ecoM2Manual");
+const campoPvcModo = document.getElementById("ecoPvcModo");
+const campoPvcCosto = document.getElementById("ecoPvcCosto");
+const campoPvcPrecioM2 = document.getElementById("ecoPvcPrecioM2");
+
+// Elementos que solo aplican al modo "Impresión" (se ocultan en Stickers)
+const seccionesImpresion = ["ecoMaterialRow", "ecoBoxRemate", "ecoBoxEstructura", "ecoBoxCuadroMadera", "ecoBoxClear", "ecoBoxTransfer", "ecoBoxPvc"].map((id) => document.getElementById(id));
 
 function leerFormComoEco() {
   return {
+    tipoTrabajo: campoTipoTrabajo.value,
     material: document.getElementById("ecoMaterial").value,
     ancho: Number(document.getElementById("ecoAncho").value) || 0,
     alto: Number(document.getElementById("ecoAlto").value) || 0,
+    m2Manual: Number(campoM2Manual.value) || 0,
     precioM2: Number(document.getElementById("ecoPrecioM2").value) || 0,
     remate: campoRemate.value,
     remateCosto: Number(campoRemateCosto.value) || 0,
@@ -51,7 +62,22 @@ function leerFormComoEco() {
     transferModo: campoTransferModo.value,
     transferCosto: Number(campoTransferCosto.value) || 0,
     transferPrecioM2: Number(campoTransferPrecioM2.value) || 0,
+    pvcModo: campoPvcModo.value,
+    pvcCosto: Number(campoPvcCosto.value) || 0,
+    pvcPrecioM2: Number(campoPvcPrecioM2.value) || 0,
   };
+}
+
+// Muestra/oculta campos según Impresión vs Stickers.
+function actualizarUITipoTrabajo() {
+  const esStickers = campoTipoTrabajo.value === "stickers";
+  seccionesImpresion.forEach((el) => {
+    if (el) el.style.display = esStickers ? "none" : "";
+  });
+  document.getElementById("ecoCampoAncho").style.display = esStickers ? "none" : "";
+  document.getElementById("ecoCampoAlto").style.display = esStickers ? "none" : "";
+  document.getElementById("ecoCampoM2Manual").style.display = esStickers ? "" : "none";
+  actualizarUIExtras();
 }
 
 function actualizarUIExtras() {
@@ -64,6 +90,8 @@ function actualizarUIExtras() {
   campoClearPrecioM2.disabled = campoClearModo.value !== "m2";
   campoTransferCosto.disabled = campoTransferModo.value !== "fijo";
   campoTransferPrecioM2.disabled = campoTransferModo.value !== "m2";
+  campoPvcCosto.disabled = campoPvcModo.value !== "fijo";
+  campoPvcPrecioM2.disabled = campoPvcModo.value !== "m2";
   if (campoRemate.value === "ninguno") campoRemateCosto.value = 0;
   if (!campoLlevaDiseno.checked) campoDisenoCosto.value = 0;
   if (!campoLlevaEstructura.checked) campoEstructuraCosto.value = 0;
@@ -71,6 +99,8 @@ function actualizarUIExtras() {
   if (campoClearModo.value !== "m2") campoClearPrecioM2.value = 0;
   if (campoTransferModo.value !== "fijo") campoTransferCosto.value = 0;
   if (campoTransferModo.value !== "m2") campoTransferPrecioM2.value = 0;
+  if (campoPvcModo.value !== "fijo") campoPvcCosto.value = 0;
+  if (campoPvcModo.value !== "m2") campoPvcPrecioM2.value = 0;
   actualizarResumenEco();
 }
 
@@ -80,12 +110,14 @@ function actualizarResumenEco() {
   document.getElementById("resumenBaseEco").textContent = money(baseEco(borrador));
   document.getElementById("resumenClearCosto").textContent = money(costoClearEco(borrador));
   document.getElementById("resumenTransferCosto").textContent = money(costoTransferEco(borrador));
+  document.getElementById("resumenPvcCosto").textContent = money(costoPvcEco(borrador));
   document.getElementById("resumenExtrasEco").textContent = money(totalExtrasEco(borrador));
   document.getElementById("resumenTotalEco").textContent = money(totalEco(borrador));
 }
 
-[campoRemate, campoClearModo, campoTransferModo].forEach((el) => el.addEventListener("change", actualizarUIExtras));
+[campoRemate, campoClearModo, campoTransferModo, campoPvcModo].forEach((el) => el.addEventListener("change", actualizarUIExtras));
 [campoLlevaDiseno, campoLlevaEstructura, campoLlevaCuadroMadera].forEach((el) => el.addEventListener("change", actualizarUIExtras));
+campoTipoTrabajo.addEventListener("change", actualizarUITipoTrabajo);
 formEco.addEventListener("input", actualizarResumenEco);
 
 export function abrirModalNuevoEco() {
@@ -95,12 +127,14 @@ export function abrirModalNuevoEco() {
   document.getElementById("ecoFechaEntrega").value = "";
   document.getElementById("ecoAvisoDias").value = "";
   document.getElementById("ecoMaterial").value = "banner";
+  campoTipoTrabajo.value = "impresion";
   campoRemate.value = "ninguno";
   campoClearModo.value = "ninguno";
   campoTransferModo.value = "ninguno";
+  campoPvcModo.value = "ninguno";
   document.getElementById("historialAbonosEco").innerHTML = "";
   modalEcoTitulo.textContent = "Nuevo pedido eco solvente";
-  actualizarUIExtras();
+  actualizarUITipoTrabajo();
   modalEcoOverlay.classList.add("active");
 }
 
@@ -114,9 +148,11 @@ export function abrirModalEditarEco(id) {
   document.getElementById("ecoFechaEntrega").value = eco.fechaEntrega ? toInputDate(eco.fechaEntrega) : "";
   document.getElementById("ecoAvisoDias").value = eco.avisoDias == null ? "" : eco.avisoDias;
   document.getElementById("ecoMaterial").value = eco.material || "banner";
+  campoTipoTrabajo.value = eco.tipoTrabajo || "impresion";
   document.getElementById("ecoAbono").value = eco.abono || 0;
   document.getElementById("ecoAncho").value = eco.ancho;
   document.getElementById("ecoAlto").value = eco.alto;
+  campoM2Manual.value = eco.m2Manual || "";
   document.getElementById("ecoPrecioM2").value = eco.precioM2;
   document.getElementById("ecoDescripcion").value = eco.descripcion || "";
   campoRemate.value = eco.remate || "ninguno";
@@ -133,8 +169,11 @@ export function abrirModalEditarEco(id) {
   campoTransferModo.value = eco.transferModo || "ninguno";
   campoTransferCosto.value = eco.transferCosto || 0;
   campoTransferPrecioM2.value = eco.transferPrecioM2 || 0;
+  campoPvcModo.value = eco.pvcModo || "ninguno";
+  campoPvcCosto.value = eco.pvcCosto || 0;
+  campoPvcPrecioM2.value = eco.pvcPrecioM2 || 0;
   modalEcoTitulo.textContent = "Editar pedido eco solvente";
-  actualizarUIExtras();
+  actualizarUITipoTrabajo();
   renderHistorialAbonos("historialAbonosEco", historialPagosEco(eco));
   modalEcoOverlay.classList.add("active");
 }
@@ -156,12 +195,25 @@ formEco.addEventListener("submit", async function (e) {
     alert("La fecha del pedido es obligatoria.");
     return;
   }
-  const ancho = Number(document.getElementById("ecoAncho").value);
-  const alto = Number(document.getElementById("ecoAlto").value);
+  const esStickers = campoTipoTrabajo.value === "stickers";
   const precioM2 = Number(document.getElementById("ecoPrecioM2").value);
-  if (!ancho || ancho <= 0 || !alto || alto <= 0 || isNaN(precioM2) || precioM2 < 0) {
-    alert("Revisa ancho y alto (mayores a 0) y el precio de impresión por m² (no puede ser negativo).");
+  if (isNaN(precioM2) || precioM2 < 0) {
+    alert("El precio por m² no puede ser negativo.");
     return;
+  }
+  if (esStickers) {
+    const m2 = Number(campoM2Manual.value);
+    if (!m2 || m2 <= 0) {
+      alert("Indica cuántos m² de stickers (mayor a 0).");
+      return;
+    }
+  } else {
+    const ancho = Number(document.getElementById("ecoAncho").value);
+    const alto = Number(document.getElementById("ecoAlto").value);
+    if (!ancho || ancho <= 0 || !alto || alto <= 0) {
+      alert("Revisa ancho y alto (mayores a 0).");
+      return;
+    }
   }
 
   const borrador = leerFormComoEco();

@@ -26,6 +26,7 @@ export const MATERIAL_ECO_LABEL = {
   papel_bond: "Papel Bond",
   clear: "Clear",
 };
+export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers" };
 
 // Tablero de Eco Solvente
 export const FASES_ECO = ["Pedido", "Diseño", "Impresión", "Acabado", "Entregado"];
@@ -117,6 +118,7 @@ export function historialPagosImpresion(imp) {
 
 // === CÁLCULOS DERIVADOS · ECO SOLVENTE ===
 export function m2Eco(eco) {
+  if (eco.tipoTrabajo === "stickers") return Number(eco.m2Manual) || 0;
   return Number(eco.ancho) * Number(eco.alto);
 }
 export function baseEco(eco) {
@@ -132,6 +134,11 @@ export function costoTransferEco(eco) {
   if (eco.transferModo === "fijo") return redondear2(Number(eco.transferCosto || 0));
   return 0;
 }
+export function costoPvcEco(eco) {
+  if (eco.pvcModo === "m2") return redondear2(m2Eco(eco) * Number(eco.pvcPrecioM2 || 0));
+  if (eco.pvcModo === "fijo") return redondear2(Number(eco.pvcCosto || 0));
+  return 0;
+}
 export function costoRemateEco(eco) {
   return eco.remate && eco.remate !== "ninguno" ? redondear2(Number(eco.remateCosto || 0)) : 0;
 }
@@ -145,13 +152,16 @@ export function costoCuadroMaderaEco(eco) {
   return eco.llevaCuadroMadera ? redondear2(Number(eco.cuadroMaderaCosto || 0)) : 0;
 }
 export function totalExtrasEco(eco) {
+  // Los stickers solo pueden llevar diseño como extra.
+  if (eco.tipoTrabajo === "stickers") return costoDisenoEco(eco);
   return redondear2(
     costoRemateEco(eco) +
       costoDisenoEco(eco) +
       costoEstructuraEco(eco) +
       costoCuadroMaderaEco(eco) +
       costoClearEco(eco) +
-      costoTransferEco(eco)
+      costoTransferEco(eco) +
+      costoPvcEco(eco)
   );
 }
 export function totalEco(eco) {

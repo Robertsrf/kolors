@@ -78,6 +78,8 @@ function ecoFromRow(row, pagos) {
     descripcion: row.descripcion || "",
     abono: Number(row.abono || 0),
     material: row.material || "banner",
+    tipoTrabajo: row.tipo_trabajo || "impresion",
+    m2Manual: Number(row.m2_manual || 0),
     estado: row.estado || "Pedido",
     fechas: {
       pedido: row.fecha_pedido,
@@ -103,6 +105,9 @@ function ecoFromRow(row, pagos) {
     transferModo: row.transfer_modo || "ninguno",
     transferCosto: Number(row.transfer_costo || 0),
     transferPrecioM2: Number(row.transfer_precio_m2 || 0),
+    pvcModo: row.pvc_modo || "ninguno",
+    pvcCosto: Number(row.pvc_costo || 0),
+    pvcPrecioM2: Number(row.pvc_precio_m2 || 0),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -423,6 +428,8 @@ export async function crearEco(datos) {
     descripcion: datos.descripcion,
     abono: datos.abono,
     material: datos.material || "banner",
+    tipo_trabajo: datos.tipoTrabajo || "impresion",
+    m2_manual: datos.m2Manual || 0,
     estado: "Pedido",
     fecha_pedido: datos.fechaInicio || new Date().toISOString(),
     fecha_inicio: datos.fechaInicio || datos.fecha || new Date().toISOString(),
@@ -442,6 +449,9 @@ export async function crearEco(datos) {
     transfer_modo: datos.transferModo,
     transfer_costo: datos.transferCosto,
     transfer_precio_m2: datos.transferPrecioM2,
+    pvc_modo: datos.pvcModo,
+    pvc_costo: datos.pvcCosto,
+    pvc_precio_m2: datos.pvcPrecioM2,
   });
   if (error) throw error;
   await cargarEcoSolvente();
@@ -459,6 +469,8 @@ export async function actualizarEco(id, datos) {
       descripcion: datos.descripcion,
       abono: datos.abono,
       material: datos.material || "banner",
+      tipo_trabajo: datos.tipoTrabajo || "impresion",
+      m2_manual: datos.m2Manual || 0,
       fecha_inicio: datos.fechaInicio || datos.fecha || null,
       fecha_entrega: datos.fechaEntrega || null,
       aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
@@ -476,6 +488,9 @@ export async function actualizarEco(id, datos) {
       transfer_modo: datos.transferModo,
       transfer_costo: datos.transferCosto,
       transfer_precio_m2: datos.transferPrecioM2,
+      pvc_modo: datos.pvcModo,
+      pvc_costo: datos.pvcCosto,
+      pvc_precio_m2: datos.pvcPrecioM2,
     })
     .eq("id", id);
   if (error) throw error;
@@ -643,6 +658,8 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         descripcion: eco.descripcion || null,
         abono: eco.abono || 0,
         material: eco.material || "banner",
+        tipo_trabajo: eco.tipoTrabajo || "impresion",
+        m2_manual: eco.m2Manual || 0,
         estado: eco.estado || "Pedido",
         fecha_pedido: (eco.fechas && eco.fechas.pedido) || eco.fecha || eco.creado || new Date().toISOString(),
         fecha_diseno: (eco.fechas && eco.fechas.diseno) || null,
@@ -666,6 +683,9 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         transfer_modo: eco.transferModo || "ninguno",
         transfer_costo: eco.transferCosto || 0,
         transfer_precio_m2: eco.transferPrecioM2 || 0,
+        pvc_modo: eco.pvcModo || "ninguno",
+        pvc_costo: eco.pvcCosto || 0,
+        pvc_precio_m2: eco.pvcPrecioM2 || 0,
         creado_at: eco.creado || new Date().toISOString(),
       })
       .select()

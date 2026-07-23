@@ -23,6 +23,11 @@ let filtroPagoEco = "todos";
 
 function badgesExtras(eco) {
   const badges = [];
+  if (eco.tipoTrabajo === "stickers") {
+    badges.push("🏷️ Stickers");
+    if (eco.llevaDiseno) badges.push("🎨 Diseño");
+    return `<div class="impresion-extras">${badges.map((b) => `<span class="badge">${b}</span>`).join("")}</div>`;
+  }
   badges.push(`📄 ${MATERIAL_ECO_LABEL[eco.material] || "Banner"}`);
   if (eco.remate && eco.remate !== "ninguno") badges.push(REMATE_LABEL[eco.remate] || eco.remate);
   if (eco.llevaDiseno) badges.push("🎨 Diseño");
@@ -30,6 +35,7 @@ function badgesExtras(eco) {
   if (eco.llevaCuadroMadera) badges.push("🖼️ Cuadro madera");
   if (eco.clearModo && eco.clearModo !== "ninguno") badges.push("🧴 Clear");
   if (eco.transferModo && eco.transferModo !== "ninguno") badges.push("🔁 Transfer");
+  if (eco.pvcModo && eco.pvcModo !== "ninguno") badges.push("🧱 PVC");
   return `<div class="impresion-extras">${badges.map((b) => `<span class="badge">${b}</span>`).join("")}</div>`;
 }
 

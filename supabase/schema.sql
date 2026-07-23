@@ -67,6 +67,8 @@ create table if not exists eco_solvente (
   descripcion text,
   abono numeric not null default 0,
   material text not null default 'banner',       -- 'vinil' | 'banner' | 'vinil_tornasol' | 'papel_bond' | 'clear'
+  tipo_trabajo text not null default 'impresion', -- 'impresion' | 'stickers'
+  m2_manual numeric not null default 0,          -- m² directo cuando es 'stickers'
 
   -- flujo del tablero: Pedido -> Diseño -> Impresión -> Acabado -> Entregado
   estado text not null default 'Pedido',
@@ -98,6 +100,10 @@ create table if not exists eco_solvente (
   transfer_modo text not null default 'ninguno', -- 'ninguno' | 'fijo' | 'm2'
   transfer_costo numeric not null default 0,
   transfer_precio_m2 numeric not null default 0,
+
+  pvc_modo text not null default 'ninguno',      -- 'ninguno' | 'fijo' | 'm2'
+  pvc_costo numeric not null default 0,
+  pvc_precio_m2 numeric not null default 0,
 
   creado_at timestamptz not null default now()
 );

@@ -112,12 +112,14 @@ Reglas:
 ```json
 {
   "cliente": "Bodegón El Sol",
+  "tipoTrabajo": "impresion",
   "fecha": "2025-05-01T00:00:00.000Z",
   "fechaEntrega": "2025-05-03T00:00:00.000Z",
   "avisoDias": 2,
   "material": "banner",
   "ancho": 3,
   "alto": 1,
+  "m2Manual": 0,
   "precioM2": 10,
   "descripcion": "Pendón promoción apertura",
   "abono": 15,
@@ -143,11 +145,22 @@ Reglas:
   "transferModo": "ninguno",
   "transferCosto": 0,
   "transferPrecioM2": 0,
+  "pvcModo": "ninguno",
+  "pvcCosto": 0,
+  "pvcPrecioM2": 0,
   "pagos": []
 }
 ```
 
 Reglas:
+- `tipoTrabajo`: **`"impresion"`** (pendones, lonas, vinil, etc. — el caso normal) o
+  **`"stickers"`**. Si el Excel dice "sticker(s)", "calcomanía", "etiqueta adhesiva"
+  → usa `"stickers"`; si no, usa `"impresion"`.
+  - Para **`"stickers"`**: en vez de ancho×alto, pon los m² directamente en
+    `m2Manual` (número), y `ancho`/`alto` en `0`. Los stickers solo pueden llevar el
+    extra de **diseño** (`llevaDiseno` + `disenoCosto`); ignora remate, estructura,
+    cuadro de madera, clear, transfer y PVC (déjalos en su valor por defecto).
+  - Para **`"impresion"`**: usa `ancho` y `alto` normales y deja `m2Manual` en `0`.
 - `material` (**analízalo siempre**): busca activamente en el Excel la columna o el
   texto que diga en qué se imprimió (puede llamarse "material", "tela", "sustrato",
   "tipo", o venir dentro de la descripción del trabajo) y mapéalo a UNO de estos
@@ -173,6 +186,8 @@ Reglas:
   - `clearModo`: **`"ninguno"`** (no lleva), **`"fijo"`** (usa `clearCosto`) o
     **`"m2"`** (usa `clearPrecioM2`, se multiplica por ancho×alto).
   - `transferModo`: igual que clear (`"ninguno"`/`"fijo"`/`"m2"`).
+  - `pvcModo`: igual que clear y transfer (`"ninguno"`/`"fijo"`/`"m2"`), con
+    `pvcCosto` (fijo) o `pvcPrecioM2` (por m²). Úsalo si el Excel menciona "PVC".
 - Si un extra no aplica, deja sus valores por defecto (`"ninguno"`, `false`, `0`).
 - `estado`: **`"Pedido"`, `"Diseño"`, `"Impresión"`, `"Acabado"`, `"Entregado"`**.
   Si no sabes, usa `"Pedido"` (o `"Entregado"` si ya se cerró).

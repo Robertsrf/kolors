@@ -148,13 +148,23 @@ Reglas:
 ```
 
 Reglas:
-- `material`: en qué se imprimió. Uno de exactamente: **`"vinil"`, `"banner"`,
-  `"vinil_tornasol"`, `"papel_bond"`, `"clear"`**. Si no sabes, usa `"banner"`.
-  (Mapea: "vinil tornasol"/"tornasol" → `vinil_tornasol`; "papel bond"/"bond" → `papel_bond`.)
+- `material` (**analízalo siempre**): busca activamente en el Excel la columna o el
+  texto que diga en qué se imprimió (puede llamarse "material", "tela", "sustrato",
+  "tipo", o venir dentro de la descripción del trabajo) y mapéalo a UNO de estos
+  valores exactos: **`"vinil"`, `"banner"`, `"vinil_tornasol"`, `"papel_bond"`, `"clear"`**.
+  Tabla de mapeo (no distingas mayúsculas/acentos):
+  - "vinil", "vinilo", "vinil brillante", "vinil mate", "adhesivo" → `vinil`
+  - "banner", "banner 13oz", "lona", "pendón", "pendon" → `banner`
+  - "vinil tornasol", "tornasol", "holográfico", "holografico" → `vinil_tornasol`
+  - "papel bond", "bond", "papel" → `papel_bond`
+  - "clear", "transparente", "cristal" → `clear`
+  - Si de plano no hay ninguna pista del material, usa `"banner"`.
 - El total = `ancho × alto × precioM2` (impresión) **más** los extras que apliquen:
   - `remate`: **`"ninguno"`, `"palos"`** o **`"tubos"`**; su costo en `remateCosto`.
-    ⚠️ Si el Excel dice **"madera"**, "palo", "listón" o similar como remate/soporte,
-    tómalo como **`"palos"`**.
+    ⚠️ Si el Excel menciona **"madera"**, "palo", "palos", "listón", "varilla" o
+    similar como remate/soporte del pendón, tómalo como **`"palos"`** y pon su costo
+    (si el Excel lo trae) en `remateCosto`. Es decir: **lo que diga "madera" súmalo
+    como palos.**
   - `llevaDiseno` (true/false) + `disenoCosto`.
   - `llevaEstructura` (true/false) + `estructuraCosto`.
   - `llevaCuadroMadera` (true/false) + `cuadroMaderaCosto`: úsalo cuando el Excel

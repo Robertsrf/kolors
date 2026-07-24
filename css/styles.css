@@ -168,16 +168,21 @@ main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
 }
 
 .board {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(260px, 1fr));
+  display: flex;
   gap: 16px;
   overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-snap-type: x proximity;
 }
-@media (max-width: 1100px) {
-  .board { grid-template-columns: 1fr; }
-}
+/* Barra de desplazamiento horizontal más visible cuando hay muchas columnas */
+.board::-webkit-scrollbar { height: 12px; }
+.board::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 8px; }
 
 .column {
+  flex: 1 0 270px;
+  min-width: 270px;
+  max-width: 360px;
+  scroll-snap-align: start;
   background: rgba(255,255,255,.55);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
@@ -864,6 +869,13 @@ body:not(.rol-admin) #btnBorrarTodo {
 .chat-vacio { font-size: 12.5px; color: var(--text-soft); text-align: center; padding: 30px 10px; }
 
 .stats-toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+
+/* === SECCIONES / FASES CONFIGURABLES === */
+body.rol-jefe .no-jefe { display: none !important; }
+#fasesLista { display: flex; flex-direction: column; gap: 8px; margin: 14px 0; }
+.fase-row { display: flex; align-items: center; gap: 8px; }
+.fase-row .fase-color { width: 42px; min-width: 42px; height: 40px; padding: 2px; cursor: pointer; }
+.fase-row .fase-nombre { flex: 1; }
 
 /* === LOG DE CAMBIOS === */
 /* La pestaña Log solo la ven admin y jefe (y nunca antes de iniciar sesión) */

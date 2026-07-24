@@ -1,4 +1,12 @@
-import { state, FASES, CLAVE_FECHA, COLOR_FASE, totalCamisas, totalPedidoMonto, saldoPendiente, estaPagado, fechaFaseActual } from "../state.js";
+import {
+  state,
+  colorFaseCamisas,
+  totalCamisas,
+  totalPedidoMonto,
+  saldoPendiente,
+  estaPagado,
+  fechaFaseActual,
+} from "../state.js";
 import { money, escapeHtml, fechaLegible, haceDias } from "../utils.js";
 import { actualizarFasePedido, eliminarPedido as apiEliminarPedido } from "../api.js";
 import { render } from "../render.js";
@@ -12,6 +20,9 @@ export function renderBoard() {
   const board = document.getElementById("board");
   board.innerHTML = "";
 
+  const fases = state.fasesCamisas;
+  const idsConocidos = new Set(fases.map((f) => f.id));
+
   const texto = filtroTexto.trim().toLowerCase();
   const visibles = state.pedidos
     .filter((p) => !texto || p.cliente.nombre.toLowerCase().includes(texto))
@@ -21,9 +32,9 @@ export function renderBoard() {
       return true;
     });
 
-  FASES.forEach((fase) => {
-    const enFase = visibles.filter((p) => p.estado === fase);
-    const totalPedidosFase = enFase.length;
+  fases.forEach((fase, colIdx) => {
+    // Los pedidos con una fase desconocida (renombrada/borrada) caen en la 1ra columna.
+    const enFase = visibles.filter((p) => p.estado === fase.id || (colIdx === 0 && !idsConocidos.has(p.estado)));
     const totalCamisasFase = enFase.reduce((s, p) => s + totalCamisas(p), 0);
 
     const col = document.createElement("div");
@@ -32,20 +43,18 @@ export function renderBoard() {
     const header = document.createElement("div");
     header.className = "column-header";
     header.innerHTML = `
-      <span class="column-title"><span class="dot" style="background:${COLOR_FASE[fase]}"></span>${fase}</span>
-      <span class="column-counts"><span><b>${totalPedidosFase}</b> ped.</span><span><b>${totalCamisasFase}</b> cam.</span></span>
+      <span class="column-title"><span class="dot" style="background:${fase.color}"></span>${escapeHtml(fase.nombre)}</span>
+      <span class="column-counts"><span><b>${enFase.length}</b> ped.</span><span><b>${totalCamisasFase}</b> cam.</span></span>
     `;
     col.appendChild(header);
 
     const cardsWrap = document.createElement("div");
     cardsWrap.className = "cards";
-
     if (enFase.length === 0) {
       cardsWrap.innerHTML = `<div class="empty-col">Sin pedidos</div>`;
     } else {
       enFase.forEach((p) => cardsWrap.appendChild(renderCard(p)));
     }
-
     col.appendChild(cardsWrap);
     board.appendChild(col);
   });
@@ -54,15 +63,17 @@ export function renderBoard() {
 function renderCard(p) {
   const card = document.createElement("div");
   card.className = "card";
-  card.style.borderLeftColor = COLOR_FASE[p.estado];
+  card.style.borderLeftColor = colorFaseCamisas(p.estado);
 
+  const fases = state.fasesCamisas;
   const camisas = totalCamisas(p);
   const total = totalPedidoMonto(p);
   const saldo = saldoPendiente(p);
   const pagado = estaPagado(p);
-  const idxActual = FASES.indexOf(p.estado);
-  const puedeAvanzar = idxActual < FASES.length - 1;
-  const puedeRetroceder = idxActual > 0;
+  let idx = fases.findIndex((f) => f.id === p.estado);
+  if (idx < 0) idx = 0;
+  const puedeAvanzar = idx < fases.length - 1;
+  const puedeRetroceder = idx > 0;
 
   card.innerHTML = `
     <div class="card-top">
@@ -99,22 +110,22 @@ function renderCard(p) {
 async function avanzarFase(id) {
   const p = state.pedidos.find((x) => x.id === id);
   if (!p) return;
-  const idx = FASES.indexOf(p.estado);
-  if (idx >= FASES.length - 1) return;
-  const nuevaFase = FASES[idx + 1];
-  const campoFecha = "fecha_" + CLAVE_FECHA[nuevaFase];
-  await actualizarFasePedido(id, nuevaFase, campoFecha, new Date().toISOString());
+  const fases = state.fasesCamisas;
+  let idx = fases.findIndex((f) => f.id === p.estado);
+  if (idx < 0) idx = 0;
+  if (idx >= fases.length - 1) return;
+  await actualizarFasePedido(id, fases[idx + 1].id);
   render();
 }
 
 async function retrocederFase(id) {
   const p = state.pedidos.find((x) => x.id === id);
   if (!p) return;
-  const idx = FASES.indexOf(p.estado);
+  const fases = state.fasesCamisas;
+  let idx = fases.findIndex((f) => f.id === p.estado);
+  if (idx < 0) idx = 0;
   if (idx <= 0) return;
-  const faseActual = p.estado;
-  const campoFecha = "fecha_" + CLAVE_FECHA[faseActual];
-  await actualizarFasePedido(id, FASES[idx - 1], campoFecha, null);
+  await actualizarFasePedido(id, fases[idx - 1].id);
   render();
 }
 

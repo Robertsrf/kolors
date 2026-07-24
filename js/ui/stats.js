@@ -1,6 +1,6 @@
 import {
   state,
-  FASES,
+  faseFinalCamisas,
   GENEROS,
   PALETA_GENERO,
   REMATE_LABEL,
@@ -34,7 +34,8 @@ export function renderStats() {
   const valorTotal = state.pedidos.reduce((s, p) => s + totalPedidoMonto(p), 0);
   const cobrado = state.pedidos.reduce((s, p) => s + totalAbonadoPedido(p), 0);
   const porCobrar = state.pedidos.reduce((s, p) => s + Math.max(saldoPendiente(p), 0), 0);
-  const facturadoEntregados = state.pedidos.filter((p) => p.estado === "Entregado").reduce((s, p) => s + totalPedidoMonto(p), 0);
+  const faseFinal = faseFinalCamisas();
+  const facturadoEntregados = state.pedidos.filter((p) => p.estado === faseFinal).reduce((s, p) => s + totalPedidoMonto(p), 0);
 
   const statsMoney = document.getElementById("statsMoney");
   statsMoney.innerHTML = "";
@@ -55,15 +56,20 @@ export function renderStats() {
     ["📋 Total de pedidos", totalPed],
   ].forEach(([label, value]) => statsCantidad.appendChild(statCard(label, value)));
 
+  const fasesCam = state.fasesCamisas;
   const camisasPorEstado = {};
   const pedidosPorEstado = {};
-  FASES.forEach((f) => {
-    camisasPorEstado[f] = 0;
-    pedidosPorEstado[f] = 0;
+  fasesCam.forEach((f) => {
+    camisasPorEstado[f.id] = 0;
+    pedidosPorEstado[f.id] = 0;
   });
+  const primeraFaseId = fasesCam.length ? fasesCam[0].id : null;
+  const idsCam = new Set(fasesCam.map((f) => f.id));
   state.pedidos.forEach((p) => {
-    camisasPorEstado[p.estado] += totalCamisas(p);
-    pedidosPorEstado[p.estado] += 1;
+    const claveId = idsCam.has(p.estado) ? p.estado : primeraFaseId;
+    if (claveId == null) return;
+    camisasPorEstado[claveId] += totalCamisas(p);
+    pedidosPorEstado[claveId] += 1;
   });
 
   const camisasPorGenero = {};
@@ -82,12 +88,12 @@ export function renderStats() {
   );
   const topTallas = Object.entries(camisasPorTalla).sort((a, b) => b[1] - a[1]).slice(0, 8);
 
-  renderChartEstado(FASES, FASES.map((f) => camisasPorEstado[f]), FASES.map((f) => pedidosPorEstado[f]));
+  renderChartEstado(fasesCam.map((f) => f.nombre), fasesCam.map((f) => camisasPorEstado[f.id]), fasesCam.map((f) => pedidosPorEstado[f.id]));
   renderChartGenero(GENEROS, GENEROS.map((g) => camisasPorGenero[g] || 0));
   renderChartTallas(topTallas.length ? topTallas.map((t) => t[0]) : ["Sin datos"], topTallas.length ? topTallas.map((t) => t[1]) : [0]);
   renderChartDinero(cobrado, porCobrar);
 
-  const entregados = state.pedidos.filter((p) => p.estado === "Entregado" && p.fechas.entregado);
+  const entregados = state.pedidos.filter((p) => diasProduccion(p) != null);
   const promDias = entregados.length ? Math.round(entregados.reduce((s, p) => s + diasProduccion(p), 0) / entregados.length) : null;
   statsCantidad.appendChild(statCard("⏱️ Tiempo prom. producción", promDias === null ? "N/A" : promDias + " días"));
 

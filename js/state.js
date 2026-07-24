@@ -28,6 +28,22 @@ export const MATERIAL_ECO_LABEL = {
 };
 export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers" };
 
+// Fases por defecto de cada tablero (id estable = valor de `estado` guardado)
+export const FASES_CAMISAS_DEFECTO = [
+  { id: "Pedido", nombre: "Pedido", color: "#94a3b8" },
+  { id: "Impresión", nombre: "Impresión", color: "#38bdf8" },
+  { id: "Sublimación", nombre: "Sublimación", color: "#a78bfa" },
+  { id: "Costura", nombre: "Costura", color: "#fbbf24" },
+  { id: "Entregado", nombre: "Entregado", color: "#34d399" },
+];
+export const FASES_ECO_DEFECTO = [
+  { id: "Pedido", nombre: "Pedido", color: "#94a3b8" },
+  { id: "Diseño", nombre: "Diseño", color: "#a78bfa" },
+  { id: "Impresión", nombre: "Impresión", color: "#38bdf8" },
+  { id: "Acabado", nombre: "Acabado", color: "#fbbf24" },
+  { id: "Entregado", nombre: "Entregado", color: "#34d399" },
+];
+
 // Tablero de Eco Solvente
 export const FASES_ECO = ["Pedido", "Diseño", "Impresión", "Acabado", "Entregado"];
 export const CLAVE_FECHA_ECO = { "Pedido": "pedido", "Diseño": "diseno", "Impresión": "impresion", "Acabado": "acabado", "Entregado": "entregado" };
@@ -53,7 +69,35 @@ export const state = {
   notas: "",
   mensajes: [],
   logs: [],
+  fasesCamisas: FASES_CAMISAS_DEFECTO.map((f) => ({ ...f })),
+  fasesEco: FASES_ECO_DEFECTO.map((f) => ({ ...f })),
 };
+
+// === FASES DINÁMICAS (configurables) ===
+export function faseFinalCamisas() {
+  const f = state.fasesCamisas;
+  return f.length ? f[f.length - 1].id : "Entregado";
+}
+export function faseFinalEco() {
+  const f = state.fasesEco;
+  return f.length ? f[f.length - 1].id : "Entregado";
+}
+export function colorFaseCamisas(id) {
+  const f = state.fasesCamisas.find((x) => x.id === id);
+  return f ? f.color : "#94a3b8";
+}
+export function colorFaseEco(id) {
+  const f = state.fasesEco.find((x) => x.id === id);
+  return f ? f.color : "#94a3b8";
+}
+export function nombreFaseCamisas(id) {
+  const f = state.fasesCamisas.find((x) => x.id === id);
+  return f ? f.nombre : id;
+}
+export function nombreFaseEco(id) {
+  const f = state.fasesEco.find((x) => x.id === id);
+  return f ? f.nombre : id;
+}
 
 // === CÁLCULOS DERIVADOS · PEDIDOS DE CAMISA ===
 export function totalCamisas(pedido) {
@@ -72,13 +116,15 @@ export function estaPagado(pedido) {
   return saldoPendiente(pedido) <= 0;
 }
 export function diasProduccion(pedido) {
-  if (!pedido.fechas.entregado) return null;
-  const inicio = new Date(pedido.fechas.pedido);
-  const fin = new Date(pedido.fechas.entregado);
-  return Math.round((fin - inicio) / (1000 * 60 * 60 * 24));
+  // Solo tiene sentido para pedidos que llegaron a la fase final (entregados).
+  if (pedido.estado !== faseFinalCamisas()) return null;
+  const ini = pedido.fechaInicio || (pedido.fechas && pedido.fechas.pedido) || pedido.creado;
+  const fin = pedido.fechaEstado || (pedido.fechas && pedido.fechas.entregado);
+  if (!ini || !fin) return null;
+  return Math.round((new Date(fin) - new Date(ini)) / (1000 * 60 * 60 * 24));
 }
 export function fechaFaseActual(pedido) {
-  return pedido.fechas[CLAVE_FECHA[pedido.estado]];
+  return pedido.fechaEstado || pedido.fechaInicio || (pedido.fechas && pedido.fechas[CLAVE_FECHA[pedido.estado]]) || pedido.creado;
 }
 export function historialPagosPedido(pedido) {
   const historial = [];
@@ -187,7 +233,7 @@ export function historialPagosEco(eco) {
 }
 export function fechaFaseActualEco(eco) {
   const fechas = eco.fechas || {};
-  return fechas[CLAVE_FECHA_ECO[eco.estado]] || eco.fecha;
+  return eco.fechaEstado || eco.fechaInicio || fechas[CLAVE_FECHA_ECO[eco.estado]] || eco.fecha;
 }
 
 // === AGENDA / ENTREGAS (para calendario y notificaciones) ===
@@ -196,8 +242,10 @@ export const AVISO_DIAS_DEFECTO = 3;
 // Lista unificada de pedidos PENDIENTES que tienen fecha de entrega.
 export function agendaItems() {
   const items = [];
+  const finalCam = faseFinalCamisas();
+  const finalEco = faseFinalEco();
   state.pedidos.forEach((p) => {
-    if (p.fechaEntrega && p.estado !== "Entregado") {
+    if (p.fechaEntrega && p.estado !== finalCam) {
       items.push({
         tipo: "camisa",
         icono: "👕",
@@ -227,7 +275,7 @@ export function agendaItems() {
     }
   });
   state.ecoSolvente.forEach((e) => {
-    if (e.fechaEntrega && e.estado !== "Entregado") {
+    if (e.fechaEntrega && e.estado !== finalEco) {
       items.push({
         tipo: "eco",
         icono: "🏳️",

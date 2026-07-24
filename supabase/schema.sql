@@ -20,6 +20,7 @@ create table if not exists pedidos (
   fecha_entregado timestamptz,
   fecha_inicio timestamptz,
   fecha_entrega timestamptz,
+  fecha_estado timestamptz,
   aviso_dias int,
   abono numeric not null default 0,
   creado_at timestamptz not null default now()
@@ -79,6 +80,7 @@ create table if not exists eco_solvente (
   fecha_entregado timestamptz,
   fecha_inicio timestamptz,
   fecha_entrega timestamptz,
+  fecha_estado timestamptz,
   aviso_dias int,
 
   remate text not null default 'ninguno',       -- 'ninguno' | 'palos' | 'tubos'
@@ -146,6 +148,29 @@ insert into precios_config (id, data) values (1, '{}'::jsonb)
   on conflict (id) do nothing;
 
 -- ============================================================
+-- FASES CONFIGURABLES DE LOS TABLEROS (camisas y eco solvente)
+-- ============================================================
+create table if not exists tableros_config (
+  id int primary key default 1,
+  camisas jsonb not null default '[
+    {"id":"Pedido","nombre":"Pedido","color":"#94a3b8"},
+    {"id":"Impresión","nombre":"Impresión","color":"#38bdf8"},
+    {"id":"Sublimación","nombre":"Sublimación","color":"#a78bfa"},
+    {"id":"Costura","nombre":"Costura","color":"#fbbf24"},
+    {"id":"Entregado","nombre":"Entregado","color":"#34d399"}
+  ]'::jsonb,
+  eco jsonb not null default '[
+    {"id":"Pedido","nombre":"Pedido","color":"#94a3b8"},
+    {"id":"Diseño","nombre":"Diseño","color":"#a78bfa"},
+    {"id":"Impresión","nombre":"Impresión","color":"#38bdf8"},
+    {"id":"Acabado","nombre":"Acabado","color":"#fbbf24"},
+    {"id":"Entregado","nombre":"Entregado","color":"#34d399"}
+  ]'::jsonb,
+  constraint tableros_singleton check (id = 1)
+);
+insert into tableros_config (id) values (1) on conflict (id) do nothing;
+
+-- ============================================================
 -- NOTAS COMPARTIDAS + CHAT DEL EQUIPO
 -- ============================================================
 create table if not exists notas_config (
@@ -203,11 +228,12 @@ alter table eco_solvente enable row level security;
 alter table perdidas enable row level security;
 alter table pagos enable row level security;
 alter table precios_config enable row level security;
+alter table tableros_config enable row level security;
 
 do $$
 declare
   t text;
-  tablas text[] := array['pedidos','pedido_items','impresiones','eco_solvente','perdidas','pagos','precios_config'];
+  tablas text[] := array['pedidos','pedido_items','impresiones','eco_solvente','perdidas','pagos','precios_config','tableros_config'];
   -- condición: el usuario NO es el jefe (solo lectura)
   puede_escribir text := '((auth.jwt() ->> ''email'') is distinct from ''jefe@kolors.app'')';
 begin
@@ -236,7 +262,7 @@ end $$;
 do $$
 begin
   begin
-    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, notas_config, mensajes, logs;
+    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, tableros_config, notas_config, mensajes, logs;
   exception when duplicate_object then
     null;
   end;

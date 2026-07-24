@@ -72,6 +72,7 @@
         <button type="button" class="neu-btn filtro-pago-btn" data-filtro="debe">⚠️ Deben</button>
         <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
       </div>
+      <button type="button" class="neu-btn no-jefe" id="btnFasesCamisas" title="Configurar secciones del tablero">⚙️ Secciones</button>
     </div>
     <div class="board" id="board"></div>
   </section>
@@ -103,6 +104,7 @@
         <button type="button" class="neu-btn filtro-pago-btn" data-filtro="debe">⚠️ Deben</button>
         <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
       </div>
+      <button type="button" class="neu-btn no-jefe" id="btnFasesEco" title="Configurar secciones del tablero">⚙️ Secciones</button>
       <button class="neu-btn primary" id="btnNuevoEco">➕ Nuevo pedido eco solvente</button>
     </div>
     <div class="board" id="ecoBoard"></div>
@@ -327,6 +329,23 @@
         <button type="submit" class="neu-btn primary">Guardar precios</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- === MODAL SECCIONES / FASES DEL TABLERO === -->
+<div class="modal-overlay" id="modalFasesOverlay">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h2 id="modalFasesTitulo">Secciones del tablero</h2>
+      <button class="neu-btn icon" id="btnCerrarModalFases">✕</button>
+    </div>
+    <p class="abono-contexto">Agrega, renombra, reordena (↑ ↓) o cambia el color de las columnas. Solo puedes borrar una sección si no tiene pedidos. La última sección se considera la de "entregado/terminado".</p>
+    <div id="fasesLista"></div>
+    <button type="button" class="neu-btn small" id="btnAgregarFase">+ Agregar sección</button>
+    <div class="modal-footer">
+      <button type="button" class="neu-btn" id="btnCancelarModalFases">Cancelar</button>
+      <button type="button" class="neu-btn primary" id="btnGuardarFases">Guardar</button>
+    </div>
   </div>
 </div>
 

@@ -1,8 +1,6 @@
 import {
   state,
-  FASES_ECO,
-  CLAVE_FECHA_ECO,
-  COLOR_FASE_ECO,
+  colorFaseEco,
   REMATE_LABEL,
   MATERIAL_ECO_LABEL,
   m2Eco,
@@ -52,11 +50,13 @@ export function renderEcoBoard() {
       return true;
     });
 
-  FASES_ECO.forEach((fase) => {
+  const fases = state.fasesEco;
+  const idsConocidos = new Set(fases.map((f) => f.id));
+
+  fases.forEach((fase, colIdx) => {
     const enFase = visibles
-      .filter((e) => (e.estado || "Pedido") === fase)
+      .filter((e) => (e.estado || "Pedido") === fase.id || (colIdx === 0 && !idsConocidos.has(e.estado || "Pedido")))
       .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-    const totalPedidos = enFase.length;
     const m2Fase = enFase.reduce((s, e) => s + m2Eco(e), 0);
 
     const col = document.createElement("div");
@@ -65,8 +65,8 @@ export function renderEcoBoard() {
     const header = document.createElement("div");
     header.className = "column-header";
     header.innerHTML = `
-      <span class="column-title"><span class="dot" style="background:${COLOR_FASE_ECO[fase]}"></span>${fase}</span>
-      <span class="column-counts"><span><b>${totalPedidos}</b> ped.</span><span><b>${fmt(m2Fase)}</b> m²</span></span>
+      <span class="column-title"><span class="dot" style="background:${fase.color}"></span>${escapeHtml(fase.nombre)}</span>
+      <span class="column-counts"><span><b>${enFase.length}</b> ped.</span><span><b>${fmt(m2Fase)}</b> m²</span></span>
     `;
     col.appendChild(header);
 
@@ -86,14 +86,16 @@ function renderEcoCard(eco) {
   const card = document.createElement("div");
   card.className = "card";
   const estado = eco.estado || "Pedido";
-  card.style.borderLeftColor = COLOR_FASE_ECO[estado];
+  card.style.borderLeftColor = colorFaseEco(estado);
 
+  const fases = state.fasesEco;
   const m2 = m2Eco(eco);
   const total = totalEco(eco);
   const saldo = saldoEco(eco);
   const pagado = estaPagadoEco(eco);
-  const idx = FASES_ECO.indexOf(estado);
-  const puedeAvanzar = idx < FASES_ECO.length - 1;
+  let idx = fases.findIndex((f) => f.id === estado);
+  if (idx < 0) idx = 0;
+  const puedeAvanzar = idx < fases.length - 1;
   const puedeRetroceder = idx > 0;
 
   card.innerHTML = `
@@ -132,20 +134,22 @@ function renderEcoCard(eco) {
 async function avanzarFaseEco(id) {
   const e = state.ecoSolvente.find((x) => x.id === id);
   if (!e) return;
-  const idx = FASES_ECO.indexOf(e.estado || "Pedido");
-  if (idx >= FASES_ECO.length - 1) return;
-  const nueva = FASES_ECO[idx + 1];
-  await actualizarFaseEco(id, nueva, "fecha_" + CLAVE_FECHA_ECO[nueva], new Date().toISOString());
+  const fases = state.fasesEco;
+  let idx = fases.findIndex((f) => f.id === (e.estado || "Pedido"));
+  if (idx < 0) idx = 0;
+  if (idx >= fases.length - 1) return;
+  await actualizarFaseEco(id, fases[idx + 1].id);
   render();
 }
 
 async function retrocederFaseEco(id) {
   const e = state.ecoSolvente.find((x) => x.id === id);
   if (!e) return;
-  const idx = FASES_ECO.indexOf(e.estado || "Pedido");
+  const fases = state.fasesEco;
+  let idx = fases.findIndex((f) => f.id === (e.estado || "Pedido"));
+  if (idx < 0) idx = 0;
   if (idx <= 0) return;
-  const actual = e.estado;
-  await actualizarFaseEco(id, FASES_ECO[idx - 1], "fecha_" + CLAVE_FECHA_ECO[actual], null);
+  await actualizarFaseEco(id, fases[idx - 1].id);
   render();
 }
 

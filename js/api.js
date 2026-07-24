@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient.js";
-import { state, migrarPrecios } from "./state.js";
+import { state, migrarPrecios, FASES_CAMISAS_DEFECTO, FASES_ECO_DEFECTO } from "./state.js";
 import { getUsuarioActual } from "./auth.js";
 
 // ============================================================
@@ -77,6 +77,7 @@ function pedidoFromRow(row, items, pagos) {
     abono: Number(row.abono || 0),
     fechaInicio: row.fecha_inicio || null,
     fechaEntrega: row.fecha_entrega || null,
+    fechaEstado: row.fecha_estado || null,
     avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
@@ -125,6 +126,7 @@ function ecoFromRow(row, pagos) {
     },
     fechaInicio: row.fecha_inicio || null,
     fechaEntrega: row.fecha_entrega || null,
+    fechaEstado: row.fecha_estado || null,
     avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
     remate: row.remate || "ninguno",
     remateCosto: Number(row.remate_costo || 0),
@@ -214,6 +216,34 @@ async function cargarPrecios() {
   state.precios = migrarPrecios(row ? row.data : null);
 }
 
+function normalizarFases(arr, defecto) {
+  if (!Array.isArray(arr) || !arr.length) return defecto.map((f) => ({ ...f }));
+  return arr
+    .filter((f) => f && f.id && f.nombre)
+    .map((f) => ({ id: String(f.id), nombre: String(f.nombre), color: f.color || "#94a3b8" }));
+}
+
+async function cargarTablerosConfig() {
+  const { data: row, error } = await supabase.from("tableros_config").select("*").eq("id", 1).maybeSingle();
+  if (error) {
+    // Si la tabla aún no existe, se usan las fases por defecto.
+    state.fasesCamisas = FASES_CAMISAS_DEFECTO.map((f) => ({ ...f }));
+    state.fasesEco = FASES_ECO_DEFECTO.map((f) => ({ ...f }));
+    return;
+  }
+  state.fasesCamisas = normalizarFases(row ? row.camisas : null, FASES_CAMISAS_DEFECTO);
+  state.fasesEco = normalizarFases(row ? row.eco : null, FASES_ECO_DEFECTO);
+}
+
+export async function guardarFasesTablero(cual, fases) {
+  const columna = cual === "eco" ? "eco" : "camisas";
+  const { error } = await supabase.from("tableros_config").upsert({ id: 1, [columna]: fases });
+  if (error) throw error;
+  if (cual === "eco") state.fasesEco = fases;
+  else state.fasesCamisas = fases;
+  registrarLog("Sistema", `Configuró las secciones del tablero de ${cual === "eco" ? "eco solvente" : "camisas"}`);
+}
+
 const CARGADORES = {
   pedidos: cargarPedidos,
   pedido_items: cargarPedidos,
@@ -224,10 +254,18 @@ const CARGADORES = {
     await Promise.all([cargarPedidos(), cargarImpresiones(), cargarEcoSolvente()]);
   },
   precios_config: cargarPrecios,
+  tableros_config: cargarTablerosConfig,
 };
 
 export async function cargarTodo() {
-  await Promise.all([cargarPedidos(), cargarImpresiones(), cargarEcoSolvente(), cargarPerdidas(), cargarPrecios()]);
+  await Promise.all([
+    cargarPedidos(),
+    cargarImpresiones(),
+    cargarEcoSolvente(),
+    cargarPerdidas(),
+    cargarPrecios(),
+    cargarTablerosConfig(),
+  ]);
 }
 
 // ============================================================
@@ -388,12 +426,13 @@ export async function actualizarPedido(id, { cliente, descripcion, abono, items,
   await cargarPedidos();
 }
 
-export async function actualizarFasePedido(id, estado, campoFecha, valorFecha) {
+export async function actualizarFasePedido(id, estado) {
   const p = state.pedidos.find((x) => x.id === id);
-  const cambios = { estado };
-  if (campoFecha) cambios[campoFecha] = valorFecha;
-  const { error } = await supabase.from("pedidos").update(cambios).eq("id", id);
+  const { error } = await supabase.from("pedidos").update({ estado }).eq("id", id);
   if (error) throw error;
+  // fecha_estado en un update aparte: si la columna aún no existe (migración
+  // pendiente), avanzar de fase igual funciona; se ignora ese error.
+  await supabase.from("pedidos").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
   registrarLog("Camisas", `Movió el pedido de "${p ? p.cliente.nombre : id}" a "${estado}"`);
   await cargarPedidos();
 }
@@ -544,12 +583,11 @@ export async function actualizarEco(id, datos) {
   await cargarEcoSolvente();
 }
 
-export async function actualizarFaseEco(id, estado, campoFecha, valorFecha) {
+export async function actualizarFaseEco(id, estado) {
   const e = state.ecoSolvente.find((x) => x.id === id);
-  const cambios = { estado };
-  if (campoFecha) cambios[campoFecha] = valorFecha;
-  const { error } = await supabase.from("eco_solvente").update(cambios).eq("id", id);
+  const { error } = await supabase.from("eco_solvente").update({ estado }).eq("id", id);
   if (error) throw error;
+  await supabase.from("eco_solvente").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
   registrarLog("Eco Solvente", `Movió el pedido eco de "${e ? e.cliente : id}" a "${estado}"`);
   await cargarEcoSolvente();
 }

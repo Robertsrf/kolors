@@ -52,6 +52,7 @@ export const state = {
   precios: { secciones: [{ titulo: "Precios", filas: [] }] },
   notas: "",
   mensajes: [],
+  logs: [],
 };
 
 // === CÁLCULOS DERIVADOS · PEDIDOS DE CAMISA ===

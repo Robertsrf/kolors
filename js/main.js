@@ -14,6 +14,7 @@ import "./ui/calendario.js";
 import "./ui/calculadora.js";
 import { initNotas } from "./ui/notas.js";
 import { initChat } from "./ui/chat.js";
+import { initLog, renderLog } from "./ui/log.js";
 
 // === TABS ===
 document.querySelectorAll(".tab-btn").forEach((btn) => {
@@ -27,6 +28,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     if (tab === "impresiones") renderImpresionesList();
     if (tab === "ecosolvente") renderEcoBoard();
     if (tab === "perdidas") renderPerdidasList();
+    if (tab === "log") renderLog();
     if (tab === "clientes") {
       setClienteSeleccionado(null);
       renderClientesGrid();
@@ -38,13 +40,14 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 let canalRealtime = null;
 
 initAuth({
-  onLogin: async () => {
+  onLogin: async (rol) => {
     await cargarTodo();
     render();
     if (canalRealtime) supabase.removeChannel(canalRealtime);
     canalRealtime = suscribirRealtime(render);
     initNotas();
     initChat();
+    initLog(rol);
   },
   onLogout: () => {
     if (canalRealtime) {

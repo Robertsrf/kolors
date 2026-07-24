@@ -171,6 +171,21 @@ drop policy if exists "mensajes_todos" on mensajes;
 create policy "notas_todos" on notas_config for all to authenticated using (true) with check (true);
 create policy "mensajes_todos" on mensajes for all to authenticated using (true) with check (true);
 
+-- LOG DE CAMBIOS (solo admin y jefe pueden leerlo)
+create table if not exists logs (
+  id uuid primary key default gen_random_uuid(),
+  usuario text,
+  seccion text,
+  descripcion text not null,
+  creado_at timestamptz not null default now()
+);
+alter table logs enable row level security;
+drop policy if exists "logs_insert" on logs;
+drop policy if exists "logs_select_admin_jefe" on logs;
+create policy "logs_insert" on logs for insert to authenticated with check (true);
+create policy "logs_select_admin_jefe" on logs for select to authenticated
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+
 -- ============================================================
 -- ROW LEVEL SECURITY (con roles por código)
 --
@@ -221,7 +236,7 @@ end $$;
 do $$
 begin
   begin
-    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, notas_config, mensajes;
+    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, notas_config, mensajes, logs;
   exception when duplicate_object then
     null;
   end;

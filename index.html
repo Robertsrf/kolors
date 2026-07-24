@@ -43,6 +43,7 @@
     <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
     <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
     <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
+    <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
     <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
     <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
   </nav>
@@ -190,6 +191,16 @@
 
     <h2 class="stats-subtitle">🗑️ Pérdidas y pruebas de impresión</h2>
     <div class="stats-grid" id="statsPerdidas"></div>
+  </section>
+
+  <!-- === LOG DE CAMBIOS (solo admin y jefe) === -->
+  <section class="section" id="section-log">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscadorLog" placeholder="🔎 Buscar por usuario, sección o acción...">
+      </div>
+    </div>
+    <div class="log-lista" id="logLista"></div>
   </section>
 
   <!-- === DATOS === -->

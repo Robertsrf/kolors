@@ -863,5 +863,26 @@ body:not(.rol-admin) #btnBorrarTodo {
 .chat-form input { flex: 1; }
 .chat-vacio { font-size: 12.5px; color: var(--text-soft); text-align: center; padding: 30px 10px; }
 
+/* === LOG DE CAMBIOS === */
+/* La pestaña Log solo la ven admin y jefe (y nunca antes de iniciar sesión) */
+body:not(.rol-admin):not(.rol-jefe) .solo-admin-jefe { display: none !important; }
+
+.log-lista { display: flex; flex-direction: column; gap: 8px; }
+.log-item {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+}
+.log-fecha { font-size: 11.5px; color: var(--text-soft); font-weight: 700; white-space: nowrap; min-width: 128px; }
+.log-cuerpo { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1; }
+.log-usuario { font-weight: 800; font-size: 13px; }
+.log-seccion { background: #ede9fe; color: #6d28d9; }
+.log-desc { font-size: 13px; color: var(--text); }
+
 ::-webkit-scrollbar { height: 8px; width: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 8px; opacity: .5; }

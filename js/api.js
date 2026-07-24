@@ -1,5 +1,40 @@
 import { supabase } from "./supabaseClient.js";
 import { state, migrarPrecios } from "./state.js";
+import { getUsuarioActual } from "./auth.js";
+
+// ============================================================
+// LOG DE CAMBIOS
+// ============================================================
+export async function registrarLog(seccion, descripcion) {
+  try {
+    const u = getUsuarioActual();
+    await supabase.from("logs").insert({ usuario: u ? u.nombre : "?", seccion, descripcion });
+  } catch (e) {
+    // El log nunca debe romper la acción principal.
+  }
+}
+
+export async function cargarLogs() {
+  const { data, error } = await supabase.from("logs").select("*").order("creado_at", { ascending: false }).limit(500);
+  if (error) {
+    state.logs = [];
+    return state.logs;
+  }
+  state.logs = data || [];
+  return state.logs;
+}
+
+export function suscribirLogs(cb) {
+  const canal = supabase.channel("kolors-logs");
+  canal.on("postgres_changes", { event: "INSERT", schema: "public", table: "logs" }, (payload) => {
+    if (payload.new) {
+      state.logs.unshift(payload.new);
+      cb(payload.new);
+    }
+  });
+  canal.subscribe();
+  return canal;
+}
 
 function agruparPor(rows, key) {
   const mapa = new Map();
@@ -313,6 +348,7 @@ export async function crearPedido({ cliente, descripcion, items, abono, fechaIni
     );
     if (errItems) throw errItems;
   }
+  registrarLog("Camisas", `Creó el pedido de "${cliente.nombre}"`);
   await cargarPedidos();
 }
 
@@ -348,21 +384,26 @@ export async function actualizarPedido(id, { cliente, descripcion, abono, items,
     );
     if (errIns) throw errIns;
   }
+  registrarLog("Camisas", `Editó el pedido de "${cliente.nombre}"`);
   await cargarPedidos();
 }
 
 export async function actualizarFasePedido(id, estado, campoFecha, valorFecha) {
+  const p = state.pedidos.find((x) => x.id === id);
   const cambios = { estado };
   if (campoFecha) cambios[campoFecha] = valorFecha;
   const { error } = await supabase.from("pedidos").update(cambios).eq("id", id);
   if (error) throw error;
+  registrarLog("Camisas", `Movió el pedido de "${p ? p.cliente.nombre : id}" a "${estado}"`);
   await cargarPedidos();
 }
 
 export async function eliminarPedido(id) {
+  const p = state.pedidos.find((x) => x.id === id);
   await supabase.from("pagos").delete().eq("entidad_tipo", "pedido").eq("entidad_id", id);
   const { error } = await supabase.from("pedidos").delete().eq("id", id);
   if (error) throw error;
+  registrarLog("Camisas", `Eliminó el pedido de "${p ? p.cliente.nombre : id}"`);
   await cargarPedidos();
 }
 
@@ -384,6 +425,7 @@ export async function crearImpresion(datos) {
     aviso_dias: datos.avisoDias == null ? null : datos.avisoDias,
   });
   if (error) throw error;
+  registrarLog("Sublimación", `Creó una sublimación de "${datos.cliente}"`);
   await cargarImpresiones();
 }
 
@@ -405,13 +447,16 @@ export async function actualizarImpresion(id, datos) {
     })
     .eq("id", id);
   if (error) throw error;
+  registrarLog("Sublimación", `Editó una sublimación de "${datos.cliente}"`);
   await cargarImpresiones();
 }
 
 export async function eliminarImpresion(id) {
+  const imp = state.impresiones.find((x) => x.id === id);
   await supabase.from("pagos").delete().eq("entidad_tipo", "impresion").eq("entidad_id", id);
   const { error } = await supabase.from("impresiones").delete().eq("id", id);
   if (error) throw error;
+  registrarLog("Sublimación", `Eliminó una sublimación de "${imp ? imp.cliente : id}"`);
   await cargarImpresiones();
 }
 
@@ -454,6 +499,7 @@ export async function crearEco(datos) {
     pvc_precio_m2: datos.pvcPrecioM2,
   });
   if (error) throw error;
+  registrarLog("Eco Solvente", `Creó un pedido eco solvente de "${datos.cliente}"`);
   await cargarEcoSolvente();
 }
 
@@ -494,21 +540,26 @@ export async function actualizarEco(id, datos) {
     })
     .eq("id", id);
   if (error) throw error;
+  registrarLog("Eco Solvente", `Editó un pedido eco solvente de "${datos.cliente}"`);
   await cargarEcoSolvente();
 }
 
 export async function actualizarFaseEco(id, estado, campoFecha, valorFecha) {
+  const e = state.ecoSolvente.find((x) => x.id === id);
   const cambios = { estado };
   if (campoFecha) cambios[campoFecha] = valorFecha;
   const { error } = await supabase.from("eco_solvente").update(cambios).eq("id", id);
   if (error) throw error;
+  registrarLog("Eco Solvente", `Movió el pedido eco de "${e ? e.cliente : id}" a "${estado}"`);
   await cargarEcoSolvente();
 }
 
 export async function eliminarEco(id) {
+  const e = state.ecoSolvente.find((x) => x.id === id);
   await supabase.from("pagos").delete().eq("entidad_tipo", "eco_solvente").eq("entidad_id", id);
   const { error } = await supabase.from("eco_solvente").delete().eq("id", id);
   if (error) throw error;
+  registrarLog("Eco Solvente", `Eliminó un pedido eco solvente de "${e ? e.cliente : id}"`);
   await cargarEcoSolvente();
 }
 
@@ -525,6 +576,7 @@ export async function crearPerdida(datos) {
     descripcion: datos.descripcion,
   });
   if (error) throw error;
+  registrarLog("Pérdidas", `Registró una ${datos.tipo === "prueba" ? "prueba" : "pérdida"}${datos.descripcion ? ` (${datos.descripcion})` : ""}`);
   await cargarPerdidas();
 }
 
@@ -547,6 +599,7 @@ export async function actualizarPerdida(id, datos) {
 export async function eliminarPerdida(id) {
   const { error } = await supabase.from("perdidas").delete().eq("id", id);
   if (error) throw error;
+  registrarLog("Pérdidas", "Eliminó un registro de pérdida/prueba");
   await cargarPerdidas();
 }
 
@@ -557,6 +610,16 @@ function tablaDeEntidad(entidadTipo) {
   return entidadTipo === "pedido" ? "pedidos" : entidadTipo === "impresion" ? "impresiones" : "eco_solvente";
 }
 
+function clienteDeEntidad(entidadTipo, entidadId) {
+  if (entidadTipo === "pedido") {
+    const p = state.pedidos.find((x) => x.id === entidadId);
+    return p ? p.cliente.nombre : entidadId;
+  }
+  const lista = entidadTipo === "impresion" ? state.impresiones : state.ecoSolvente;
+  const e = lista.find((x) => x.id === entidadId);
+  return e ? e.cliente : entidadId;
+}
+
 export async function agregarPago(entidadTipo, entidadId, fecha, monto) {
   const { error } = await supabase.from("pagos").insert({
     entidad_tipo: entidadTipo,
@@ -565,12 +628,14 @@ export async function agregarPago(entidadTipo, entidadId, fecha, monto) {
     monto,
   });
   if (error) throw error;
+  registrarLog("Abonos", `Registró un abono de $${monto} a "${clienteDeEntidad(entidadTipo, entidadId)}"`);
   await CARGADORES[tablaDeEntidad(entidadTipo)]();
 }
 
 // Elimina un abono: si es un pago posterior, borra la fila de `pagos`;
 // si es el abono inicial (vive en la entidad), lo pone en 0.
 export async function eliminarAbono(entidadTipo, entidadId, pagoId) {
+  const cliente = clienteDeEntidad(entidadTipo, entidadId);
   if (pagoId) {
     const { error } = await supabase.from("pagos").delete().eq("id", pagoId);
     if (error) throw error;
@@ -578,6 +643,7 @@ export async function eliminarAbono(entidadTipo, entidadId, pagoId) {
     const { error } = await supabase.from(tablaDeEntidad(entidadTipo)).update({ abono: 0 }).eq("id", entidadId);
     if (error) throw error;
   }
+  registrarLog("Abonos", `Eliminó un abono de "${cliente}"`);
   await CARGADORES[tablaDeEntidad(entidadTipo)]();
 }
 
@@ -588,6 +654,7 @@ export async function guardarPrecios(precios) {
   const { error } = await supabase.from("precios_config").upsert({ id: 1, data: precios });
   if (error) throw error;
   state.precios = precios;
+  registrarLog("Sistema", "Actualizó la lista de precios");
 }
 
 // ============================================================
@@ -727,6 +794,10 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
     });
   }
 
+  registrarLog(
+    "Sistema",
+    `Importó datos: ${(pedidos || []).length} camisas, ${(impresiones || []).length} sublimación, ${(ecoSolvente || []).length} eco solvente, ${(perdidas || []).length} pérdidas`
+  );
   await cargarTodo();
 }
 
@@ -734,6 +805,7 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
 // BORRAR TODO
 // ============================================================
 export async function borrarTodo() {
+  await registrarLog("Sistema", "⚠️ Borró TODOS los datos");
   await supabase.from("pagos").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("pedido_items").delete().neq("id", "00000000-0000-0000-0000-000000000000");
   await supabase.from("pedidos").delete().neq("id", "00000000-0000-0000-0000-000000000000");

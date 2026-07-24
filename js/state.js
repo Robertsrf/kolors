@@ -82,9 +82,9 @@ export function fechaFaseActual(pedido) {
 export function historialPagosPedido(pedido) {
   const historial = [];
   if (Number(pedido.abono) > 0) {
-    historial.push({ fecha: pedido.creado, monto: Number(pedido.abono), nota: "Abono inicial" });
+    historial.push({ fecha: pedido.creado, monto: Number(pedido.abono), nota: "Abono inicial", entidadTipo: "pedido", entidadId: pedido.id, pagoId: null });
   }
-  (pedido.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono" }));
+  (pedido.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono", entidadTipo: "pedido", entidadId: pedido.id, pagoId: pg.id }));
   return historial.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 }
 
@@ -110,9 +110,9 @@ export function estaPagadaImpresion(imp) {
 export function historialPagosImpresion(imp) {
   const historial = [];
   if (Number(imp.abono) > 0) {
-    historial.push({ fecha: imp.creado, monto: Number(imp.abono), nota: "Abono inicial" });
+    historial.push({ fecha: imp.creado, monto: Number(imp.abono), nota: "Abono inicial", entidadTipo: "impresion", entidadId: imp.id, pagoId: null });
   }
-  (imp.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono" }));
+  (imp.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono", entidadTipo: "impresion", entidadId: imp.id, pagoId: pg.id }));
   return historial.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 }
 
@@ -179,9 +179,9 @@ export function estaPagadoEco(eco) {
 export function historialPagosEco(eco) {
   const historial = [];
   if (Number(eco.abono) > 0) {
-    historial.push({ fecha: eco.creado, monto: Number(eco.abono), nota: "Abono inicial" });
+    historial.push({ fecha: eco.creado, monto: Number(eco.abono), nota: "Abono inicial", entidadTipo: "eco_solvente", entidadId: eco.id, pagoId: null });
   }
-  (eco.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono" }));
+  (eco.pagos || []).forEach((pg) => historial.push({ fecha: pg.fecha, monto: Number(pg.monto), nota: "Abono", entidadTipo: "eco_solvente", entidadId: eco.id, pagoId: pg.id }));
   return historial.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 }
 export function fechaFaseActualEco(eco) {

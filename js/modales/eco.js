@@ -10,7 +10,7 @@ import {
   totalEco,
 } from "../state.js";
 import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
-import { crearEco, actualizarEco } from "../api.js";
+import { crearEco, actualizarEco, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
 const modalEcoOverlay = document.getElementById("modalEcoOverlay");
@@ -174,8 +174,24 @@ export function abrirModalEditarEco(id) {
   campoPvcPrecioM2.value = eco.pvcPrecioM2 || 0;
   modalEcoTitulo.textContent = "Editar pedido eco solvente";
   actualizarUITipoTrabajo();
-  renderHistorialAbonos("historialAbonosEco", historialPagosEco(eco));
+  pintarHistorialEco(eco);
   modalEcoOverlay.classList.add("active");
+}
+
+function pintarHistorialEco(eco) {
+  renderHistorialAbonos("historialAbonosEco", historialPagosEco(eco), async (entry) => {
+    if (!confirm(`¿Eliminar el abono de ${money(entry.monto)}${entry.nota === "Abono inicial" ? " (inicial)" : ""}? Esta acción no se puede deshacer.`)) return;
+    await eliminarAbono(entry.entidadTipo, entry.entidadId, entry.pagoId);
+    const actualizado = state.ecoSolvente.find((x) => x.id === eco.id);
+    if (!actualizado) {
+      cerrarModalEco();
+      render();
+      return;
+    }
+    document.getElementById("ecoAbono").value = actualizado.abono || 0;
+    pintarHistorialEco(actualizado);
+    render();
+  });
 }
 
 function cerrarModalEco() {
@@ -256,6 +272,4 @@ formEco.addEventListener("submit", async function (e) {
 document.getElementById("btnNuevoEco").addEventListener("click", abrirModalNuevoEco);
 document.getElementById("btnCerrarModalEco").addEventListener("click", cerrarModalEco);
 document.getElementById("btnCancelarModalEco").addEventListener("click", cerrarModalEco);
-modalEcoOverlay.addEventListener("click", (e) => {
-  if (e.target === modalEcoOverlay) cerrarModalEco();
-});
+// Solo se cierra con la X o Cancelar (no al hacer clic afuera).

@@ -83,6 +83,4 @@ formPerdida.addEventListener("submit", async function (e) {
 document.getElementById("btnNuevaPerdida").addEventListener("click", abrirModalNuevaPerdida);
 document.getElementById("btnCerrarModalPerdida").addEventListener("click", cerrarModalPerdida);
 document.getElementById("btnCancelarModalPerdida").addEventListener("click", cerrarModalPerdida);
-modalPerdidaOverlay.addEventListener("click", (e) => {
-  if (e.target === modalPerdidaOverlay) cerrarModalPerdida();
-});
+// Solo se cierra con la X o Cancelar (no al hacer clic afuera).

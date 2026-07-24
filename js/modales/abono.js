@@ -51,6 +51,4 @@ formAbono.addEventListener("submit", async function (e) {
 
 document.getElementById("btnCerrarModalAbono").addEventListener("click", cerrarModalAbono);
 document.getElementById("btnCancelarModalAbono").addEventListener("click", cerrarModalAbono);
-modalAbonoOverlay.addEventListener("click", (e) => {
-  if (e.target === modalAbonoOverlay) cerrarModalAbono();
-});
+// Solo se cierra con la X o Cancelar (no al hacer clic afuera).

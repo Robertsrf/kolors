@@ -553,6 +553,10 @@ export async function eliminarPerdida(id) {
 // ============================================================
 // ABONOS (compartidos entre pedidos, impresiones y eco solvente)
 // ============================================================
+function tablaDeEntidad(entidadTipo) {
+  return entidadTipo === "pedido" ? "pedidos" : entidadTipo === "impresion" ? "impresiones" : "eco_solvente";
+}
+
 export async function agregarPago(entidadTipo, entidadId, fecha, monto) {
   const { error } = await supabase.from("pagos").insert({
     entidad_tipo: entidadTipo,
@@ -561,7 +565,20 @@ export async function agregarPago(entidadTipo, entidadId, fecha, monto) {
     monto,
   });
   if (error) throw error;
-  await CARGADORES[entidadTipo === "pedido" ? "pedidos" : entidadTipo === "impresion" ? "impresiones" : "eco_solvente"]();
+  await CARGADORES[tablaDeEntidad(entidadTipo)]();
+}
+
+// Elimina un abono: si es un pago posterior, borra la fila de `pagos`;
+// si es el abono inicial (vive en la entidad), lo pone en 0.
+export async function eliminarAbono(entidadTipo, entidadId, pagoId) {
+  if (pagoId) {
+    const { error } = await supabase.from("pagos").delete().eq("id", pagoId);
+    if (error) throw error;
+  } else {
+    const { error } = await supabase.from(tablaDeEntidad(entidadTipo)).update({ abono: 0 }).eq("id", entidadId);
+    if (error) throw error;
+  }
+  await CARGADORES[tablaDeEntidad(entidadTipo)]();
 }
 
 // ============================================================

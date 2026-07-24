@@ -1,6 +1,6 @@
 import { state, impresionCobraDinero, historialPagosImpresion } from "../state.js";
 import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
-import { crearImpresion, actualizarImpresion } from "../api.js";
+import { crearImpresion, actualizarImpresion, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
 const modalImpresionOverlay = document.getElementById("modalImpresionOverlay");
@@ -49,6 +49,22 @@ export function abrirModalNuevaImpresion() {
   modalImpresionOverlay.classList.add("active");
 }
 
+function pintarHistorialImpresion(imp) {
+  renderHistorialAbonos("historialAbonosImpresion", historialPagosImpresion(imp), async (entry) => {
+    if (!confirm(`¿Eliminar el abono de ${money(entry.monto)}${entry.nota === "Abono inicial" ? " (inicial)" : ""}? Esta acción no se puede deshacer.`)) return;
+    await eliminarAbono(entry.entidadTipo, entry.entidadId, entry.pagoId);
+    const actualizado = state.impresiones.find((x) => x.id === imp.id);
+    if (!actualizado) {
+      cerrarModalImpresion();
+      render();
+      return;
+    }
+    document.getElementById("impresionAbono").value = actualizado.abono || 0;
+    pintarHistorialImpresion(actualizado);
+    render();
+  });
+}
+
 export function abrirModalEditarImpresion(id) {
   const imp = state.impresiones.find((x) => x.id === id);
   if (!imp) return;
@@ -66,7 +82,7 @@ export function abrirModalEditarImpresion(id) {
   document.getElementById("impresionDescripcion").value = imp.descripcion || "";
   modalImpresionTitulo.textContent = "Editar impresión";
   actualizarTipoImpresionUI();
-  renderHistorialAbonos("historialAbonosImpresion", historialPagosImpresion(imp));
+  pintarHistorialImpresion(imp);
   modalImpresionOverlay.classList.add("active");
 }
 
@@ -139,6 +155,4 @@ formImpresion.addEventListener("submit", async function (e) {
 document.getElementById("btnNuevaImpresion").addEventListener("click", abrirModalNuevaImpresion);
 document.getElementById("btnCerrarModalImpresion").addEventListener("click", cerrarModalImpresion);
 document.getElementById("btnCancelarModalImpresion").addEventListener("click", cerrarModalImpresion);
-modalImpresionOverlay.addEventListener("click", (e) => {
-  if (e.target === modalImpresionOverlay) cerrarModalImpresion();
-});
+// Solo se cierra con la X o Cancelar (no al hacer clic afuera).

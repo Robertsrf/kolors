@@ -85,6 +85,4 @@ document.getElementById("formPrecios").addEventListener("submit", async function
 document.getElementById("btnPrecios").addEventListener("click", abrirModalPrecios);
 document.getElementById("btnCerrarModalPrecios").addEventListener("click", cerrarModalPrecios);
 document.getElementById("btnCancelarModalPrecios").addEventListener("click", cerrarModalPrecios);
-modalPreciosOverlay.addEventListener("click", (e) => {
-  if (e.target === modalPreciosOverlay) cerrarModalPrecios();
-});
+// Solo se cierra con la X o Cancelar (no al hacer clic afuera).

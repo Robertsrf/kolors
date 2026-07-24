@@ -1,6 +1,6 @@
 import { state, GENEROS, tallasPorGenero, historialPagosPedido } from "../state.js";
 import { money, escapeHtml, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
-import { crearPedido, actualizarPedido } from "../api.js";
+import { crearPedido, actualizarPedido, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
 const modalOverlay = document.getElementById("modalOverlay");
@@ -99,6 +99,23 @@ export function abrirModalNuevoPedido() {
   modalOverlay.classList.add("active");
 }
 
+function pintarHistorialPedido(p) {
+  renderHistorialAbonos("historialAbonosPedido", historialPagosPedido(p), async (entry) => {
+    if (!confirm(`¿Eliminar el abono de ${money(entry.monto)}${entry.nota === "Abono inicial" ? " (inicial)" : ""}? Esta acción no se puede deshacer.`)) return;
+    await eliminarAbono(entry.entidadTipo, entry.entidadId, entry.pagoId);
+    const actualizado = state.pedidos.find((x) => x.id === p.id);
+    if (!actualizado) {
+      cerrarModal();
+      render();
+      return;
+    }
+    document.getElementById("clienteAbono").value = actualizado.abono;
+    pintarHistorialPedido(actualizado);
+    actualizarResumen();
+    render();
+  });
+}
+
 export function abrirModalEditarPedido(id) {
   const p = state.pedidos.find((x) => x.id === id);
   if (!p) return;
@@ -117,7 +134,7 @@ export function abrirModalEditarPedido(id) {
   itemsContainer.innerHTML = "";
   p.items.forEach((it) => agregarLineaItem(it));
   actualizarResumen();
-  renderHistorialAbonos("historialAbonosPedido", historialPagosPedido(p));
+  pintarHistorialPedido(p);
   modalOverlay.classList.add("active");
 }
 
@@ -206,6 +223,5 @@ document.getElementById("btnAgregarLinea").addEventListener("click", () => {
   agregarLineaItem();
   actualizarResumen();
 });
-modalOverlay.addEventListener("click", (e) => {
-  if (e.target === modalOverlay) cerrarModal();
-});
+// El modal solo se cierra con la X o el botón Cancelar (no al hacer clic afuera),
+// para no perder el pedido por un doble clic accidental.

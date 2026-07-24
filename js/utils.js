@@ -66,7 +66,7 @@ export function pagosListaHtml(historial) {
     .join("")}</div>`;
 }
 
-export function renderHistorialAbonos(containerId, historial) {
+export function renderHistorialAbonos(containerId, historial, onEliminar) {
   const el = document.getElementById(containerId);
   if (!historial.length) {
     el.innerHTML = "";
@@ -76,8 +76,18 @@ export function renderHistorialAbonos(containerId, historial) {
     <div class="historial-abonos-box neu-inset">
       <h4>Historial de abonos</h4>
       <div class="pagos-lista">
-        ${historial.map((h) => `<div class="pago-fila"><span>${fechaLegible(h.fecha)}</span><b>${money(h.monto)}</b></div>`).join("")}
+        ${historial
+          .map(
+            (h, i) => `<div class="pago-fila">
+          <span>${fechaLegible(h.fecha)}${h.nota === "Abono inicial" ? " · inicial" : ""}</span>
+          <span class="pago-fila-monto"><b>${money(h.monto)}</b>${onEliminar ? `<button type="button" class="neu-btn icon danger abono-del" data-i="${i}" title="Eliminar abono">🗑️</button>` : ""}</span>
+        </div>`
+          )
+          .join("")}
       </div>
     </div>
   `;
+  if (onEliminar) {
+    el.querySelectorAll(".abono-del").forEach((btn) => btn.addEventListener("click", () => onEliminar(historial[Number(btn.dataset.i)])));
+  }
 }

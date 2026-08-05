@@ -10,6 +10,15 @@ export function money(n) {
   return MONEDA + fmtMoneda.format(n || 0);
 }
 
+// Ajusta la altura del tablero para que llegue justo al fondo de la pantalla,
+// dejando la barra de desplazamiento horizontal siempre visible.
+export function ajustarAltoTablero(boardEl) {
+  if (!boardEl || boardEl.offsetParent === null) return; // no visible
+  const top = boardEl.getBoundingClientRect().top;
+  const alto = window.innerHeight - top - 16;
+  boardEl.style.height = Math.max(200, alto) + "px";
+}
+
 export function redondear2(n) {
   return Math.round((Number(n) || 0) * 100) / 100;
 }

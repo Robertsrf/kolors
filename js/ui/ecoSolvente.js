@@ -10,7 +10,7 @@ import {
   estaPagadoEco,
   fechaFaseActualEco,
 } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero } from "../utils.js";
 import { actualizarFaseEco, eliminarEco as apiEliminarEco } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -80,6 +80,7 @@ export function renderEcoBoard() {
     col.appendChild(cardsWrap);
     board.appendChild(col);
   });
+  ajustarAltoTablero(board);
 }
 
 function renderEcoCard(eco) {

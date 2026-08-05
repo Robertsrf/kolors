@@ -171,17 +171,24 @@ main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
   display: flex;
   gap: 16px;
   overflow-x: auto;
+  overflow-y: hidden;
+  /* Altura fija: el tablero ocupa lo que queda de pantalla, así la barra de
+     desplazamiento horizontal queda SIEMPRE visible abajo (estilo Trello). */
+  height: calc(100vh - 200px);
+  min-height: 200px;
   padding-bottom: 10px;
   scroll-snap-type: x proximity;
 }
-/* Barra de desplazamiento horizontal más visible cuando hay muchas columnas */
+/* Barra de desplazamiento horizontal más visible (siempre abajo del tablero) */
 .board::-webkit-scrollbar { height: 12px; }
+.board::-webkit-scrollbar-track { background: var(--surface-alt); border-radius: 8px; }
 .board::-webkit-scrollbar-thumb { background: var(--accent-2); border-radius: 8px; }
 
 .column {
   flex: 1 0 270px;
   min-width: 270px;
   max-width: 360px;
+  height: 100%;
   scroll-snap-align: start;
   background: rgba(255,255,255,.55);
   border: 1px solid var(--border-soft);
@@ -191,6 +198,7 @@ main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
   flex-direction: column;
   gap: 12px;
   min-height: 120px;
+  overflow: hidden;
 }
 .column-header {
   display: flex;
@@ -217,7 +225,19 @@ main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
 }
 .column-counts b { color: var(--text); }
 
-.cards { display: flex; flex-direction: column; gap: 12px; }
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;      /* imprescindible para que el scroll interno funcione en flexbox */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; /* espacio para la barra de scroll de las tarjetas */
+}
+.cards::-webkit-scrollbar { width: 8px; }
+.cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
+.cards:hover::-webkit-scrollbar-thumb { background: var(--accent-2); }
 
 .card {
   background: var(--surface);

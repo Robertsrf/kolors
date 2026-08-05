@@ -2,6 +2,7 @@ import { supabase } from "./supabaseClient.js";
 import { initAuth } from "./auth.js";
 import { cargarTodo, suscribirRealtime } from "./api.js";
 import { render } from "./render.js";
+import { ajustarAltoTablero } from "./utils.js";
 import { setClienteSeleccionado, renderClientesGrid } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
@@ -37,7 +38,14 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
       setClienteSeleccionado(null);
       renderClientesGrid();
     }
+    if (tab === "tablero") ajustarAltoTablero(document.getElementById("board"));
   });
+});
+
+// Mantener la altura de los tableros al cambiar el tamaño de la ventana.
+window.addEventListener("resize", () => {
+  ajustarAltoTablero(document.getElementById("board"));
+  ajustarAltoTablero(document.getElementById("ecoBoard"));
 });
 
 // === AUTENTICACIÓN + CARGA INICIAL ===

@@ -77,6 +77,11 @@ function actualizarUITipoTrabajo() {
   document.getElementById("ecoCampoAncho").style.display = esStickers ? "none" : "";
   document.getElementById("ecoCampoAlto").style.display = esStickers ? "none" : "";
   document.getElementById("ecoCampoM2Manual").style.display = esStickers ? "" : "none";
+  // Deshabilitar los campos ocultos para que no bloqueen el guardado por
+  // validación HTML (un campo oculto con valor fuera de rango no es "focusable").
+  document.getElementById("ecoAncho").disabled = esStickers;
+  document.getElementById("ecoAlto").disabled = esStickers;
+  document.getElementById("ecoM2Manual").disabled = !esStickers;
   actualizarUIExtras();
 }
 

@@ -239,6 +239,15 @@ main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
 .cards::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
 .cards:hover::-webkit-scrollbar-thumb { background: var(--accent-2); }
 
+/* Arrastrar tarjetas entre columnas */
+.card[draggable="true"] { cursor: grab; }
+.card.arrastrando { opacity: .45; cursor: grabbing; }
+.column.drop-activo {
+  outline: 2px dashed var(--accent-2);
+  outline-offset: -4px;
+  background: #eef0ff;
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border-soft);

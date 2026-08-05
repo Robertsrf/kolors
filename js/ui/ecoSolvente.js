@@ -61,6 +61,7 @@ export function renderEcoBoard() {
 
     const col = document.createElement("div");
     col.className = "column";
+    habilitarSoltarEco(col, fase.id);
 
     const header = document.createElement("div");
     header.className = "column-header";
@@ -83,11 +84,42 @@ export function renderEcoBoard() {
   ajustarAltoTablero(board);
 }
 
+function habilitarSoltarEco(col, faseId) {
+  col.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    col.classList.add("drop-activo");
+  });
+  col.addEventListener("dragleave", (e) => {
+    if (!col.contains(e.relatedTarget)) col.classList.remove("drop-activo");
+  });
+  col.addEventListener("drop", (e) => {
+    e.preventDefault();
+    col.classList.remove("drop-activo");
+    const id = e.dataTransfer.getData("text/plain");
+    moverEcoAFase(id, faseId);
+  });
+}
+
+async function moverEcoAFase(id, faseId) {
+  const e = state.ecoSolvente.find((x) => x.id === id);
+  if (!e || (e.estado || "Pedido") === faseId) return;
+  await actualizarFaseEco(id, faseId);
+  render();
+}
+
 function renderEcoCard(eco) {
   const card = document.createElement("div");
   card.className = "card";
   const estado = eco.estado || "Pedido";
   card.style.borderLeftColor = colorFaseEco(estado);
+  card.draggable = true;
+  card.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", eco.id);
+    e.dataTransfer.effectAllowed = "move";
+    card.classList.add("arrastrando");
+  });
+  card.addEventListener("dragend", () => card.classList.remove("arrastrando"));
 
   const fases = state.fasesEco;
   const m2 = m2Eco(eco);

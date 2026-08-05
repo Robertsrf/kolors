@@ -39,6 +39,7 @@ export function renderBoard() {
 
     const col = document.createElement("div");
     col.className = "column";
+    habilitarSoltar(col, fase.id);
 
     const header = document.createElement("div");
     header.className = "column-header";
@@ -61,10 +62,41 @@ export function renderBoard() {
   ajustarAltoTablero(board);
 }
 
+function habilitarSoltar(col, faseId) {
+  col.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    col.classList.add("drop-activo");
+  });
+  col.addEventListener("dragleave", (e) => {
+    if (!col.contains(e.relatedTarget)) col.classList.remove("drop-activo");
+  });
+  col.addEventListener("drop", (e) => {
+    e.preventDefault();
+    col.classList.remove("drop-activo");
+    const id = e.dataTransfer.getData("text/plain");
+    moverPedidoAFase(id, faseId);
+  });
+}
+
+async function moverPedidoAFase(id, faseId) {
+  const p = state.pedidos.find((x) => x.id === id);
+  if (!p || p.estado === faseId) return;
+  await actualizarFasePedido(id, faseId);
+  render();
+}
+
 function renderCard(p) {
   const card = document.createElement("div");
   card.className = "card";
   card.style.borderLeftColor = colorFaseCamisas(p.estado);
+  card.draggable = true;
+  card.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", p.id);
+    e.dataTransfer.effectAllowed = "move";
+    card.classList.add("arrastrando");
+  });
+  card.addEventListener("dragend", () => card.classList.remove("arrastrando"));
 
   const fases = state.fasesCamisas;
   const camisas = totalCamisas(p);

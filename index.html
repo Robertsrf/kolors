@@ -209,7 +209,7 @@
         <div class="chart-wrap"><canvas id="chartEcoMaterial"></canvas></div>
       </div>
       <div class="stats-block neu-raised">
-        <h3>🏷️ Impresión vs Stickers (m²)</h3>
+        <h3>🏷️ Por tipo de trabajo (m²)</h3>
         <div class="chart-wrap"><canvas id="chartEcoTipoTrabajo"></canvas></div>
       </div>
       <div class="stats-block neu-raised">
@@ -427,7 +427,7 @@
       <button class="neu-btn icon" id="btnCerrarModal">✕</button>
     </div>
 
-    <form id="formPedido">
+    <form id="formPedido" novalidate>
       <input type="hidden" id="pedidoId">
 
       <div class="form-row three">
@@ -498,7 +498,7 @@
       <button class="neu-btn icon" id="btnCerrarModalImpresion">✕</button>
     </div>
 
-    <form id="formImpresion">
+    <form id="formImpresion" novalidate>
       <input type="hidden" id="impresionId">
 
       <div class="form-row three">
@@ -581,7 +581,7 @@
       <button class="neu-btn icon" id="btnCerrarModalEco">✕</button>
     </div>
 
-    <form id="formEco">
+    <form id="formEco" novalidate>
       <input type="hidden" id="ecoId">
 
       <div class="form-row three">
@@ -594,6 +594,7 @@
           <select id="ecoTipoTrabajo">
             <option value="impresion">🖨️ Impresión</option>
             <option value="stickers">🏷️ Stickers</option>
+            <option value="vinil_tornasol">🌈 Vinil Tornasol</option>
           </select>
         </div>
         <div>
@@ -623,7 +624,6 @@
           <select id="ecoMaterial">
             <option value="vinil">Vinil</option>
             <option value="banner">Banner</option>
-            <option value="vinil_tornasol">Vinil Tornasol</option>
             <option value="papel_bond">Papel Bond</option>
             <option value="clear">Clear</option>
           </select>
@@ -817,7 +817,7 @@
       <button class="neu-btn icon" id="btnCerrarModalPerdida">✕</button>
     </div>
 
-    <form id="formPerdida">
+    <form id="formPerdida" novalidate>
       <input type="hidden" id="perdidaId">
 
       <div class="form-row three">

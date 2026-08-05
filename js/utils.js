@@ -10,6 +10,17 @@ export function money(n) {
   return MONEDA + fmtMoneda.format(n || 0);
 }
 
+// Marca (o desmarca) un campo como inválido en rojo. Devuelve si es válido.
+export function marcarCampo(el, valido) {
+  if (el) el.classList.toggle("campo-invalido", !valido);
+  return !!valido;
+}
+// Enfoca el primer campo inválido de un formulario (si hay).
+export function enfocarPrimerInvalido(form) {
+  const el = form.querySelector(".campo-invalido");
+  if (el) el.focus();
+}
+
 // Ajusta la altura del tablero para que llegue justo al fondo de la pantalla,
 // dejando la barra de desplazamiento horizontal siempre visible.
 export function ajustarAltoTablero(boardEl) {

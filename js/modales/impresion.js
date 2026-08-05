@@ -1,5 +1,5 @@
 import { state, impresionCobraDinero, historialPagosImpresion } from "../state.js";
-import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
+import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos, marcarCampo, enfocarPrimerInvalido } from "../utils.js";
 import { crearImpresion, actualizarImpresion, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
@@ -93,23 +93,27 @@ function cerrarModalImpresion() {
 formImpresion.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const cliente = document.getElementById("impresionCliente").value.trim();
-  if (!cliente) {
-    alert("El nombre del cliente es obligatorio.");
-    return;
-  }
-  const fechaInput = document.getElementById("impresionFecha").value;
-  if (!fechaInput) {
-    alert("La fecha de la impresión es obligatoria.");
-    return;
-  }
+  const clienteEl = document.getElementById("impresionCliente");
+  const fechaEl = document.getElementById("impresionFecha");
+  const anchoEl = document.getElementById("impresionAncho");
+  const altoEl = document.getElementById("impresionAlto");
+  const precioEl = document.getElementById("impresionPrecioM2");
+  const cliente = clienteEl.value.trim();
+  const fechaInput = fechaEl.value;
   const tipo = document.getElementById("impresionTipo").value;
   const cobra = impresionCobraDinero(tipo);
-  const ancho = Number(document.getElementById("impresionAncho").value);
-  const alto = Number(document.getElementById("impresionAlto").value);
-  const precioM2 = cobra ? Number(document.getElementById("impresionPrecioM2").value) : 0;
-  if (!ancho || ancho <= 0 || !alto || alto <= 0 || isNaN(precioM2) || precioM2 < 0) {
-    alert("Revisa ancho y alto (mayores a 0) y el precio por m² (no puede ser negativo).");
+  const ancho = Number(anchoEl.value);
+  const alto = Number(altoEl.value);
+  const precioM2 = cobra ? Number(precioEl.value) : 0;
+
+  let valido = true;
+  valido = marcarCampo(clienteEl, !!cliente) && valido;
+  valido = marcarCampo(fechaEl, !!fechaInput) && valido;
+  valido = marcarCampo(anchoEl, ancho > 0) && valido;
+  valido = marcarCampo(altoEl, alto > 0) && valido;
+  if (cobra) valido = marcarCampo(precioEl, !isNaN(precioM2) && precioM2 >= 0) && valido;
+  if (!valido) {
+    enfocarPrimerInvalido(formImpresion);
     return;
   }
   const descripcion = document.getElementById("impresionDescripcion").value.trim();

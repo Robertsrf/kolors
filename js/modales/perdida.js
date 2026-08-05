@@ -1,5 +1,5 @@
 import { state } from "../state.js";
-import { money, fmt, toInputDate, fechaInputToISO } from "../utils.js";
+import { money, fmt, toInputDate, fechaInputToISO, marcarCampo, enfocarPrimerInvalido } from "../utils.js";
 import { crearPerdida, actualizarPerdida } from "../api.js";
 import { render } from "../render.js";
 
@@ -50,17 +50,23 @@ function cerrarModalPerdida() {
 formPerdida.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const fechaInput = document.getElementById("perdidaFecha").value;
-  if (!fechaInput) {
-    alert("La fecha es obligatoria.");
-    return;
-  }
+  const fechaEl = document.getElementById("perdidaFecha");
+  const anchoEl = document.getElementById("perdidaAncho");
+  const altoEl = document.getElementById("perdidaAlto");
+  const precioEl = document.getElementById("perdidaPrecioM2");
+  const fechaInput = fechaEl.value;
   const tipo = document.getElementById("perdidaTipo").value;
-  const ancho = Number(document.getElementById("perdidaAncho").value);
-  const alto = Number(document.getElementById("perdidaAlto").value);
-  const precioM2 = Number(document.getElementById("perdidaPrecioM2").value);
-  if (!ancho || ancho <= 0 || !alto || alto <= 0 || isNaN(precioM2) || precioM2 < 0) {
-    alert("Revisa ancho y alto (mayores a 0) y el precio por m² (no puede ser negativo).");
+  const ancho = Number(anchoEl.value);
+  const alto = Number(altoEl.value);
+  const precioM2 = Number(precioEl.value);
+
+  let valido = true;
+  valido = marcarCampo(fechaEl, !!fechaInput) && valido;
+  valido = marcarCampo(anchoEl, ancho > 0) && valido;
+  valido = marcarCampo(altoEl, alto > 0) && valido;
+  valido = marcarCampo(precioEl, !isNaN(precioM2) && precioM2 >= 0) && valido;
+  if (!valido) {
+    enfocarPrimerInvalido(formPerdida);
     return;
   }
   const descripcion = document.getElementById("perdidaDescripcion").value.trim();

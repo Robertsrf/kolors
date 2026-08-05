@@ -907,6 +907,15 @@ body.rol-jefe .no-jefe { display: none !important; }
 .fase-row .fase-color { width: 42px; min-width: 42px; height: 40px; padding: 2px; cursor: pointer; }
 .fase-row .fase-nombre { flex: 1; }
 
+/* === VALIDACIÓN DE CAMPOS === */
+input.campo-invalido,
+select.campo-invalido,
+textarea.campo-invalido {
+  border-color: #ef4770 !important;
+  background: #fff1f5 !important;
+  box-shadow: 0 0 0 3px rgba(239, 71, 112, 0.18);
+}
+
 /* === METAS === */
 .metas-acciones { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 .metas-bloque { margin-bottom: 22px; }

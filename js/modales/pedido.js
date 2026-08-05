@@ -1,5 +1,5 @@
 import { state, GENEROS, tallasPorGenero, historialPagosPedido } from "../state.js";
-import { money, escapeHtml, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
+import { money, escapeHtml, toInputDate, fechaInputToISO, renderHistorialAbonos, marcarCampo, enfocarPrimerInvalido } from "../utils.js";
 import { crearPedido, actualizarPedido, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
@@ -147,20 +147,20 @@ itemsContainer.addEventListener("input", actualizarResumen);
 formPedido.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const nombre = document.getElementById("clienteNombre").value.trim();
-  if (!nombre) {
-    alert("El nombre del cliente es obligatorio.");
-    return;
-  }
+  const nombreEl = document.getElementById("clienteNombre");
+  const nombre = nombreEl.value.trim();
 
   const items = [];
   let invalido = false;
+  const clienteOk = marcarCampo(nombreEl, !!nombre);
   itemsContainer.querySelectorAll(".item-line").forEach((row) => {
-    const cantidad = Number(row.querySelector(".in-cant").value);
-    const precioUnitario = Number(row.querySelector(".in-precio").value);
-    if (!cantidad || cantidad < 1 || precioUnitario < 0 || isNaN(precioUnitario)) {
-      invalido = true;
-    }
+    const cantEl = row.querySelector(".in-cant");
+    const precioEl = row.querySelector(".in-precio");
+    const cantidad = Number(cantEl.value);
+    const precioUnitario = Number(precioEl.value);
+    const cantOk = marcarCampo(cantEl, cantidad >= 1);
+    const precioOk = marcarCampo(precioEl, !isNaN(precioUnitario) && precioUnitario >= 0);
+    if (!cantOk || !precioOk) invalido = true;
     items.push({
       id: row.dataset.itemId,
       genero: row.querySelector(".in-genero").value,
@@ -175,8 +175,8 @@ formPedido.addEventListener("submit", async function (e) {
     alert("Agrega al menos una línea de camisa.");
     return;
   }
-  if (invalido) {
-    alert("Revisa las líneas: la cantidad debe ser mayor a 0 y el precio no puede ser negativo.");
+  if (!clienteOk || invalido) {
+    enfocarPrimerInvalido(formPedido);
     return;
   }
 

@@ -22,11 +22,10 @@ export const REMATE_LABEL = { ninguno: "Sin remate", palos: "🪵 Palos", tubos:
 export const MATERIAL_ECO_LABEL = {
   vinil: "Vinil",
   banner: "Banner",
-  vinil_tornasol: "Vinil Tornasol",
   papel_bond: "Papel Bond",
   clear: "Clear",
 };
-export const MATERIALES_ECO = ["vinil", "banner", "vinil_tornasol", "papel_bond", "clear"];
+export const MATERIALES_ECO = ["vinil", "banner", "papel_bond", "clear"];
 
 // Metas de producción (objetivos por semana y por mes)
 export function metasVacias() {
@@ -47,7 +46,12 @@ export function normalizarMetas(data) {
   }
   return base;
 }
-export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers" };
+export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers", vinil_tornasol: "🌈 Vinil Tornasol" };
+
+// Los stickers y el vinil tornasol se cargan por m² directo (mismo flujo: m² + diseño).
+export function ecoEsPorM2Manual(eco) {
+  return eco.tipoTrabajo === "stickers" || eco.tipoTrabajo === "vinil_tornasol";
+}
 
 // Fases por defecto de cada tablero (id estable = valor de `estado` guardado)
 export const FASES_CAMISAS_DEFECTO = [
@@ -187,7 +191,7 @@ export function historialPagosImpresion(imp) {
 
 // === CÁLCULOS DERIVADOS · ECO SOLVENTE ===
 export function m2Eco(eco) {
-  if (eco.tipoTrabajo === "stickers") return Number(eco.m2Manual) || 0;
+  if (ecoEsPorM2Manual(eco)) return Number(eco.m2Manual) || 0;
   return Number(eco.ancho) * Number(eco.alto);
 }
 export function baseEco(eco) {
@@ -221,8 +225,8 @@ export function costoCuadroMaderaEco(eco) {
   return eco.llevaCuadroMadera ? redondear2(Number(eco.cuadroMaderaCosto || 0)) : 0;
 }
 export function totalExtrasEco(eco) {
-  // Los stickers solo pueden llevar diseño como extra.
-  if (eco.tipoTrabajo === "stickers") return costoDisenoEco(eco);
+  // Stickers y vinil tornasol solo pueden llevar diseño como extra.
+  if (ecoEsPorM2Manual(eco)) return costoDisenoEco(eco);
   return redondear2(
     costoRemateEco(eco) +
       costoDisenoEco(eco) +

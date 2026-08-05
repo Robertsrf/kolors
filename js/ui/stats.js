@@ -5,6 +5,8 @@ import {
   PALETA_GENERO,
   REMATE_LABEL,
   MATERIAL_ECO_LABEL,
+  MATERIALES_ECO,
+  ecoEsPorM2Manual,
   totalCamisas,
   totalPedidoMonto,
   totalAbonadoPedido,
@@ -197,24 +199,29 @@ export function renderStats() {
     ["ninguno", "palos", "tubos"].map((r) => pedidosPorRemate[r])
   );
 
-  // m² por material (solo impresión; los stickers no tienen material)
-  const MATERIALES = ["vinil", "banner", "vinil_tornasol", "papel_bond", "clear"];
+  // m² por material (solo impresión normal; stickers y vinil tornasol van por tipo de trabajo)
   const m2PorMaterial = {};
-  MATERIALES.forEach((m) => (m2PorMaterial[m] = 0));
+  MATERIALES_ECO.forEach((m) => (m2PorMaterial[m] = 0));
   state.ecoSolvente.forEach((e) => {
-    if ((e.tipoTrabajo || "impresion") === "stickers") return;
+    if (ecoEsPorM2Manual(e)) return;
     const m = e.material || "banner";
-    m2PorMaterial[m] = (m2PorMaterial[m] || 0) + m2Eco(e);
+    if (m in m2PorMaterial) m2PorMaterial[m] += m2Eco(e);
   });
   renderChartEcoMaterial(
-    MATERIALES.map((m) => MATERIAL_ECO_LABEL[m]),
-    MATERIALES.map((m) => Number(m2PorMaterial[m].toFixed(2)))
+    MATERIALES_ECO.map((m) => MATERIAL_ECO_LABEL[m]),
+    MATERIALES_ECO.map((m) => Number(m2PorMaterial[m].toFixed(2)))
   );
 
-  // Impresión vs Stickers (m²)
-  const m2Impresiones = state.ecoSolvente.filter((e) => (e.tipoTrabajo || "impresion") !== "stickers").reduce((s, e) => s + m2Eco(e), 0);
-  const m2Stickers = state.ecoSolvente.filter((e) => e.tipoTrabajo === "stickers").reduce((s, e) => s + m2Eco(e), 0);
-  renderChartEcoTipoTrabajo(["🖨️ Impresión", "🏷️ Stickers"], [Number(m2Impresiones.toFixed(2)), Number(m2Stickers.toFixed(2))]);
+  // Por tipo de trabajo (m²): Impresión / Stickers / Vinil Tornasol
+  const m2PorTipoTrabajo = { impresion: 0, stickers: 0, vinil_tornasol: 0 };
+  state.ecoSolvente.forEach((e) => {
+    const t = e.tipoTrabajo || "impresion";
+    m2PorTipoTrabajo[t] = (m2PorTipoTrabajo[t] || 0) + m2Eco(e);
+  });
+  renderChartEcoTipoTrabajo(
+    ["🖨️ Impresión", "🏷️ Stickers", "🌈 Vinil Tornasol"],
+    [m2PorTipoTrabajo.impresion, m2PorTipoTrabajo.stickers, m2PorTipoTrabajo.vinil_tornasol].map((v) => Number(v.toFixed(2)))
+  );
 
   // === Producción por semana y por mes (dinero facturado) ===
   const semanas = ultimasSemanas(8);
@@ -463,7 +470,7 @@ function renderChartEcoMaterial(labels, data) {
 function renderChartEcoTipoTrabajo(labels, data) {
   pintarChart("chartEcoTipoTrabajo", {
     type: "doughnut",
-    data: { labels, datasets: [{ data, backgroundColor: ["#14b8a6", "#ff5c8a"], borderColor: "#ffffff", borderWidth: 3 }] },
+    data: { labels, datasets: [{ data, backgroundColor: ["#14b8a6", "#ff5c8a", "#7c5cff"], borderColor: "#ffffff", borderWidth: 3 }] },
     options: {
       responsive: true,
       maintainAspectRatio: false,

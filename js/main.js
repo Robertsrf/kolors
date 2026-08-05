@@ -42,6 +42,14 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
   });
 });
 
+// Al escribir/cambiar en un campo marcado en rojo, se le quita el resaltado.
+document.addEventListener("input", (e) => {
+  if (e.target && e.target.classList) e.target.classList.remove("campo-invalido");
+});
+document.addEventListener("change", (e) => {
+  if (e.target && e.target.classList) e.target.classList.remove("campo-invalido");
+});
+
 // Mantener la altura de los tableros al cambiar el tamaño de la ventana.
 window.addEventListener("resize", () => {
   ajustarAltoTablero(document.getElementById("board"));

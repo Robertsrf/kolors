@@ -1,4 +1,4 @@
-import { state, MATERIALES_ECO, MATERIAL_ECO_LABEL, faseFinalCamisas, faseFinalEco, totalCamisas, m2Eco } from "../state.js";
+import { state, MATERIALES_ECO, MATERIAL_ECO_LABEL, faseFinalCamisas, faseFinalEco, totalCamisas, m2Eco, ecoEsPorM2Manual } from "../state.js";
 import { guardarMetas } from "../api.js";
 import { fmt } from "../utils.js";
 
@@ -42,7 +42,7 @@ export function calcularProgreso() {
   });
   state.ecoSolvente.forEach((e) => {
     if (e.estado !== finalEco || !e.fechaEstado) return;
-    if ((e.tipoTrabajo || "impresion") === "stickers") return;
+    if (ecoEsPorM2Manual(e)) return;
     const m = e.material || "banner";
     const a = m2Eco(e);
     if (mismaSemana(e.fechaEstado, hoy)) matSem[m] += a;

@@ -9,7 +9,7 @@ import {
   totalExtrasEco,
   totalEco,
 } from "../state.js";
-import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos } from "../utils.js";
+import { money, fmt, toInputDate, fechaInputToISO, renderHistorialAbonos, marcarCampo, enfocarPrimerInvalido } from "../utils.js";
 import { crearEco, actualizarEco, eliminarAbono } from "../api.js";
 import { render } from "../render.js";
 
@@ -68,20 +68,22 @@ function leerFormComoEco() {
   };
 }
 
-// Muestra/oculta campos según Impresión vs Stickers.
+// Muestra/oculta campos según el tipo de trabajo. Stickers y Vinil Tornasol
+// usan el mismo flujo simple: m² directo + diseño (sin material ni otros extras).
 function actualizarUITipoTrabajo() {
-  const esStickers = campoTipoTrabajo.value === "stickers";
+  const tipo = campoTipoTrabajo.value;
+  const porM2 = tipo === "stickers" || tipo === "vinil_tornasol";
   seccionesImpresion.forEach((el) => {
-    if (el) el.style.display = esStickers ? "none" : "";
+    if (el) el.style.display = porM2 ? "none" : "";
   });
-  document.getElementById("ecoCampoAncho").style.display = esStickers ? "none" : "";
-  document.getElementById("ecoCampoAlto").style.display = esStickers ? "none" : "";
-  document.getElementById("ecoCampoM2Manual").style.display = esStickers ? "" : "none";
+  document.getElementById("ecoCampoAncho").style.display = porM2 ? "none" : "";
+  document.getElementById("ecoCampoAlto").style.display = porM2 ? "none" : "";
+  document.getElementById("ecoCampoM2Manual").style.display = porM2 ? "" : "none";
   // Deshabilitar los campos ocultos para que no bloqueen el guardado por
   // validación HTML (un campo oculto con valor fuera de rango no es "focusable").
-  document.getElementById("ecoAncho").disabled = esStickers;
-  document.getElementById("ecoAlto").disabled = esStickers;
-  document.getElementById("ecoM2Manual").disabled = !esStickers;
+  document.getElementById("ecoAncho").disabled = porM2;
+  document.getElementById("ecoAlto").disabled = porM2;
+  document.getElementById("ecoM2Manual").disabled = !porM2;
   actualizarUIExtras();
 }
 
@@ -206,35 +208,29 @@ function cerrarModalEco() {
 formEco.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const cliente = document.getElementById("ecoCliente").value.trim();
-  if (!cliente) {
-    alert("El nombre del cliente es obligatorio.");
-    return;
-  }
-  const fechaInput = document.getElementById("ecoFecha").value;
-  if (!fechaInput) {
-    alert("La fecha del pedido es obligatoria.");
-    return;
-  }
-  const esStickers = campoTipoTrabajo.value === "stickers";
-  const precioM2 = Number(document.getElementById("ecoPrecioM2").value);
-  if (isNaN(precioM2) || precioM2 < 0) {
-    alert("El precio por m² no puede ser negativo.");
-    return;
-  }
-  if (esStickers) {
-    const m2 = Number(campoM2Manual.value);
-    if (!m2 || m2 <= 0) {
-      alert("Indica cuántos m² de stickers (mayor a 0).");
-      return;
-    }
+  const clienteEl = document.getElementById("ecoCliente");
+  const fechaEl = document.getElementById("ecoFecha");
+  const precioEl = document.getElementById("ecoPrecioM2");
+  const anchoEl = document.getElementById("ecoAncho");
+  const altoEl = document.getElementById("ecoAlto");
+  const cliente = clienteEl.value.trim();
+  const fechaInput = fechaEl.value;
+  const porM2 = campoTipoTrabajo.value === "stickers" || campoTipoTrabajo.value === "vinil_tornasol";
+  const precioM2 = Number(precioEl.value);
+
+  let valido = true;
+  valido = marcarCampo(clienteEl, !!cliente) && valido;
+  valido = marcarCampo(fechaEl, !!fechaInput) && valido;
+  valido = marcarCampo(precioEl, !isNaN(precioM2) && precioM2 >= 0) && valido;
+  if (porM2) {
+    valido = marcarCampo(campoM2Manual, Number(campoM2Manual.value) > 0) && valido;
   } else {
-    const ancho = Number(document.getElementById("ecoAncho").value);
-    const alto = Number(document.getElementById("ecoAlto").value);
-    if (!ancho || ancho <= 0 || !alto || alto <= 0) {
-      alert("Revisa ancho y alto (mayores a 0).");
-      return;
-    }
+    valido = marcarCampo(anchoEl, Number(anchoEl.value) > 0) && valido;
+    valido = marcarCampo(altoEl, Number(altoEl.value) > 0) && valido;
+  }
+  if (!valido) {
+    enfocarPrimerInvalido(formEco);
+    return;
   }
 
   const borrador = leerFormComoEco();

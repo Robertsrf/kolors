@@ -171,6 +171,23 @@ create table if not exists tableros_config (
 insert into tableros_config (id) values (1) on conflict (id) do nothing;
 
 -- ============================================================
+-- METAS DE PRODUCCIÓN (las fijan admin y jefe; todos las ven)
+-- ============================================================
+create table if not exists metas_config (
+  id int primary key default 1,
+  data jsonb not null default '{}'::jsonb,
+  constraint metas_singleton check (id = 1)
+);
+insert into metas_config (id, data) values (1, '{}'::jsonb) on conflict (id) do nothing;
+alter table metas_config enable row level security;
+drop policy if exists "metas_leer" on metas_config;
+drop policy if exists "metas_escribir" on metas_config;
+create policy "metas_leer" on metas_config for select to authenticated using (true);
+create policy "metas_escribir" on metas_config for all to authenticated
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+
+-- ============================================================
 -- NOTAS COMPARTIDAS + CHAT DEL EQUIPO
 -- ============================================================
 create table if not exists notas_config (
@@ -262,7 +279,7 @@ end $$;
 do $$
 begin
   begin
-    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, tableros_config, notas_config, mensajes, logs;
+    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, tableros_config, metas_config, notas_config, mensajes, logs;
   exception when duplicate_object then
     null;
   end;

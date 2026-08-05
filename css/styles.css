@@ -878,6 +878,47 @@ body.rol-jefe .no-jefe { display: none !important; }
 .fase-row .fase-color { width: 42px; min-width: 42px; height: 40px; padding: 2px; cursor: pointer; }
 .fase-row .fase-nombre { flex: 1; }
 
+/* === METAS === */
+.metas-acciones { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.metas-bloque { margin-bottom: 22px; }
+.metas-bloque h4 { margin: 0 0 12px; font-size: 14px; }
+.meta-item { margin-bottom: 14px; }
+.meta-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; margin-bottom: 5px; gap: 8px; }
+.meta-label { font-weight: 700; }
+.meta-cifra { color: var(--text-soft); font-weight: 700; white-space: nowrap; }
+.meta-barra { height: 14px; background: var(--surface-alt); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+.meta-relleno {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .5s ease;
+}
+.meta-item.cumplida .meta-relleno { background: linear-gradient(90deg, #34d399, #10b981); }
+.meta-item.cumplida .meta-cifra { color: #178a43; }
+.meta-edit-row { display: grid; grid-template-columns: 1fr 90px 90px; gap: 8px; align-items: center; margin-bottom: 8px; font-size: 13px; }
+.meta-edit-head { font-size: 11px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; text-align: center; }
+.meta-edit-head span:first-child { text-align: left; }
+
+/* === LOGROS === */
+.logros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+.logro {
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  background: var(--surface-alt);
+  opacity: .6;
+  position: relative;
+}
+.logro.desbloqueado { opacity: 1; background: var(--surface); border-color: #ffe08a; box-shadow: 0 4px 12px rgba(251,191,36,.18); }
+.logro .ic { font-size: 26px; }
+.logro .nom { font-size: 12px; font-weight: 800; margin-top: 4px; }
+.logro .desc { font-size: 10.5px; color: var(--text-soft); margin-top: 2px; }
+.logro .prog { font-size: 10px; color: var(--text-soft); margin-top: 6px; }
+.logro .mini-barra { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; margin-top: 5px; }
+.logro .mini-relleno { height: 100%; background: linear-gradient(90deg,#fbbf24,#f59e0b); }
+.logros-resumen { font-size: 14px; font-weight: 800; text-align: center; margin: 6px 0 4px; }
+
 /* === LOG DE CAMBIOS === */
 /* La pestaña Log solo la ven admin y jefe (y nunca antes de iniciar sesión) */
 body:not(.rol-admin):not(.rol-jefe) .solo-admin-jefe { display: none !important; }

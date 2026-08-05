@@ -274,6 +274,8 @@
 
 <!-- === HERRAMIENTAS (launcher izquierdo) === -->
 <div class="tools-launcher">
+  <button type="button" class="fab-tool" id="btnMetas" title="Metas de producción">🎯</button>
+  <button type="button" class="fab-tool" id="btnLogros" title="Logros">🏆</button>
   <button type="button" class="fab-tool" id="btnCalendario" title="Calendario de entregas">📅</button>
   <button type="button" class="fab-tool" id="btnCalculadora" title="Calculadora">🧮</button>
   <button type="button" class="fab-tool" id="btnNotas" title="Notas compartidas">📝</button>
@@ -334,6 +336,48 @@
       <input type="text" id="chatInput" placeholder="Escribe un mensaje..." autocomplete="off">
       <button type="submit" class="neu-btn primary">Enviar</button>
     </form>
+  </div>
+</div>
+
+<!-- === MODAL METAS (panel) === -->
+<div class="modal-overlay panel-izq" id="modalMetasOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>🎯 Metas de producción</h2>
+      <button class="neu-btn icon" id="btnCerrarMetas">✕</button>
+    </div>
+    <div class="metas-acciones">
+      <button type="button" class="neu-btn small solo-admin-jefe" id="btnEditarMetas">✏️ Editar metas</button>
+    </div>
+    <div id="metasContenido"></div>
+  </div>
+</div>
+
+<!-- === MODAL EDITAR METAS === -->
+<div class="modal-overlay" id="modalEditarMetasOverlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <h2>✏️ Editar metas</h2>
+      <button class="neu-btn icon" id="btnCerrarEditarMetas">✕</button>
+    </div>
+    <p class="abono-contexto">Escribe la cantidad objetivo por semana y por mes. Deja en 0 las que no quieras mostrar. Cuentan los pedidos que llegan a la fase final (entregado).</p>
+    <div id="editarMetasCampos"></div>
+    <div class="modal-footer">
+      <button type="button" class="neu-btn" id="btnCancelarEditarMetas">Cancelar</button>
+      <button type="button" class="neu-btn primary" id="btnGuardarMetas">Guardar metas</button>
+    </div>
+  </div>
+</div>
+
+<!-- === MODAL LOGROS (panel) === -->
+<div class="modal-overlay panel-izq" id="modalLogrosOverlay">
+  <div class="modal panel-modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2>🏆 Logros del año</h2>
+      <button class="neu-btn icon" id="btnCerrarLogros">✕</button>
+    </div>
+    <div id="logrosResumen"></div>
+    <div class="logros-grid" id="logrosGrid"></div>
   </div>
 </div>
 

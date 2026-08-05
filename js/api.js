@@ -1,5 +1,5 @@
 import { supabase } from "./supabaseClient.js";
-import { state, migrarPrecios, FASES_CAMISAS_DEFECTO, FASES_ECO_DEFECTO } from "./state.js";
+import { state, migrarPrecios, FASES_CAMISAS_DEFECTO, FASES_ECO_DEFECTO, normalizarMetas } from "./state.js";
 import { getUsuarioActual } from "./auth.js";
 
 // ============================================================
@@ -244,6 +244,22 @@ export async function guardarFasesTablero(cual, fases) {
   registrarLog("Sistema", `Configuró las secciones del tablero de ${cual === "eco" ? "eco solvente" : "camisas"}`);
 }
 
+async function cargarMetas() {
+  const { data: row, error } = await supabase.from("metas_config").select("*").eq("id", 1).maybeSingle();
+  if (error) {
+    state.metas = normalizarMetas(null);
+    return;
+  }
+  state.metas = normalizarMetas(row ? row.data : null);
+}
+
+export async function guardarMetas(metas) {
+  const { error } = await supabase.from("metas_config").upsert({ id: 1, data: metas });
+  if (error) throw error;
+  state.metas = normalizarMetas(metas);
+  registrarLog("Sistema", "Actualizó las metas de producción");
+}
+
 const CARGADORES = {
   pedidos: cargarPedidos,
   pedido_items: cargarPedidos,
@@ -255,6 +271,7 @@ const CARGADORES = {
   },
   precios_config: cargarPrecios,
   tableros_config: cargarTablerosConfig,
+  metas_config: cargarMetas,
 };
 
 export async function cargarTodo() {
@@ -265,6 +282,7 @@ export async function cargarTodo() {
     cargarPerdidas(),
     cargarPrecios(),
     cargarTablerosConfig(),
+    cargarMetas(),
   ]);
 }
 

@@ -7,6 +7,7 @@ import { renderPerdidasList } from "./ui/perdidas.js";
 import { renderClientesGrid, abrirDetalleCliente, getClienteSeleccionado } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
 import { refrescarNotificaciones } from "./ui/notificaciones.js";
+import { renderMetas } from "./ui/metas.js";
 
 function actualizarListaClientes() {
   const nombres = new Set();
@@ -30,6 +31,7 @@ export function render() {
   renderBoard();
   actualizarListaClientes();
   refrescarNotificaciones();
+  if (document.getElementById("modalMetasOverlay").classList.contains("active")) renderMetas();
   const activeTab = document.querySelector(".tab-btn.active");
   const tab = activeTab ? activeTab.dataset.tab : "tablero";
   if (tab === "stats") renderStats();

@@ -26,6 +26,27 @@ export const MATERIAL_ECO_LABEL = {
   papel_bond: "Papel Bond",
   clear: "Clear",
 };
+export const MATERIALES_ECO = ["vinil", "banner", "vinil_tornasol", "papel_bond", "clear"];
+
+// Metas de producción (objetivos por semana y por mes)
+export function metasVacias() {
+  const materiales = {};
+  MATERIALES_ECO.forEach((m) => (materiales[m] = { semana: 0, mes: 0 }));
+  return { camisasSemana: 0, camisasMes: 0, materiales };
+}
+export function normalizarMetas(data) {
+  const base = metasVacias();
+  if (!data || typeof data !== "object") return base;
+  base.camisasSemana = Number(data.camisasSemana) || 0;
+  base.camisasMes = Number(data.camisasMes) || 0;
+  if (data.materiales) {
+    MATERIALES_ECO.forEach((m) => {
+      const v = data.materiales[m] || {};
+      base.materiales[m] = { semana: Number(v.semana) || 0, mes: Number(v.mes) || 0 };
+    });
+  }
+  return base;
+}
 export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers" };
 
 // Fases por defecto de cada tablero (id estable = valor de `estado` guardado)
@@ -71,6 +92,7 @@ export const state = {
   logs: [],
   fasesCamisas: FASES_CAMISAS_DEFECTO.map((f) => ({ ...f })),
   fasesEco: FASES_ECO_DEFECTO.map((f) => ({ ...f })),
+  metas: metasVacias(),
 };
 
 // === FASES DINÁMICAS (configurables) ===

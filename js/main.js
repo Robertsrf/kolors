@@ -10,6 +10,8 @@ import { renderPerdidasList } from "./ui/perdidas.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
 import "./modales/fases.js";
+import "./ui/metas.js";
+import "./ui/logros.js";
 import "./ui/notificaciones.js";
 import "./ui/calendario.js";
 import "./ui/calculadora.js";

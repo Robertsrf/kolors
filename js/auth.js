@@ -20,6 +20,7 @@ const CUENTAS = [
   { email: "jefe@kolors.app", rol: "jefe" },
   { email: "maria@kolors.app", rol: "editor" },
   { email: "mia@kolors.app", rol: "editor" },
+  { email: "dariana@kolors.app", rol: "editor" },
 ];
 
 function rolPorEmail(email) {
@@ -32,6 +33,7 @@ const NOMBRE_POR_EMAIL = {
   "jefe@kolors.app": "Jefe",
   "maria@kolors.app": "María",
   "mia@kolors.app": "Mía",
+  "dariana@kolors.app": "Dariana",
 };
 
 let usuarioSesion = null;

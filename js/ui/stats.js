@@ -216,6 +216,20 @@ export function renderStats() {
   const m2Stickers = state.ecoSolvente.filter((e) => e.tipoTrabajo === "stickers").reduce((s, e) => s + m2Eco(e), 0);
   renderChartEcoTipoTrabajo(["🖨️ Impresión", "🏷️ Stickers"], [Number(m2Impresiones.toFixed(2)), Number(m2Stickers.toFixed(2))]);
 
+  // === Producción por semana y por mes (dinero facturado) ===
+  const semanas = ultimasSemanas(8);
+  const meses = ultimosMeses(6);
+  const fPed = (p) => p.fechaInicio || (p.fechas && p.fechas.pedido) || p.creado;
+  const fImp = (i) => i.fechaInicio || i.fecha || i.creado;
+  const fEco = (e) => e.fechaInicio || e.fecha || e.creado;
+
+  renderChartBarras("chartCamisasSemana", semanas.map(etiquetaSemana), dineroPorPeriodo(state.pedidos, fPed, totalPedidoMonto, semanas, claveSemana), "#ff5c8a");
+  renderChartBarras("chartCamisasMes", meses.map(etiquetaMes), dineroPorPeriodo(state.pedidos, fPed, totalPedidoMonto, meses, claveMes), "#ff5c8a");
+  renderChartBarras("chartSublimacionSemana", semanas.map(etiquetaSemana), dineroPorPeriodo(state.impresiones, fImp, totalImpresion, semanas, claveSemana), "#a78bfa");
+  renderChartBarras("chartSublimacionMes", meses.map(etiquetaMes), dineroPorPeriodo(state.impresiones, fImp, totalImpresion, meses, claveMes), "#a78bfa");
+  renderChartBarras("chartEcoSemana", semanas.map(etiquetaSemana), dineroPorPeriodo(state.ecoSolvente, fEco, totalEco, semanas, claveSemana), "#14b8a6");
+  renderChartBarras("chartEcoMes", meses.map(etiquetaMes), dineroPorPeriodo(state.ecoSolvente, fEco, totalEco, meses, claveMes), "#14b8a6");
+
   // === Pérdidas y pruebas ===
   const m2TotalPerdidas = state.perdidas.reduce((s, p) => s + m2Perdida(p), 0);
   const totalPerdidas = state.perdidas.reduce((s, p) => s + totalPerdida(p), 0);
@@ -237,6 +251,55 @@ const chartInstances = {};
 const CHART_FONT = "-apple-system, 'Segoe UI', Roboto, sans-serif";
 Chart.defaults.font.family = CHART_FONT;
 Chart.defaults.color = "#94a0b8";
+
+// === Helpers de periodos (semanas / meses) ===
+function inicioSemana(d) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = (x.getDay() + 6) % 7; // 0 = lunes
+  x.setDate(x.getDate() - dow);
+  return x;
+}
+function claveSemana(d) {
+  const s = inicioSemana(d);
+  return `${s.getFullYear()}-${s.getMonth()}-${s.getDate()}`;
+}
+function ultimasSemanas(n) {
+  const base = inicioSemana(new Date());
+  const arr = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const s = new Date(base);
+    s.setDate(s.getDate() - i * 7);
+    arr.push(s);
+  }
+  return arr;
+}
+function etiquetaSemana(s) {
+  return `${String(s.getDate()).padStart(2, "0")}/${String(s.getMonth() + 1).padStart(2, "0")}`;
+}
+function claveMes(d) {
+  return `${d.getFullYear()}-${d.getMonth()}`;
+}
+function ultimosMeses(n) {
+  const hoy = new Date();
+  const arr = [];
+  for (let i = n - 1; i >= 0; i--) arr.push(new Date(hoy.getFullYear(), hoy.getMonth() - i, 1));
+  return arr;
+}
+const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+function etiquetaMes(m) {
+  return `${MESES_CORTOS[m.getMonth()]} ${String(m.getFullYear()).slice(2)}`;
+}
+function dineroPorPeriodo(items, fechaFn, totalFn, buckets, claveFn) {
+  const map = {};
+  buckets.forEach((b) => (map[claveFn(b)] = 0));
+  items.forEach((it) => {
+    const f = fechaFn(it);
+    if (!f) return;
+    const k = claveFn(new Date(f));
+    if (k in map) map[k] += totalFn(it);
+  });
+  return buckets.map((b) => Number(map[claveFn(b)].toFixed(2)));
+}
 
 function pintarChart(canvasId, config) {
   const canvas = document.getElementById(canvasId);
@@ -344,6 +407,22 @@ function renderChartEcoCliente(labels, data) {
       scales: {
         x: { beginAtZero: true, grid: { color: "#eef0f8" } },
         y: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function renderChartBarras(canvasId, labels, data, color) {
+  pintarChart(canvasId, {
+    type: "bar",
+    data: { labels, datasets: [{ label: "$", data, backgroundColor: color, borderRadius: 6, maxBarThickness: 34 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => money(ctx.raw) } } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, grid: { color: "#eef0f8" }, ticks: { callback: (v) => "$" + v } },
       },
     },
   });

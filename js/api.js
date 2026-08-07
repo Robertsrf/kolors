@@ -116,6 +116,8 @@ function ecoFromRow(row, pagos) {
     material: row.material || "banner",
     tipoTrabajo: row.tipo_trabajo || "impresion",
     m2Manual: Number(row.m2_manual || 0),
+    cantidadImpresiones: Number(row.cantidad_impresiones || 0),
+    costoImpresion: Number(row.costo_impresion || 0),
     estado: row.estado || "Pedido",
     fechas: {
       pedido: row.fecha_pedido,
@@ -521,7 +523,7 @@ export async function eliminarImpresion(id) {
 // ECO SOLVENTE
 // ============================================================
 export async function crearEco(datos) {
-  const { error } = await supabase.from("eco_solvente").insert({
+  const { data: row, error } = await supabase.from("eco_solvente").insert({
     cliente: datos.cliente,
     fecha: datos.fecha,
     ancho: datos.ancho,
@@ -554,8 +556,16 @@ export async function crearEco(datos) {
     pvc_modo: datos.pvcModo,
     pvc_costo: datos.pvcCosto,
     pvc_precio_m2: datos.pvcPrecioM2,
-  });
+  }).select("id").single();
   if (error) throw error;
+  // Columnas de Papel Bond en un update aparte: si falta la migración, el resto
+  // del pedido igual se crea (solo el papel bond necesita esas columnas).
+  if (row && row.id) {
+    await supabase
+      .from("eco_solvente")
+      .update({ cantidad_impresiones: datos.cantidadImpresiones || 0, costo_impresion: datos.costoImpresion || 0 })
+      .eq("id", row.id);
+  }
   registrarLog("Eco Solvente", `Creó un pedido eco solvente de "${datos.cliente}"`);
   await cargarEcoSolvente();
 }
@@ -597,6 +607,10 @@ export async function actualizarEco(id, datos) {
     })
     .eq("id", id);
   if (error) throw error;
+  await supabase
+    .from("eco_solvente")
+    .update({ cantidad_impresiones: datos.cantidadImpresiones || 0, costo_impresion: datos.costoImpresion || 0 })
+    .eq("id", id);
   registrarLog("Eco Solvente", `Editó un pedido eco solvente de "${datos.cliente}"`);
   await cargarEcoSolvente();
 }
@@ -800,6 +814,8 @@ export async function importarRespaldoAntiguo({ pedidos, impresiones, ecoSolvent
         material: eco.material || "banner",
         tipo_trabajo: eco.tipoTrabajo || "impresion",
         m2_manual: eco.m2Manual || 0,
+        cantidad_impresiones: eco.cantidadImpresiones || 0,
+        costo_impresion: eco.costoImpresion || 0,
         estado: eco.estado || "Pedido",
         fecha_pedido: (eco.fechas && eco.fechas.pedido) || eco.fecha || eco.creado || new Date().toISOString(),
         fecha_diseno: (eco.fechas && eco.fechas.diseno) || null,

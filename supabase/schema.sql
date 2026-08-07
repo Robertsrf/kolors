@@ -68,8 +68,10 @@ create table if not exists eco_solvente (
   descripcion text,
   abono numeric not null default 0,
   material text not null default 'banner',       -- 'vinil' | 'banner' | 'vinil_tornasol' | 'papel_bond' | 'clear'
-  tipo_trabajo text not null default 'impresion', -- 'impresion' | 'stickers'
-  m2_manual numeric not null default 0,          -- m² directo cuando es 'stickers'
+  tipo_trabajo text not null default 'impresion', -- 'impresion' | 'stickers' | 'vinil_tornasol' | 'papel_bond'
+  m2_manual numeric not null default 0,          -- m² directo (stickers / vinil tornasol)
+  cantidad_impresiones numeric not null default 0, -- cantidad (papel bond)
+  costo_impresion numeric not null default 0,      -- costo por impresión (papel bond)
 
   -- flujo del tablero: Pedido -> Diseño -> Impresión -> Acabado -> Entregado
   estado text not null default 'Pedido',

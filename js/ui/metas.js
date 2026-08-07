@@ -1,4 +1,4 @@
-import { state, MATERIALES_ECO, MATERIAL_ECO_LABEL, faseFinalCamisas, faseFinalEco, totalCamisas, m2Eco, ecoEsPorM2Manual } from "../state.js";
+import { state, MATERIALES_ECO, MATERIAL_ECO_LABEL, faseFinalCamisas, faseFinalEco, totalCamisas, m2Eco, ecoEsSimple } from "../state.js";
 import { guardarMetas } from "../api.js";
 import { fmt } from "../utils.js";
 
@@ -40,15 +40,22 @@ export function calcularProgreso() {
     matSem[m] = 0;
     matMes[m] = 0;
   });
+  let stickSem = 0;
+  let stickMes = 0;
   state.ecoSolvente.forEach((e) => {
     if (e.estado !== finalEco || !e.fechaEstado) return;
-    if (ecoEsPorM2Manual(e)) return;
-    const m = e.material || "banner";
     const a = m2Eco(e);
+    if (e.tipoTrabajo === "stickers") {
+      if (mismaSemana(e.fechaEstado, hoy)) stickSem += a;
+      if (mismoMes(e.fechaEstado, hoy)) stickMes += a;
+      return;
+    }
+    if (ecoEsSimple(e)) return; // vinil tornasol / papel bond: sin meta por material
+    const m = e.material || "banner";
     if (mismaSemana(e.fechaEstado, hoy)) matSem[m] += a;
     if (mismoMes(e.fechaEstado, hoy)) matMes[m] += a;
   });
-  return { camSem, camMes, matSem, matMes };
+  return { camSem, camMes, matSem, matMes, stickSem, stickMes };
 }
 
 function barra(label, actual, meta, unidad) {
@@ -63,9 +70,10 @@ function barra(label, actual, meta, unidad) {
   </div>`;
 }
 
-function bloque(titulo, metasCam, actualCam, matMetaKey, matActual) {
+function bloque(titulo, metasCam, actualCam, metasStick, actualStick, matMetaKey, matActual) {
   const items = [];
   if (metasCam > 0) items.push(barra("👕 Camisas", actualCam, metasCam, "cam."));
+  if (metasStick > 0) items.push(barra("🏷️ Stickers", actualStick, metasStick, "m²"));
   MATERIALES_ECO.forEach((m) => {
     const meta = state.metas.materiales[m][matMetaKey];
     if (meta > 0) items.push(barra("📄 " + MATERIAL_ECO_LABEL[m], matActual[m], meta, "m²"));
@@ -77,8 +85,8 @@ function bloque(titulo, metasCam, actualCam, matMetaKey, matActual) {
 export function renderMetas() {
   const p = calcularProgreso();
   const m = state.metas;
-  const semana = bloque("📅 Esta semana", m.camisasSemana, p.camSem, "semana", p.matSem);
-  const mes = bloque("🗓️ Este mes", m.camisasMes, p.camMes, "mes", p.matMes);
+  const semana = bloque("📅 Esta semana", m.camisasSemana, p.camSem, m.stickersSemana, p.stickSem, "semana", p.matSem);
+  const mes = bloque("🗓️ Este mes", m.camisasMes, p.camMes, m.stickersMes, p.stickMes, "mes", p.matMes);
   contenido.innerHTML =
     semana + mes || `<div class="empty-state">Todavía no hay metas configuradas.<br>El admin o el jefe pueden establecerlas con "✏️ Editar metas".</div>`;
 }
@@ -92,6 +100,11 @@ function renderCamposEditar() {
       <span>👕 Camisas</span>
       <input type="number" min="0" step="1" id="metaCamSemana" value="${m.camisasSemana || 0}">
       <input type="number" min="0" step="1" id="metaCamMes" value="${m.camisasMes || 0}">
+    </div>
+    <div class="meta-edit-row">
+      <span>🏷️ Stickers (m²)</span>
+      <input type="number" min="0" step="0.01" id="metaStickSemana" value="${m.stickersSemana || 0}">
+      <input type="number" min="0" step="0.01" id="metaStickMes" value="${m.stickersMes || 0}">
     </div>`;
   MATERIALES_ECO.forEach((mat) => {
     html += `<div class="meta-edit-row">
@@ -115,6 +128,8 @@ async function guardar() {
   const nuevas = {
     camisasSemana: Number(document.getElementById("metaCamSemana").value) || 0,
     camisasMes: Number(document.getElementById("metaCamMes").value) || 0,
+    stickersSemana: Number(document.getElementById("metaStickSemana").value) || 0,
+    stickersMes: Number(document.getElementById("metaStickMes").value) || 0,
     materiales: {},
   };
   MATERIALES_ECO.forEach((mat) => (nuevas.materiales[mat] = { semana: 0, mes: 0 }));

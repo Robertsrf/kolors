@@ -22,22 +22,23 @@ export const REMATE_LABEL = { ninguno: "Sin remate", palos: "🪵 Palos", tubos:
 export const MATERIAL_ECO_LABEL = {
   vinil: "Vinil",
   banner: "Banner",
-  papel_bond: "Papel Bond",
   clear: "Clear",
 };
-export const MATERIALES_ECO = ["vinil", "banner", "papel_bond", "clear"];
+export const MATERIALES_ECO = ["vinil", "banner", "clear"];
 
 // Metas de producción (objetivos por semana y por mes)
 export function metasVacias() {
   const materiales = {};
   MATERIALES_ECO.forEach((m) => (materiales[m] = { semana: 0, mes: 0 }));
-  return { camisasSemana: 0, camisasMes: 0, materiales };
+  return { camisasSemana: 0, camisasMes: 0, stickersSemana: 0, stickersMes: 0, materiales };
 }
 export function normalizarMetas(data) {
   const base = metasVacias();
   if (!data || typeof data !== "object") return base;
   base.camisasSemana = Number(data.camisasSemana) || 0;
   base.camisasMes = Number(data.camisasMes) || 0;
+  base.stickersSemana = Number(data.stickersSemana) || 0;
+  base.stickersMes = Number(data.stickersMes) || 0;
   if (data.materiales) {
     MATERIALES_ECO.forEach((m) => {
       const v = data.materiales[m] || {};
@@ -46,11 +47,24 @@ export function normalizarMetas(data) {
   }
   return base;
 }
-export const TIPO_TRABAJO_ECO_LABEL = { impresion: "🖨️ Impresión", stickers: "🏷️ Stickers", vinil_tornasol: "🌈 Vinil Tornasol" };
+export const TIPO_TRABAJO_ECO_LABEL = {
+  impresion: "🖨️ Impresión",
+  stickers: "🏷️ Stickers",
+  vinil_tornasol: "🌈 Vinil Tornasol",
+  papel_bond: "📃 Papel Bond",
+};
 
-// Los stickers y el vinil tornasol se cargan por m² directo (mismo flujo: m² + diseño).
+// Los stickers y el vinil tornasol se cargan por m² directo (m² + diseño).
 export function ecoEsPorM2Manual(eco) {
   return eco.tipoTrabajo === "stickers" || eco.tipoTrabajo === "vinil_tornasol";
+}
+// El papel bond se cobra por cantidad de impresiones × costo por impresión (no m²).
+export function ecoEsPapelBond(eco) {
+  return eco.tipoTrabajo === "papel_bond";
+}
+// "Simples": no llevan material ni extras salvo diseño (stickers, tornasol, papel bond).
+export function ecoEsSimple(eco) {
+  return ecoEsPorM2Manual(eco) || ecoEsPapelBond(eco);
 }
 
 // Fases por defecto de cada tablero (id estable = valor de `estado` guardado)
@@ -191,10 +205,12 @@ export function historialPagosImpresion(imp) {
 
 // === CÁLCULOS DERIVADOS · ECO SOLVENTE ===
 export function m2Eco(eco) {
+  if (ecoEsPapelBond(eco)) return 0; // se mide en impresiones, no en m²
   if (ecoEsPorM2Manual(eco)) return Number(eco.m2Manual) || 0;
   return Number(eco.ancho) * Number(eco.alto);
 }
 export function baseEco(eco) {
+  if (ecoEsPapelBond(eco)) return redondear2((Number(eco.cantidadImpresiones) || 0) * (Number(eco.costoImpresion) || 0));
   return redondear2(m2Eco(eco) * Number(eco.precioM2));
 }
 export function costoClearEco(eco) {
@@ -225,8 +241,8 @@ export function costoCuadroMaderaEco(eco) {
   return eco.llevaCuadroMadera ? redondear2(Number(eco.cuadroMaderaCosto || 0)) : 0;
 }
 export function totalExtrasEco(eco) {
-  // Stickers y vinil tornasol solo pueden llevar diseño como extra.
-  if (ecoEsPorM2Manual(eco)) return costoDisenoEco(eco);
+  // Los tipos simples (stickers, vinil tornasol, papel bond) solo llevan diseño.
+  if (ecoEsSimple(eco)) return costoDisenoEco(eco);
   return redondear2(
     costoRemateEco(eco) +
       costoDisenoEco(eco) +

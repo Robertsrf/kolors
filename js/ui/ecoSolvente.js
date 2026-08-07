@@ -5,6 +5,8 @@ import {
   MATERIAL_ECO_LABEL,
   TIPO_TRABAJO_ECO_LABEL,
   ecoEsPorM2Manual,
+  ecoEsSimple,
+  ecoEsPapelBond,
   m2Eco,
   totalExtrasEco,
   totalEco,
@@ -23,7 +25,7 @@ let filtroPagoEco = "todos";
 
 function badgesExtras(eco) {
   const badges = [];
-  if (ecoEsPorM2Manual(eco)) {
+  if (ecoEsSimple(eco)) {
     badges.push(TIPO_TRABAJO_ECO_LABEL[eco.tipoTrabajo] || "🏷️ Stickers");
     if (eco.llevaDiseno) badges.push("🎨 Diseño");
     return `<div class="impresion-extras">${badges.map((b) => `<span class="badge">${b}</span>`).join("")}</div>`;
@@ -137,7 +139,11 @@ function renderEcoCard(eco) {
     <div class="card-top">
       <div>
         <div class="card-cliente">${escapeHtml(eco.cliente)}</div>
-        <div class="card-tel">📐 ${fmt(m2)} m²${ecoEsPorM2Manual(eco) ? "" : ` (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`}</div>
+        <div class="card-tel">${
+          ecoEsPapelBond(eco)
+            ? `🖨️ ${fmt(eco.cantidadImpresiones)} impresión(es) × ${money(eco.costoImpresion)}`
+            : `📐 ${fmt(m2)} m²${ecoEsPorM2Manual(eco) ? "" : ` (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`}`
+        }</div>
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>

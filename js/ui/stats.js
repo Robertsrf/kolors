@@ -6,7 +6,7 @@ import {
   REMATE_LABEL,
   MATERIAL_ECO_LABEL,
   MATERIALES_ECO,
-  ecoEsPorM2Manual,
+  ecoEsSimple,
   totalCamisas,
   totalPedidoMonto,
   totalAbonadoPedido,
@@ -203,7 +203,7 @@ export function renderStats() {
   const m2PorMaterial = {};
   MATERIALES_ECO.forEach((m) => (m2PorMaterial[m] = 0));
   state.ecoSolvente.forEach((e) => {
-    if (ecoEsPorM2Manual(e)) return;
+    if (ecoEsSimple(e)) return;
     const m = e.material || "banner";
     if (m in m2PorMaterial) m2PorMaterial[m] += m2Eco(e);
   });

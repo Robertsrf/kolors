@@ -1,5 +1,5 @@
 import { state, TIPO_IMPRESION_LABEL, impresionCobraDinero, m2Impresion, totalImpresion, saldoImpresion, estaPagadaImpresion } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, compararPorEntrega } from "../utils.js";
 import { eliminarImpresion as apiEliminarImpresion } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -19,7 +19,7 @@ export function renderImpresionesList() {
       if (filtroPagoImpresiones === "pagado") return estaPagadaImpresion(i);
       return true;
     })
-    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    .sort(compararPorEntrega);
 
   if (visibles.length === 0) {
     el.innerHTML = `<div class="empty-state">Todavía no hay impresiones registradas.</div>`;

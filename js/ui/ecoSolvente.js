@@ -14,7 +14,7 @@ import {
   estaPagadoEco,
   fechaFaseActualEco,
 } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega } from "../utils.js";
 import { actualizarFaseEco, eliminarEco as apiEliminarEco } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -60,7 +60,7 @@ export function renderEcoBoard() {
   fases.forEach((fase, colIdx) => {
     const enFase = visibles
       .filter((e) => (e.estado || "Pedido") === fase.id || (colIdx === 0 && !idsConocidos.has(e.estado || "Pedido")))
-      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      .sort(compararPorEntrega);
     const m2Fase = enFase.reduce((s, e) => s + m2Eco(e), 0);
 
     const col = document.createElement("div");

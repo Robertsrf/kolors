@@ -7,7 +7,7 @@ import {
   estaPagado,
   fechaFaseActual,
 } from "../state.js";
-import { money, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero } from "../utils.js";
+import { money, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega } from "../utils.js";
 import { actualizarFasePedido, eliminarPedido as apiEliminarPedido } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -34,7 +34,9 @@ export function renderBoard() {
 
   fases.forEach((fase, colIdx) => {
     // Los pedidos con una fase desconocida (renombrada/borrada) caen en la 1ra columna.
-    const enFase = visibles.filter((p) => p.estado === fase.id || (colIdx === 0 && !idsConocidos.has(p.estado)));
+    const enFase = visibles
+      .filter((p) => p.estado === fase.id || (colIdx === 0 && !idsConocidos.has(p.estado)))
+      .sort(compararPorEntrega);
     const totalCamisasFase = enFase.reduce((s, p) => s + totalCamisas(p), 0);
 
     const col = document.createElement("div");

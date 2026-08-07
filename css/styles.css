@@ -82,6 +82,10 @@ body {
   font-size: 15px;
   line-height: 1;
   border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 .neu-btn.small { padding: 7px 12px; font-size: 12px; }
 .neu-btn.danger { color: #ef4770; border-color: #ffd7e2; }

@@ -10,6 +10,17 @@ export function money(n) {
   return MONEDA + fmtMoneda.format(n || 0);
 }
 
+// Ordena por fecha de entrega ascendente (los más próximos arriba). Los que no
+// tienen fecha de entrega quedan al final, y entre iguales, los más recientes primero.
+export function compararPorEntrega(a, b) {
+  const fa = a.fechaEntrega ? new Date(a.fechaEntrega).getTime() : Infinity;
+  const fb = b.fechaEntrega ? new Date(b.fechaEntrega).getTime() : Infinity;
+  if (fa !== fb) return fa - fb;
+  const ia = new Date(a.fechaInicio || a.fecha || a.creado || 0).getTime();
+  const ib = new Date(b.fechaInicio || b.fecha || b.creado || 0).getTime();
+  return ib - ia;
+}
+
 // Marca (o desmarca) un campo como inválido en rojo. Devuelve si es válido.
 export function marcarCampo(el, valido) {
   if (el) el.classList.toggle("campo-invalido", !valido);

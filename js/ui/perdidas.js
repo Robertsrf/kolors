@@ -1,5 +1,5 @@
 import { state, TIPO_PERDIDA_LABEL, m2Perdida, totalPerdida } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, datoDestacadoHtml } from "../utils.js";
 import { eliminarPerdida as apiEliminarPerdida } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalEditarPerdida } from "../modales/perdida.js";
@@ -37,9 +37,9 @@ function renderPerdidaCard(p) {
       </div>
       <span class="badge tipo-${tipo}">${TIPO_PERDIDA_LABEL[tipo] || tipo}</span>
     </div>
+    ${datoDestacadoHtml({ icono: "📐", valor: fmt(m2), unidad: "m²", detalle: `${fmt(p.ancho)}×${fmt(p.alto)} m` })}
     ${p.descripcion ? `<div class="impresion-desc">${escapeHtml(p.descripcion)}</div>` : ""}
     <div class="impresion-mid">
-      <span>📐 <b>${fmt(m2)} m²</b> (${fmt(p.ancho)}×${fmt(p.alto)} m)</span>
       <span>💵 <b>${money(total)}</b></span>
     </div>
     <div class="impresion-actions">

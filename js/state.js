@@ -282,12 +282,28 @@ export function totalExtrasEco(eco) {
 export function totalEco(eco) {
   return redondear2(baseEco(eco) + totalExtrasEco(eco));
 }
-// Cómo se mide el pedido, en una línea (tablero y ficha del cliente).
+// El dato que importa de un pedido eco, en piezas, para poder destacarlo:
+// cuántos m² si son stickers, la medida si es impresión, cuántas unidades si va
+// por cantidad. { icono, valor, unidad, detalle }
+export function datoPrincipalEco(eco) {
+  if (ecoEsPapelBond(eco)) {
+    const n = Number(eco.cantidadImpresiones) || 0;
+    return { icono: "🖨️", valor: fmtNum(n), unidad: n === 1 ? "impresión" : "impresiones", detalle: `${money(eco.costoImpresion)} c/u` };
+  }
+  if (ecoEsDtf(eco)) {
+    const n = Number(eco.cantidadImpresiones) || 0;
+    return { icono: "🎽", valor: fmtNum(n), unidad: "DTF", detalle: `${fmt(m2Eco(eco))} m² · ${money(eco.costoImpresion)} c/u` };
+  }
+  if (ecoEsPorM2Manual(eco)) {
+    return { icono: "📐", valor: fmt(m2Eco(eco)), unidad: "m²", detalle: "" };
+  }
+  return { icono: "📐", valor: fmt(m2Eco(eco)), unidad: "m²", detalle: `${fmt(eco.ancho)}×${fmt(eco.alto)} m` };
+}
+
+// Lo mismo pero en una línea de texto (ficha del cliente).
 export function descripcionMedidaEco(eco) {
-  if (ecoEsPapelBond(eco)) return `🖨️ ${fmtNum(eco.cantidadImpresiones)} impresión(es) × ${money(eco.costoImpresion)}`;
-  if (ecoEsDtf(eco)) return `🎽 ${fmtNum(eco.cantidadImpresiones)} DTF (${DTF_TAMANO_LABEL}) × ${money(eco.costoImpresion)} · ${fmt(m2Eco(eco))} m²`;
-  if (ecoEsPorM2Manual(eco)) return `📐 ${fmt(m2Eco(eco))} m²`;
-  return `📐 ${fmt(m2Eco(eco))} m² (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`;
+  const d = datoPrincipalEco(eco);
+  return `${d.icono} ${d.valor} ${d.unidad}${d.detalle ? ` · ${d.detalle}` : ""}`;
 }
 export function totalAbonadoEco(eco) {
   return redondear2(Number(eco.abono || 0) + sumPagos(eco.pagos));

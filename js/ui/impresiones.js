@@ -1,5 +1,5 @@
 import { state, TIPO_IMPRESION_LABEL, impresionCobraDinero, m2Impresion, totalImpresion, saldoImpresion, estaPagadaImpresion } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias, compararPorEntrega } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, compararPorEntrega, datoDestacadoHtml } from "../utils.js";
 import { eliminarImpresion as apiEliminarImpresion } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -47,9 +47,9 @@ function renderImpresionCard(imp) {
       </div>
       <span class="badge tipo-${tipo}">${TIPO_IMPRESION_LABEL[tipo] || tipo}</span>
     </div>
+    ${datoDestacadoHtml({ icono: "📐", valor: fmt(m2), unidad: "m²", detalle: `${fmt(imp.ancho)}×${fmt(imp.alto)} m` })}
     ${imp.descripcion ? `<div class="impresion-desc">${escapeHtml(imp.descripcion)}</div>` : ""}
     <div class="impresion-mid">
-      <span>📐 <b>${fmt(m2)} m²</b> (${fmt(imp.ancho)}×${fmt(imp.alto)} m)</span>
       <span>💵 <b>${cobra ? money(total) : "No se cobra aparte"}</b></span>
     </div>
     ${cobra ? `<div class="impresion-mid"><span class="badge ${pagada ? "pagado" : "debe"}">${pagada ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span></div>` : ""}

@@ -85,6 +85,17 @@ export function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// El dato principal de una tarjeta, destacado: el número grande primero, su
+// unidad al lado y el detalle (la medida, el costo unitario) discreto debajo.
+export function datoDestacadoHtml({ icono, valor, unidad, detalle }) {
+  return `<div class="card-dato">
+    <span class="card-dato-ico">${icono}</span>
+    <span class="card-dato-valor">${valor}</span>
+    <span class="card-dato-unidad">${unidad}</span>
+    ${detalle ? `<span class="card-dato-detalle">${detalle}</span>` : ""}
+  </div>`;
+}
+
 export function statCard(label, value) {
   const div = document.createElement("div");
   div.className = "stat-card neu-raised";

@@ -5,7 +5,7 @@ import {
   MATERIAL_ECO_LABEL,
   TIPO_TRABAJO_ECO_LABEL,
   ecoEsSimple,
-  descripcionMedidaEco,
+  datoPrincipalEco,
   m2Eco,
   totalExtrasEco,
   totalEco,
@@ -13,7 +13,7 @@ import {
   estaPagadoEco,
   fechaFaseActualEco,
 } from "../state.js";
-import { money, fmt, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega } from "../utils.js";
+import { money, fmt, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega, datoDestacadoHtml } from "../utils.js";
 import { actualizarFaseEco, eliminarEco as apiEliminarEco } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -137,10 +137,10 @@ function renderEcoCard(eco) {
     <div class="card-top">
       <div>
         <div class="card-cliente">${escapeHtml(eco.cliente)}</div>
-        <div class="card-tel">${descripcionMedidaEco(eco)}</div>
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>
+    ${datoDestacadoHtml(datoPrincipalEco(eco))}
     ${eco.descripcion ? `<div class="impresion-desc">${escapeHtml(eco.descripcion)}</div>` : ""}
     ${badgesExtras(eco)}
     <div class="card-mid">

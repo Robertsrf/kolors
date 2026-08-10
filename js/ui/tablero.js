@@ -7,7 +7,7 @@ import {
   estaPagado,
   fechaFaseActual,
 } from "../state.js";
-import { money, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega } from "../utils.js";
+import { money, escapeHtml, fechaLegible, haceDias, ajustarAltoTablero, compararPorEntrega, datoDestacadoHtml } from "../utils.js";
 import { actualizarFasePedido, eliminarPedido as apiEliminarPedido } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
@@ -118,9 +118,9 @@ function renderCard(p) {
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>
+    ${datoDestacadoHtml({ icono: "👕", valor: camisas, unidad: camisas === 1 ? "camisa" : "camisas", detalle: "" })}
     ${p.descripcion ? `<div class="impresion-desc">${escapeHtml(p.descripcion)}</div>` : ""}
     <div class="card-mid">
-      <span>👕 <b>${camisas}</b> camisas</span>
       <span>💵 <b>${money(total)}</b></span>
     </div>
     <div class="card-fecha">${fechaLegible(fechaFaseActual(p))} · ${haceDias(fechaFaseActual(p))}</div>

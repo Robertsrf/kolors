@@ -53,6 +53,24 @@ document.addEventListener("change", (e) => {
   if (e.target && e.target.classList) e.target.classList.remove("campo-invalido");
 });
 
+// Si una operación contra la base de datos falla y nadie la atrapa, hasta ahora
+// no pasaba nada visible: el usuario creía que la app "no hacía caso". Ahora se
+// avisa, distinguiendo el caso de permisos.
+window.addEventListener("unhandledrejection", (e) => {
+  const err = e.reason || {};
+  const mensaje = err.message || String(err);
+  console.error("Kolors · error no atrapado:", err);
+  if (/row-level security|permission denied|not authorized|violates policy/i.test(mensaje)) {
+    alert(
+      "Tu cuenta no tiene permiso para hacer ese cambio en la base de datos.\n\n" +
+        "Avísale al administrador: hay que revisar los permisos de tu usuario.\n\n" +
+        "Detalle técnico: " + mensaje
+    );
+  } else {
+    alert("No se pudo completar la acción.\n\nDetalle: " + mensaje);
+  }
+});
+
 // Mantener la altura de los tableros al cambiar el tamaño de la ventana.
 window.addEventListener("resize", () => {
   ajustarAltoTablero(document.getElementById("board"));

@@ -36,6 +36,23 @@ export function suscribirLogs(cb) {
   return canal;
 }
 
+// Editar con acuse de recibo.
+//
+// Si los permisos de la base (RLS) le niegan el UPDATE a esta cuenta, Postgres NO
+// devuelve error: simplemente no cambia ninguna fila, y la app parecía "no hacer
+// caso". Pidiendo el id de vuelta sabemos si de verdad se guardó.
+async function actualizarFila(tabla, id, campos) {
+  const { data, error } = await supabase.from(tabla).update(campos).eq("id", id).select("id");
+  if (error) throw error;
+  if (!data || !data.length) {
+    throw new Error(
+      "El cambio no se guardó: la base de datos no le permite editar a esta cuenta (row-level security), " +
+        "o el registro ya no existe. Revisa los permisos del usuario."
+    );
+  }
+  return data;
+}
+
 function agruparPor(rows, key) {
   const mapa = new Map();
   (rows || []).forEach((row) => {
@@ -473,8 +490,7 @@ export async function actualizarPedido(id, { cliente, descripcion, abono, items,
 
 export async function actualizarFasePedido(id, estado) {
   const p = state.pedidos.find((x) => x.id === id);
-  const { error } = await supabase.from("pedidos").update({ estado }).eq("id", id);
-  if (error) throw error;
+  await actualizarFila("pedidos", id, { estado });
   // fecha_estado en un update aparte: si la columna aún no existe (migración
   // pendiente), avanzar de fase igual funciona; se ignora ese error.
   await supabase.from("pedidos").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
@@ -642,8 +658,7 @@ export async function actualizarEco(id, datos) {
 
 export async function actualizarFaseEco(id, estado) {
   const e = state.ecoSolvente.find((x) => x.id === id);
-  const { error } = await supabase.from("eco_solvente").update({ estado }).eq("id", id);
-  if (error) throw error;
+  await actualizarFila("eco_solvente", id, { estado });
   await supabase.from("eco_solvente").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
   registrarLog("Eco Solvente", `Movió el pedido eco de "${e ? e.cliente : id}" a "${estado}"`);
   await cargarEcoSolvente();

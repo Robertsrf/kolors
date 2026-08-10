@@ -72,7 +72,11 @@ function mostrarLogin() {
 function aplicarRol(rol) {
   document.body.classList.remove("rol-admin", "rol-editor", "rol-jefe");
   document.body.classList.add("rol-" + rol);
-  usuarioActual.textContent = ETIQUETA_ROL[rol] || "";
+  // Se muestra el nombre además del permiso: así se ve de una con qué cuenta
+  // se entró (útil cuando alguien cree estar en su usuario y está en otro).
+  const nombre = usuarioSesion ? usuarioSesion.nombre : "";
+  const etiqueta = ETIQUETA_ROL[rol] || "";
+  usuarioActual.textContent = nombre ? `${nombre} · ${etiqueta}` : etiqueta;
 }
 
 function mostrarApp(rol) {

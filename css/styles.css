@@ -154,10 +154,12 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* Cuerpo: contenido + columna derecha pegada al borde de la ventana */
-.app-body { display: flex; align-items: flex-start; gap: 20px; }
-main { padding: 0 24px 40px; flex: 1; min-width: 0; max-width: 1400px; } /* min-width:0 = deja que el tablero se desplace en vez de estirar */
+.app-body { display: flex; align-items: flex-start; gap: 10px; }
+/* El contenido ocupa todo el ancho disponible y se detiene justo antes de la
+   columna. min-width:0 = deja que el tablero se desplace en vez de estirar. */
+main { padding: 0 14px 40px 24px; flex: 1; min-width: 0; }
 
-.rail-der { width: 250px; flex-shrink: 0; margin-left: auto; padding: 0 24px 40px 0; position: sticky; top: 16px; }
+.rail-der { width: 250px; flex-shrink: 0; padding: 0 20px 40px 0; position: sticky; top: 16px; }
 .rail-card { padding: 10px; }
 .rail-img {
   display: block;

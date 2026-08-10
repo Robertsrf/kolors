@@ -151,7 +151,28 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-sm);
 }
 
-main { padding: 0 24px 40px; max-width: 1400px; margin: 0 auto; }
+/* Cuerpo: contenido + columna derecha fija */
+.app-body { display: flex; align-items: flex-start; gap: 20px; max-width: 1680px; margin: 0 auto; }
+main { padding: 0 24px 40px; flex: 1; min-width: 0; } /* min-width:0 = deja que el tablero se desplace en vez de estirar */
+
+.rail-der { width: 250px; flex-shrink: 0; padding: 0 24px 40px 0; position: sticky; top: 16px; }
+.rail-card { padding: 12px; }
+.rail-card h3 { margin: 0 0 10px; font-size: 14px; }
+.rail-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+}
+.rail-acciones { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.rail-acciones .neu-btn { flex: 1; text-align: center; text-decoration: none; white-space: nowrap; }
+/* En pantallas angostas el tablero manda: la columna se va al fondo, a lo ancho. */
+@media (max-width: 1200px) {
+  .app-body { flex-direction: column; }
+  .rail-der { width: 100%; position: static; padding: 0 24px 40px; }
+  .rail-card { max-width: 420px; margin: 0 auto; }
+}
 
 .section { display: none; }
 .section.active { display: block; }
@@ -617,9 +638,8 @@ label {
 }
 .fab-precios:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 14px 28px rgba(124, 92, 255, .4); }
 .fab-precios:active { transform: scale(.95); }
-/* Segundo botón flotante, justo encima del de precios */
-.fab-micro { bottom: 96px; background: linear-gradient(135deg, #6b1e8c, #a021c4); box-shadow: 0 10px 24px rgba(107, 30, 140, .35); }
-.fab-micro:hover { box-shadow: 0 14px 28px rgba(107, 30, 140, .4); }
+/* Cuando está la columna derecha, el botón se corre para no taparla. */
+@media (min-width: 1201px) { .fab-precios { right: 290px; } }
 
 #preciosSecciones { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; }
 .precios-seccion { padding: 14px; }
@@ -804,7 +824,6 @@ body:not(.rol-admin) #btnBorrarTodo {
 
 /* === PANELES LATERALES (calendario, calc, notas, chat) === */
 .modal-overlay.panel-izq { justify-content: flex-start; align-items: stretch; padding: 0; }
-.modal-overlay.panel-der { justify-content: flex-end; align-items: stretch; padding: 0; }
 .panel-modal {
   max-width: 440px;
   width: 94vw;
@@ -815,12 +834,6 @@ body:not(.rol-admin) #btnBorrarTodo {
   flex-direction: column;
   overflow-y: auto;
 }
-.panel-der .panel-modal { border-radius: var(--radius-lg) 0 0 var(--radius-lg); overflow-y: hidden; }
-/* El flyer es muy alto: se desplaza solo la imagen (min-height:0 es lo que deja
-   encoger al hijo flex), así los botones quedan siempre visibles abajo. */
-.micro-wrap { flex: 1; min-height: 0; overflow-y: auto; }
-.micro-img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
-.panel-der .modal-footer { margin-top: 12px; }
 
 /* === CALENDARIO === */
 .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

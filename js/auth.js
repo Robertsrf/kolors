@@ -10,8 +10,11 @@ import { supabase, CONFIGURADO } from "./supabaseClient.js";
 //
 // rol:
 //   'admin'  -> ve y edita todo, además puede importar / borrar todo
-//   'editor' -> ve y edita todo (María y Mía)
+//   'editor' -> edita el trabajo diario, pero no ve el log ni fija las metas
 //   'jefe'   -> SOLO LECTURA (ve todo, no puede modificar nada)
+//
+// Los permisos que dependen del correo (log, metas) también están en la base de
+// datos: si cambias un rol aquí, revisa las políticas en supabase/schema.sql.
 // ============================================================
 export const SUFIJO_PASSWORD = "kolors";
 
@@ -20,7 +23,7 @@ const CUENTAS = [
   { email: "jefe@kolors.app", rol: "jefe" },
   { email: "maria@kolors.app", rol: "editor" },
   { email: "mia@kolors.app", rol: "editor" },
-  { email: "dariana@kolors.app", rol: "editor" },
+  { email: "dariana@kolors.app", rol: "admin" },
 ];
 
 function rolPorEmail(email) {

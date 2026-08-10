@@ -173,7 +173,7 @@ create table if not exists tableros_config (
 insert into tableros_config (id) values (1) on conflict (id) do nothing;
 
 -- ============================================================
--- METAS DE PRODUCCIÓN (las fijan admin y jefe; todos las ven)
+-- METAS DE PRODUCCIÓN (las fijan las cuentas con acceso completo; todos las ven)
 -- ============================================================
 create table if not exists metas_config (
   id int primary key default 1,
@@ -186,8 +186,8 @@ drop policy if exists "metas_leer" on metas_config;
 drop policy if exists "metas_escribir" on metas_config;
 create policy "metas_leer" on metas_config for select to authenticated using (true);
 create policy "metas_escribir" on metas_config for all to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
-  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 
 -- Registro histórico: las metas que estaban vigentes en cada período ya cerrado.
 create table if not exists metas_historial (
@@ -205,10 +205,10 @@ drop policy if exists "metas_hist_borrar" on metas_historial;
 create policy "metas_hist_leer" on metas_historial for select to authenticated using (true);
 create policy "metas_hist_crear" on metas_historial for insert to authenticated with check (true);
 create policy "metas_hist_editar" on metas_historial for update to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
-  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 create policy "metas_hist_borrar" on metas_historial for delete to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 
 -- ============================================================
 -- NOTAS COMPARTIDAS + CHAT DEL EQUIPO
@@ -236,7 +236,7 @@ drop policy if exists "mensajes_todos" on mensajes;
 create policy "notas_todos" on notas_config for all to authenticated using (true) with check (true);
 create policy "mensajes_todos" on mensajes for all to authenticated using (true) with check (true);
 
--- LOG DE CAMBIOS (solo admin y jefe pueden leerlo)
+-- LOG DE CAMBIOS (solo lo leen las cuentas con acceso completo)
 create table if not exists logs (
   id uuid primary key default gen_random_uuid(),
   usuario text,
@@ -249,7 +249,7 @@ drop policy if exists "logs_insert" on logs;
 drop policy if exists "logs_select_admin_jefe" on logs;
 create policy "logs_insert" on logs for insert to authenticated with check (true);
 create policy "logs_select_admin_jefe" on logs for select to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 
 -- ============================================================
 -- ROW LEVEL SECURITY (con roles por código)

@@ -22,12 +22,12 @@ drop policy if exists "metas_hist_borrar" on metas_historial;
 -- Todos pueden ver el registro y congelar el período que acaba de cerrar...
 create policy "metas_hist_leer" on metas_historial for select to authenticated using (true);
 create policy "metas_hist_crear" on metas_historial for insert to authenticated with check (true);
--- ...pero solo admin y jefe pueden corregir o borrar el registro.
+-- ...pero solo las cuentas con acceso completo pueden corregir o borrar el registro.
 create policy "metas_hist_editar" on metas_historial for update to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
-  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 create policy "metas_hist_borrar" on metas_historial for delete to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 
 do $$
 begin

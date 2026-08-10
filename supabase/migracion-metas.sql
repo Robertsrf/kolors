@@ -1,7 +1,7 @@
 -- Kolors · migración: sistema de metas (objetivos de producción)
 --
 -- Corre esto UNA vez en: Supabase → SQL Editor → New query → Run.
--- Las metas las establecen el admin y el jefe; todos pueden verlas.
+-- Las metas las establecen las cuentas con acceso completo; todos pueden verlas.
 
 create table if not exists metas_config (
   id int primary key default 1,
@@ -14,10 +14,10 @@ alter table metas_config enable row level security;
 drop policy if exists "metas_leer" on metas_config;
 drop policy if exists "metas_escribir" on metas_config;
 create policy "metas_leer" on metas_config for select to authenticated using (true);
--- Solo admin y jefe pueden establecer/editar las metas
+-- Solo las cuentas con acceso completo pueden establecer/editar las metas
 create policy "metas_escribir" on metas_config for all to authenticated
-  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
-  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app', 'dariana@kolors.app'));
 
 do $$
 begin

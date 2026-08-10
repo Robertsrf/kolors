@@ -33,14 +33,15 @@ una cuenta de Supabase con un correo fijo. La contraseña de cada cuenta es
 
 1. Menú lateral: **Authentication** → **Users** → **Add user** → **Create new user**.
 2. Marca **"Auto Confirm User"** (para que pueda entrar de una vez).
-3. Crea estas 4 cuentas con EXACTAMENTE estos correos y estas contraseñas:
+3. Crea estas 5 cuentas con EXACTAMENTE estos correos y estas contraseñas:
 
    | Persona / rol                 | Email (fijo)          | Contraseña (código + `kolors`) |
    |-------------------------------|-----------------------|--------------------------------|
    | Admin general (tú)            | `admin@kolors.app`    | `<código admin>kolors`         |
    | Jefe (solo lectura)           | `jefe@kolors.app`     | `<código jefe>kolors`          |
-   | María (edita todo)            | `maria@kolors.app`    | `<código maría>kolors`         |
-   | Mía (edita todo)              | `mia@kolors.app`      | `<código mía>kolors`           |
+   | Dariana (acceso completo)     | `dariana@kolors.app`  | `<código dariana>kolors`       |
+   | María (edita el día a día)    | `maria@kolors.app`    | `<código maría>kolors`         |
+   | Mía (edita el día a día)      | `mia@kolors.app`      | `<código mía>kolors`           |
 
    > Los correos son internos, no tienen que existir de verdad. Lo único que la
    > gente escribe al entrar es su código de 4 dígitos.
@@ -49,8 +50,10 @@ una cuenta de Supabase con un correo fijo. La contraseña de cada cuenta es
 cuenta, **Reset password** y pon la nueva contraseña = nuevo código + `kolors`.
 
 **¿Los roles?** El jefe (`jefe@kolors.app`) queda como **solo lectura** hasta a
-nivel de base de datos: aunque quisiera, no puede modificar nada. Admin, María y
-Mía pueden editar todo. Solo el admin ve los botones de "Importar" y "Borrar todo".
+nivel de base de datos: aunque quisiera, no puede modificar nada. María y Mía
+editan el trabajo diario (pedidos, clientes, etc.), pero no ven el log ni fijan
+las metas. **Admin y Dariana tienen acceso completo**, incluidos el log, las
+metas y los botones de "Importar" y "Borrar todo".
 
 ### 4. Pegar las credenciales en la app
 1. En Supabase: **Project Settings** (engranaje) → **API**.

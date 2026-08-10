@@ -21,6 +21,7 @@ import { initNotas } from "./ui/notas.js";
 import { initChat } from "./ui/chat.js";
 import { initLog, renderLog } from "./ui/log.js";
 import "./ui/exportarPdf.js";
+import "./ui/herramientas.js";
 
 // === TABS ===
 document.querySelectorAll(".tab-btn").forEach((btn) => {

@@ -311,13 +311,17 @@
 </div>
 
 <!-- === HERRAMIENTAS (launcher izquierdo) === -->
-<div class="tools-launcher">
-  <button type="button" class="fab-tool" id="btnMetas" title="Metas de producción">🎯</button>
-  <button type="button" class="fab-tool" id="btnLogros" title="Logros">🏆</button>
-  <button type="button" class="fab-tool" id="btnCalendario" title="Calendario de entregas">📅</button>
-  <button type="button" class="fab-tool" id="btnCalculadora" title="Calculadora">🧮</button>
-  <button type="button" class="fab-tool" id="btnNotas" title="Notas compartidas">📝</button>
-  <button type="button" class="fab-tool" id="btnChat" title="Chat del equipo">💬<span class="notif-badge" id="chatBadge" style="display:none">0</span></button>
+<div class="tools-dock" id="toolsDock">
+  <div class="tools-lista">
+    <button type="button" class="fab-tool" id="btnMetas" title="Metas de producción">🎯</button>
+    <button type="button" class="fab-tool" id="btnLogros" title="Logros">🏆</button>
+    <button type="button" class="fab-tool" id="btnCalendario" title="Calendario de entregas">📅</button>
+    <button type="button" class="fab-tool" id="btnCalculadora" title="Calculadora">🧮</button>
+    <button type="button" class="fab-tool" id="btnNotas" title="Notas compartidas">📝</button>
+    <button type="button" class="fab-tool" id="btnChat" title="Chat del equipo">💬<span class="notif-badge" id="chatBadge" style="display:none">0</span></button>
+    <button type="button" class="fab-tool" id="btnPrecios" title="Precios">💲</button>
+  </div>
+  <button type="button" class="tools-toggle" id="btnToolsDock" title="Ocultar herramientas" aria-expanded="true">‹</button>
 </div>
 
 <!-- === MODAL CALENDARIO === -->
@@ -420,9 +424,7 @@
   </div>
 </div>
 
-<!-- === TARJETA FLOTANTE DE PRECIOS === -->
-<button type="button" class="fab-precios" id="btnPrecios" title="Configurar precios">💲</button>
-
+<!-- === PRECIOS (el botón vive en el panel de herramientas de la izquierda) === -->
 <div class="modal-overlay" id="modalPreciosOverlay">
   <div class="modal" style="max-width:640px">
     <div class="modal-header">

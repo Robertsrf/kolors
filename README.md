@@ -106,10 +106,13 @@ archivo y se subirá todo a Supabase.
 - **📇 Clientes**: cuánto debe cada cliente, desglosado por camisas, sublimación y
   eco solvente.
 - **📊 Estadísticas**: gráficos y totales de todo.
-- **🎯 Metas**: objetivos por semana y por mes (los fijan admin y jefe). Cuenta lo
-  que llega a la fase final. Abajo queda el **registro**: cómo terminó cada semana
-  y cada mes ya cerrado. Las metas de un período cerrado se congelan, así que
-  cambiarlas hoy no reescribe el pasado.
+- **🎯 Metas** (panel): objetivos por semana y por mes (los fijan admin y jefe).
+  Cuenta lo que llega a la fase final, en la semana y el mes en curso.
+- **🏁 Historial de metas**: cómo terminó cada semana y cada mes ya cerrado —
+  resumen (cuántos períodos al 100%, cumplimiento promedio, racha, mejor período),
+  un gráfico por meta (barras de lo logrado + línea de la meta, con ✅ en los
+  períodos cumplidos) y el detalle período por período. Las metas de un período
+  cerrado se congelan, así que cambiarlas hoy no reescribe el pasado.
 - **💲 Precios** (botón flotante): tu tarifario de referencia.
 
 Cualquier cambio que haga una persona aparece automáticamente en las pantallas de
@@ -128,6 +131,7 @@ js/
   auth.js             Login / cerrar sesión
   utils.js            Formato de dinero, fechas, helpers
   state.js            Datos en memoria + cálculos (totales, saldos...)
+  metasCalc.js        Metas: períodos, lo producido en cada uno y su comparación
   api.js              Leer/guardar en Supabase + tiempo real
   render.js           Redibuja la pantalla
   main.js             Arranque general y pestañas

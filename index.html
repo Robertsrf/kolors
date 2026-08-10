@@ -45,6 +45,7 @@
     <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
     <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
     <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
+    <button class="neu-btn tab-btn" data-tab="metashist">🏁 Historial de metas</button>
     <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
     <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
     <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
@@ -226,6 +227,23 @@
     <div class="stats-grid" id="statsPerdidas"></div>
   </section>
 
+  <!-- === HISTORIAL DE METAS === -->
+  <section class="section" id="section-metashist">
+    <div class="board-toolbar">
+      <div class="filtro-pago-group" id="filtroPeriodoMetas">
+        <button type="button" class="neu-btn filtro-pago-btn active" data-periodo="semana">📅 Por semana</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-periodo="mes">🗓️ Por mes</button>
+      </div>
+      <span class="hist-ayuda">Cuenta lo que llegó a la fase final. La meta de un período cerrado queda congelada: cambiarla hoy no reescribe el pasado.</span>
+      <button type="button" class="neu-btn" id="btnEditarMetasHist">🎯 Metas de ahora</button>
+    </div>
+
+    <div id="metasHistVacio"></div>
+    <div class="stats-grid" id="metasHistResumen"></div>
+    <div class="charts-grid" id="metasHistGraficos"></div>
+    <div id="metasHistLista"></div>
+  </section>
+
   <!-- === LOG DE CAMBIOS (solo admin y jefe) === -->
   <section class="section" id="section-log">
     <div class="board-toolbar">
@@ -347,10 +365,10 @@
       <button class="neu-btn icon" id="btnCerrarMetas">✕</button>
     </div>
     <div class="metas-acciones">
+      <button type="button" class="neu-btn small" id="btnVerHistorialMetas">🏁 Ver historial</button>
       <button type="button" class="neu-btn small solo-admin-jefe" id="btnEditarMetas">✏️ Editar metas</button>
     </div>
     <div id="metasContenido"></div>
-    <div id="metasHistorial"></div>
   </div>
 </div>
 

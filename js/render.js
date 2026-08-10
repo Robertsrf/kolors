@@ -8,6 +8,7 @@ import { renderClientesGrid, abrirDetalleCliente, getClienteSeleccionado } from 
 import { renderStats } from "./ui/stats.js";
 import { refrescarNotificaciones } from "./ui/notificaciones.js";
 import { renderMetas } from "./ui/metas.js";
+import { renderHistorialMetas } from "./ui/historialMetas.js";
 
 function actualizarListaClientes() {
   const nombres = new Set();
@@ -35,6 +36,7 @@ export function render() {
   const activeTab = document.querySelector(".tab-btn.active");
   const tab = activeTab ? activeTab.dataset.tab : "tablero";
   if (tab === "stats") renderStats();
+  if (tab === "metashist") renderHistorialMetas();
   if (tab === "impresiones") renderImpresionesList();
   if (tab === "ecosolvente") renderEcoBoard();
   if (tab === "perdidas") renderPerdidasList();

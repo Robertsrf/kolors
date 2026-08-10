@@ -921,7 +921,7 @@ textarea.campo-invalido {
 }
 
 /* === METAS === */
-.metas-acciones { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.metas-acciones { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
 .metas-bloque { margin-bottom: 22px; }
 .metas-bloque h4 { margin: 0 0 12px; font-size: 14px; }
 .meta-item { margin-bottom: 14px; }
@@ -942,13 +942,15 @@ textarea.campo-invalido {
 .meta-edit-head span:first-child { text-align: left; }
 
 /* Registro de metas (semanas y meses ya cerrados) */
-.hist-lista { display: flex; flex-direction: column; gap: 8px; }
+.hist-ayuda { font-size: 12px; color: var(--text-soft); flex: 1; min-width: 220px; }
+.hist-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
 .hist-fila {
   border: 1px solid var(--border-soft);
   border-left: 4px solid var(--border);
   border-radius: 12px;
-  padding: 9px 11px;
-  background: var(--surface-alt);
+  padding: 10px 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 .hist-fila.ok { border-left-color: #10b981; }
 .hist-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
@@ -962,7 +964,7 @@ textarea.campo-invalido {
   padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: var(--surface);
+  background: var(--surface-alt);
   color: var(--text-soft);
   white-space: nowrap;
 }

@@ -12,6 +12,7 @@ import "./ui/datos.js";
 import "./modales/precios.js";
 import "./modales/fases.js";
 import "./ui/metas.js";
+import { abrirHistorialMetas } from "./ui/historialMetas.js";
 import "./ui/logros.js";
 import "./ui/notificaciones.js";
 import "./ui/calendario.js";
@@ -33,6 +34,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     if (tab === "impresiones") renderImpresionesList();
     if (tab === "ecosolvente") renderEcoBoard();
     if (tab === "perdidas") renderPerdidasList();
+    if (tab === "metashist") abrirHistorialMetas();
     if (tab === "log") renderLog();
     if (tab === "clientes") {
       setClienteSeleccionado(null);

@@ -12,3 +12,9 @@ Desktop.ini
 # Editores
 .vscode/
 .idea/
+
+# Imágenes originales en alta (pesan mucho). Las versiones para web, ya
+# reducidas, sí van en el repo: están en img/
+/LOGO KOLORS.png
+/Recurso 17.png
+/Microperforado.jpg

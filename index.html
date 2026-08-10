@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kolors · Gestor de Pedidos</title>
+<link rel="icon" type="image/png" sizes="512x512" href="img/icono-kolors.png">
+<link rel="apple-touch-icon" href="img/icono-kolors-180.png">
+<meta name="theme-color" content="#6b1e8c">
 <link rel="stylesheet" href="css/styles.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -15,7 +18,7 @@
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box neu-raised">
     <div class="brand">
-      <span class="logo">Kolors</span>
+      <img src="img/logo-kolors.png" alt="Kolors" class="logo-img logo-img-grande">
       <span class="sub">Gestor de pedidos</span>
     </div>
     <form id="formLogin">
@@ -35,7 +38,7 @@
 
 <header class="app-header">
   <div class="brand">
-    <span class="logo">Kolors</span>
+    <img src="img/logo-kolors.png" alt="Kolors" class="logo-img">
     <span class="sub">Gestor de pedidos</span>
   </div>
   <nav class="tabs">
@@ -397,6 +400,25 @@
     </div>
     <div id="logrosResumen"></div>
     <div class="logros-grid" id="logrosGrid"></div>
+  </div>
+</div>
+
+<!-- === MICROPERFORADO (panel derecho) === -->
+<button type="button" class="fab-precios fab-micro" id="btnMicroperforado" title="Microperforado">🪧</button>
+
+<div class="modal-overlay panel-der" id="modalMicroOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>🪧 Microperforado</h2>
+      <button class="neu-btn icon" id="btnCerrarMicro">✕</button>
+    </div>
+    <div class="micro-wrap">
+      <img src="img/microperforado.jpg" alt="Publicidad de Kolors para microperforado" class="micro-img" id="microImg" loading="lazy">
+    </div>
+    <div class="modal-footer">
+      <a class="neu-btn" href="img/microperforado.jpg" target="_blank" rel="noopener">🔍 Ver en grande</a>
+      <a class="neu-btn primary" href="img/microperforado.jpg" download="Kolors-microperforado.jpg">⬇️ Descargar</a>
+    </div>
   </div>
 </div>
 

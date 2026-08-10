@@ -118,6 +118,8 @@ input:focus, select:focus, textarea:focus {
   padding: 20px 24px;
 }
 .brand { display: flex; flex-direction: column; }
+.brand .logo-img { height: 34px; width: auto; max-width: 190px; object-fit: contain; }
+.brand .logo-img-grande { height: 54px; max-width: 100%; margin: 0 auto 4px; }
 .brand .logo {
   font-size: 28px;
   font-weight: 800;
@@ -615,6 +617,9 @@ label {
 }
 .fab-precios:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 14px 28px rgba(124, 92, 255, .4); }
 .fab-precios:active { transform: scale(.95); }
+/* Segundo botón flotante, justo encima del de precios */
+.fab-micro { bottom: 96px; background: linear-gradient(135deg, #6b1e8c, #a021c4); box-shadow: 0 10px 24px rgba(107, 30, 140, .35); }
+.fab-micro:hover { box-shadow: 0 14px 28px rgba(107, 30, 140, .4); }
 
 #preciosSecciones { display: flex; flex-direction: column; gap: 14px; margin: 16px 0; }
 .precios-seccion { padding: 14px; }
@@ -799,6 +804,7 @@ body:not(.rol-admin) #btnBorrarTodo {
 
 /* === PANELES LATERALES (calendario, calc, notas, chat) === */
 .modal-overlay.panel-izq { justify-content: flex-start; align-items: stretch; padding: 0; }
+.modal-overlay.panel-der { justify-content: flex-end; align-items: stretch; padding: 0; }
 .panel-modal {
   max-width: 440px;
   width: 94vw;
@@ -809,6 +815,12 @@ body:not(.rol-admin) #btnBorrarTodo {
   flex-direction: column;
   overflow-y: auto;
 }
+.panel-der .panel-modal { border-radius: var(--radius-lg) 0 0 var(--radius-lg); overflow-y: hidden; }
+/* El flyer es muy alto: se desplaza solo la imagen (min-height:0 es lo que deja
+   encoger al hijo flex), así los botones quedan siempre visibles abajo. */
+.micro-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+.micro-img { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+.panel-der .modal-footer { margin-top: 12px; }
 
 /* === CALENDARIO === */
 .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }

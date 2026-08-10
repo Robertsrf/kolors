@@ -22,6 +22,10 @@ Sigue estos pasos en orden. Solo hay que hacerlos la primera vez.
    contenido, pégalo en el editor y presiona **Run**.
 3. Debe decir "Success". Esto crea todas las tablas y la seguridad.
 
+> **¿Ya tenías la base de datos creada de antes?** No repitas el paso: corre solo
+> los archivos `supabase/migracion-*.sql` que todavía no hayas ejecutado (uno por
+> función nueva), igual que en el SQL Editor. Son seguros de correr una sola vez.
+
 ### 3. Crear las 4 cuentas (una por rol / código)
 El acceso es por **código de 4 dígitos** (sin usuario). Cada código está ligado a
 una cuenta de Supabase con un correo fijo. La contraseña de cada cuenta es
@@ -90,13 +94,22 @@ archivo y se subirá todo a Supabase.
   Costura → Entregado). Filtro de "Deben / Pagados".
 - **🖨️ Sublimación**: impresiones para sublimar. El tipo "camisa" o "taller" solo
   registra m² (no cobra aparte); "otros" sí cobra.
-- **🏳️ Eco Solvente**: pendones. Impresión por m² más extras opcionales con su
-  costo: remate (palos/tubos), diseño, estructura, clear y transfer (estos dos se
-  pueden cobrar fijo o por m²).
+- **🏳️ Eco Solvente**: pendones y demás trabajos. Según el **tipo de trabajo**:
+  - *Impresión*: por m² (ancho × alto) más extras opcionales con su costo: remate
+    (palos/tubos), diseño, estructura, clear, transfer y PVC (estos se pueden
+    cobrar fijo o por m²).
+  - *Stickers* y *Vinil Tornasol*: se escriben los m² directo (+ diseño opcional).
+  - *Papel Bond*: cantidad de impresiones × costo por impresión (+ diseño opcional).
+  - *DTF*: cantidad de unidades × precio por unidad (+ diseño opcional). Una unidad
+    de DTF mide siempre 1 m × 57 cm (0,57 m²).
 - **🗑️ Pérdidas**: material perdido y pruebas de impresión (m² y su costo).
 - **📇 Clientes**: cuánto debe cada cliente, desglosado por camisas, sublimación y
   eco solvente.
 - **📊 Estadísticas**: gráficos y totales de todo.
+- **🎯 Metas**: objetivos por semana y por mes (los fijan admin y jefe). Cuenta lo
+  que llega a la fase final. Abajo queda el **registro**: cómo terminó cada semana
+  y cada mes ya cerrado. Las metas de un período cerrado se congelan, así que
+  cambiarlas hoy no reescribe el pasado.
 - **💲 Precios** (botón flotante): tu tarifario de referencia.
 
 Cualquier cambio que haga una persona aparece automáticamente en las pantallas de

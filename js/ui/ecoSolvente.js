@@ -4,9 +4,8 @@ import {
   REMATE_LABEL,
   MATERIAL_ECO_LABEL,
   TIPO_TRABAJO_ECO_LABEL,
-  ecoEsPorM2Manual,
   ecoEsSimple,
-  ecoEsPapelBond,
+  descripcionMedidaEco,
   m2Eco,
   totalExtrasEco,
   totalEco,
@@ -126,7 +125,6 @@ function renderEcoCard(eco) {
   card.addEventListener("dragend", () => card.classList.remove("arrastrando"));
 
   const fases = state.fasesEco;
-  const m2 = m2Eco(eco);
   const total = totalEco(eco);
   const saldo = saldoEco(eco);
   const pagado = estaPagadoEco(eco);
@@ -139,11 +137,7 @@ function renderEcoCard(eco) {
     <div class="card-top">
       <div>
         <div class="card-cliente">${escapeHtml(eco.cliente)}</div>
-        <div class="card-tel">${
-          ecoEsPapelBond(eco)
-            ? `🖨️ ${fmt(eco.cantidadImpresiones)} impresión(es) × ${money(eco.costoImpresion)}`
-            : `📐 ${fmt(m2)} m²${ecoEsPorM2Manual(eco) ? "" : ` (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`}`
-        }</div>
+        <div class="card-tel">${descripcionMedidaEco(eco)}</div>
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>

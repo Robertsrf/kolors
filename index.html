@@ -350,6 +350,7 @@
       <button type="button" class="neu-btn small solo-admin-jefe" id="btnEditarMetas">✏️ Editar metas</button>
     </div>
     <div id="metasContenido"></div>
+    <div id="metasHistorial"></div>
   </div>
 </div>
 
@@ -596,6 +597,7 @@
             <option value="stickers">🏷️ Stickers</option>
             <option value="vinil_tornasol">🌈 Vinil Tornasol</option>
             <option value="papel_bond">📃 Papel Bond</option>
+            <option value="dtf">🎽 DTF</option>
           </select>
         </div>
         <div>
@@ -644,7 +646,7 @@
           <input type="number" id="ecoM2Manual" min="0.01" step="0.01">
         </div>
         <div id="ecoCampoCantidad" style="display:none">
-          <label for="ecoCantidadImpresiones">¿Cuántas impresiones? *</label>
+          <label for="ecoCantidadImpresiones" id="ecoLabelCantidad">¿Cuántas impresiones? *</label>
           <input type="number" id="ecoCantidadImpresiones" min="1" step="1">
         </div>
         <div id="ecoCampoPrecioM2">
@@ -652,7 +654,7 @@
           <input type="number" id="ecoPrecioM2" min="0" step="0.01">
         </div>
         <div id="ecoCampoCostoImpresion" style="display:none">
-          <label for="ecoCostoImpresion">Costo por impresión ($) *</label>
+          <label for="ecoCostoImpresion" id="ecoLabelCostoImpresion">Costo por impresión ($) *</label>
           <input type="number" id="ecoCostoImpresion" min="0" step="0.01">
         </div>
       </div>
@@ -801,7 +803,7 @@
       </div>
 
       <div class="items-summary neu-inset">
-        <span>m²: <b id="resumenM2Eco">0.00</b></span>
+        <span><span id="resumenLabelM2Eco">m²:</span> <b id="resumenM2Eco">0.00</b></span>
         <span>Impresión base: <b id="resumenBaseEco">$0,00</b></span>
         <span>Extras: <b id="resumenExtrasEco">$0,00</b></span>
         <span>Total: <b id="resumenTotalEco">$0,00</b></span>

@@ -6,6 +6,12 @@ export function fmt(n) {
   return fmtMoneda.format(n || 0);
 }
 
+// Cantidades (unidades, m², metas): sin decimales de relleno.
+const fmtCantidad = new Intl.NumberFormat("es-VE", { maximumFractionDigits: 2 });
+export function fmtNum(n) {
+  return fmtCantidad.format(n || 0);
+}
+
 export function money(n) {
   return MONEDA + fmtMoneda.format(n || 0);
 }

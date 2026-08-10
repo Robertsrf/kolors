@@ -68,7 +68,7 @@ create table if not exists eco_solvente (
   descripcion text,
   abono numeric not null default 0,
   material text not null default 'banner',       -- 'vinil' | 'banner' | 'vinil_tornasol' | 'papel_bond' | 'clear'
-  tipo_trabajo text not null default 'impresion', -- 'impresion' | 'stickers' | 'vinil_tornasol' | 'papel_bond'
+  tipo_trabajo text not null default 'impresion', -- 'impresion' | 'stickers' | 'vinil_tornasol' | 'papel_bond' | 'dtf'
   m2_manual numeric not null default 0,          -- m² directo (stickers / vinil tornasol)
   cantidad_impresiones numeric not null default 0, -- cantidad (papel bond)
   costo_impresion numeric not null default 0,      -- costo por impresión (papel bond)
@@ -189,6 +189,27 @@ create policy "metas_escribir" on metas_config for all to authenticated
   using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
   with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
 
+-- Registro histórico: las metas que estaban vigentes en cada período ya cerrado.
+create table if not exists metas_historial (
+  periodo text not null check (periodo in ('semana', 'mes')),
+  clave text not null,              -- semana: 'AAAA-MM-DD' (lunes) · mes: 'AAAA-MM'
+  data jsonb not null default '{}'::jsonb,
+  creado_at timestamptz not null default now(),
+  primary key (periodo, clave)
+);
+alter table metas_historial enable row level security;
+drop policy if exists "metas_hist_leer" on metas_historial;
+drop policy if exists "metas_hist_crear" on metas_historial;
+drop policy if exists "metas_hist_editar" on metas_historial;
+drop policy if exists "metas_hist_borrar" on metas_historial;
+create policy "metas_hist_leer" on metas_historial for select to authenticated using (true);
+create policy "metas_hist_crear" on metas_historial for insert to authenticated with check (true);
+create policy "metas_hist_editar" on metas_historial for update to authenticated
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'))
+  with check ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+create policy "metas_hist_borrar" on metas_historial for delete to authenticated
+  using ((auth.jwt() ->> 'email') in ('admin@kolors.app', 'jefe@kolors.app'));
+
 -- ============================================================
 -- NOTAS COMPARTIDAS + CHAT DEL EQUIPO
 -- ============================================================
@@ -281,7 +302,7 @@ end $$;
 do $$
 begin
   begin
-    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, tableros_config, metas_config, notas_config, mensajes, logs;
+    alter publication supabase_realtime add table pedidos, pedido_items, impresiones, eco_solvente, perdidas, pagos, precios_config, tableros_config, metas_config, metas_historial, notas_config, mensajes, logs;
   exception when duplicate_object then
     null;
   end;

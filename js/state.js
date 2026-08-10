@@ -1,4 +1,4 @@
-import { redondear2, sumPagos } from "./utils.js";
+import { redondear2, sumPagos, fmt, fmtNum, money } from "./utils.js";
 
 // === CONSTANTES ===
 export const FASES = ["Pedido", "Impresión", "Sublimación", "Costura", "Entregado"];
@@ -32,6 +32,12 @@ export function metasVacias() {
   MATERIALES_ECO.forEach((m) => (materiales[m] = { semana: 0, mes: 0 }));
   return { camisasSemana: 0, camisasMes: 0, stickersSemana: 0, stickersMes: 0, materiales };
 }
+// ¿Hay al menos una meta con valor? (si no, no vale la pena guardar el registro)
+export function tieneAlgunaMeta(metas) {
+  if (!metas) return false;
+  if (metas.camisasSemana > 0 || metas.camisasMes > 0 || metas.stickersSemana > 0 || metas.stickersMes > 0) return true;
+  return MATERIALES_ECO.some((m) => metas.materiales[m].semana > 0 || metas.materiales[m].mes > 0);
+}
 export function normalizarMetas(data) {
   const base = metasVacias();
   if (!data || typeof data !== "object") return base;
@@ -52,7 +58,14 @@ export const TIPO_TRABAJO_ECO_LABEL = {
   stickers: "🏷️ Stickers",
   vinil_tornasol: "🌈 Vinil Tornasol",
   papel_bond: "📃 Papel Bond",
+  dtf: "🎽 DTF",
 };
+
+// Una unidad de DTF tiene siempre el mismo tamaño: 1 m × 57 cm.
+export const DTF_ANCHO = 1;
+export const DTF_ALTO = 0.57;
+export const DTF_M2 = DTF_ANCHO * DTF_ALTO;
+export const DTF_TAMANO_LABEL = "1 m × 57 cm";
 
 // Los stickers y el vinil tornasol se cargan por m² directo (m² + diseño).
 export function ecoEsPorM2Manual(eco) {
@@ -62,9 +75,17 @@ export function ecoEsPorM2Manual(eco) {
 export function ecoEsPapelBond(eco) {
   return eco.tipoTrabajo === "papel_bond";
 }
-// "Simples": no llevan material ni extras salvo diseño (stickers, tornasol, papel bond).
+// El DTF se cobra por cantidad de unidades × precio por unidad (tamaño fijo).
+export function ecoEsDtf(eco) {
+  return eco.tipoTrabajo === "dtf";
+}
+// Tipos que se cobran por cantidad × costo unitario (papel bond y DTF).
+export function ecoEsPorUnidad(eco) {
+  return ecoEsPapelBond(eco) || ecoEsDtf(eco);
+}
+// "Simples": no llevan material ni extras salvo diseño (stickers, tornasol, papel bond, DTF).
 export function ecoEsSimple(eco) {
-  return ecoEsPorM2Manual(eco) || ecoEsPapelBond(eco);
+  return ecoEsPorM2Manual(eco) || ecoEsPorUnidad(eco);
 }
 
 // Fases por defecto de cada tablero (id estable = valor de `estado` guardado)
@@ -111,6 +132,9 @@ export const state = {
   fasesCamisas: FASES_CAMISAS_DEFECTO.map((f) => ({ ...f })),
   fasesEco: FASES_ECO_DEFECTO.map((f) => ({ ...f })),
   metas: metasVacias(),
+  // Registro histórico: metas que estaban vigentes en cada semana / mes ya cerrado.
+  // [{ periodo: "semana" | "mes", clave: "2026-08-04" | "2026-08", metas: {...} }]
+  metasHistorial: [],
 };
 
 // === FASES DINÁMICAS (configurables) ===
@@ -206,11 +230,13 @@ export function historialPagosImpresion(imp) {
 // === CÁLCULOS DERIVADOS · ECO SOLVENTE ===
 export function m2Eco(eco) {
   if (ecoEsPapelBond(eco)) return 0; // se mide en impresiones, no en m²
+  if (ecoEsDtf(eco)) return redondear2((Number(eco.cantidadImpresiones) || 0) * DTF_M2);
   if (ecoEsPorM2Manual(eco)) return Number(eco.m2Manual) || 0;
   return Number(eco.ancho) * Number(eco.alto);
 }
 export function baseEco(eco) {
-  if (ecoEsPapelBond(eco)) return redondear2((Number(eco.cantidadImpresiones) || 0) * (Number(eco.costoImpresion) || 0));
+  // Papel bond y DTF: cantidad × costo unitario (comparten las mismas columnas).
+  if (ecoEsPorUnidad(eco)) return redondear2((Number(eco.cantidadImpresiones) || 0) * (Number(eco.costoImpresion) || 0));
   return redondear2(m2Eco(eco) * Number(eco.precioM2));
 }
 export function costoClearEco(eco) {
@@ -241,7 +267,7 @@ export function costoCuadroMaderaEco(eco) {
   return eco.llevaCuadroMadera ? redondear2(Number(eco.cuadroMaderaCosto || 0)) : 0;
 }
 export function totalExtrasEco(eco) {
-  // Los tipos simples (stickers, vinil tornasol, papel bond) solo llevan diseño.
+  // Los tipos simples (stickers, vinil tornasol, papel bond, DTF) solo llevan diseño.
   if (ecoEsSimple(eco)) return costoDisenoEco(eco);
   return redondear2(
     costoRemateEco(eco) +
@@ -255,6 +281,13 @@ export function totalExtrasEco(eco) {
 }
 export function totalEco(eco) {
   return redondear2(baseEco(eco) + totalExtrasEco(eco));
+}
+// Cómo se mide el pedido, en una línea (tablero y ficha del cliente).
+export function descripcionMedidaEco(eco) {
+  if (ecoEsPapelBond(eco)) return `🖨️ ${fmtNum(eco.cantidadImpresiones)} impresión(es) × ${money(eco.costoImpresion)}`;
+  if (ecoEsDtf(eco)) return `🎽 ${fmtNum(eco.cantidadImpresiones)} DTF (${DTF_TAMANO_LABEL}) × ${money(eco.costoImpresion)} · ${fmt(m2Eco(eco))} m²`;
+  if (ecoEsPorM2Manual(eco)) return `📐 ${fmt(m2Eco(eco))} m²`;
+  return `📐 ${fmt(m2Eco(eco))} m² (${fmt(eco.ancho)}×${fmt(eco.alto)} m)`;
 }
 export function totalAbonadoEco(eco) {
   return redondear2(Number(eco.abono || 0) + sumPagos(eco.pagos));

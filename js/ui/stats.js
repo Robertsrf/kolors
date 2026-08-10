@@ -6,6 +6,7 @@ import {
   REMATE_LABEL,
   MATERIAL_ECO_LABEL,
   MATERIALES_ECO,
+  TIPO_TRABAJO_ECO_LABEL,
   ecoEsSimple,
   totalCamisas,
   totalPedidoMonto,
@@ -212,15 +213,18 @@ export function renderStats() {
     MATERIALES_ECO.map((m) => Number(m2PorMaterial[m].toFixed(2)))
   );
 
-  // Por tipo de trabajo (m²): Impresión / Stickers / Vinil Tornasol
-  const m2PorTipoTrabajo = { impresion: 0, stickers: 0, vinil_tornasol: 0 };
+  // Por tipo de trabajo (m²): Impresión / Stickers / Vinil Tornasol / DTF
+  // (el papel bond va por impresiones, no tiene m²)
+  const TIPOS_TRABAJO_M2 = ["impresion", "stickers", "vinil_tornasol", "dtf"];
+  const m2PorTipoTrabajo = {};
+  TIPOS_TRABAJO_M2.forEach((t) => (m2PorTipoTrabajo[t] = 0));
   state.ecoSolvente.forEach((e) => {
     const t = e.tipoTrabajo || "impresion";
-    m2PorTipoTrabajo[t] = (m2PorTipoTrabajo[t] || 0) + m2Eco(e);
+    if (t in m2PorTipoTrabajo) m2PorTipoTrabajo[t] += m2Eco(e);
   });
   renderChartEcoTipoTrabajo(
-    ["🖨️ Impresión", "🏷️ Stickers", "🌈 Vinil Tornasol"],
-    [m2PorTipoTrabajo.impresion, m2PorTipoTrabajo.stickers, m2PorTipoTrabajo.vinil_tornasol].map((v) => Number(v.toFixed(2)))
+    TIPOS_TRABAJO_M2.map((t) => TIPO_TRABAJO_ECO_LABEL[t]),
+    TIPOS_TRABAJO_M2.map((t) => Number(m2PorTipoTrabajo[t].toFixed(2)))
   );
 
   // === Producción por semana y por mes (dinero facturado) ===

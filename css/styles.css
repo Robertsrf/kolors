@@ -941,6 +941,34 @@ textarea.campo-invalido {
 .meta-edit-head { font-size: 11px; font-weight: 800; color: var(--text-soft); text-transform: uppercase; text-align: center; }
 .meta-edit-head span:first-child { text-align: left; }
 
+/* Registro de metas (semanas y meses ya cerrados) */
+.hist-lista { display: flex; flex-direction: column; gap: 8px; }
+.hist-fila {
+  border: 1px solid var(--border-soft);
+  border-left: 4px solid var(--border);
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: var(--surface-alt);
+}
+.hist-fila.ok { border-left-color: #10b981; }
+.hist-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.hist-periodo { font-size: 12.5px; font-weight: 800; }
+.hist-nota { font-size: 10px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; }
+.hist-resumen { font-size: 12px; font-weight: 800; color: var(--text-soft); white-space: nowrap; }
+.hist-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hist-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--surface);
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+.hist-chip.ok { border-color: #a7f3d0; background: #ecfdf5; color: #178a43; }
+.hist-chip.falla { border-color: #fecdd3; background: #fff1f5; color: #b3123c; }
+
 /* === LOGROS === */
 .logros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
 .logro {

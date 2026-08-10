@@ -1,6 +1,7 @@
 import {
   state,
   historialPagosEco,
+  DTF_TAMANO_LABEL,
   m2Eco,
   baseEco,
   costoClearEco,
@@ -74,11 +75,13 @@ function leerFormComoEco() {
 
 // Muestra/oculta campos según el tipo de trabajo. Stickers y Vinil Tornasol
 // usan el mismo flujo simple: m² directo + diseño (sin material ni otros extras).
+// Papel Bond y DTF comparten el flujo por unidades: cantidad × costo unitario.
 function actualizarUITipoTrabajo() {
   const tipo = campoTipoTrabajo.value;
   const porM2 = tipo === "stickers" || tipo === "vinil_tornasol";
-  const esPapelBond = tipo === "papel_bond";
-  const esSimple = porM2 || esPapelBond; // sin material ni extras (salvo diseño)
+  const porUnidad = tipo === "papel_bond" || tipo === "dtf";
+  const esDtf = tipo === "dtf";
+  const esSimple = porM2 || porUnidad; // sin material ni extras (salvo diseño)
 
   seccionesImpresion.forEach((el) => {
     if (el) el.style.display = esSimple ? "none" : "";
@@ -86,16 +89,19 @@ function actualizarUITipoTrabajo() {
   document.getElementById("ecoCampoAncho").style.display = esSimple ? "none" : "";
   document.getElementById("ecoCampoAlto").style.display = esSimple ? "none" : "";
   document.getElementById("ecoCampoM2Manual").style.display = porM2 ? "" : "none";
-  document.getElementById("ecoCampoCantidad").style.display = esPapelBond ? "" : "none";
-  document.getElementById("ecoCampoPrecioM2").style.display = esPapelBond ? "none" : "";
-  document.getElementById("ecoCampoCostoImpresion").style.display = esPapelBond ? "" : "none";
+  document.getElementById("ecoCampoCantidad").style.display = porUnidad ? "" : "none";
+  document.getElementById("ecoCampoPrecioM2").style.display = porUnidad ? "none" : "";
+  document.getElementById("ecoCampoCostoImpresion").style.display = porUnidad ? "" : "none";
+  document.getElementById("ecoLabelCantidad").textContent = esDtf ? `¿Cuántos DTF? (${DTF_TAMANO_LABEL} c/u) *` : "¿Cuántas impresiones? *";
+  document.getElementById("ecoLabelCostoImpresion").textContent = esDtf ? "Precio por DTF ($) *" : "Costo por impresión ($) *";
+  document.getElementById("resumenLabelM2Eco").textContent = tipo === "papel_bond" ? "Impresiones:" : esDtf ? "DTF:" : "m²:";
   // Deshabilitar los ocultos para que no interfieran con el guardado.
   document.getElementById("ecoAncho").disabled = esSimple;
   document.getElementById("ecoAlto").disabled = esSimple;
   campoM2Manual.disabled = !porM2;
-  campoCantidad.disabled = !esPapelBond;
-  document.getElementById("ecoPrecioM2").disabled = esPapelBond;
-  campoCostoImpresion.disabled = !esPapelBond;
+  campoCantidad.disabled = !porUnidad;
+  document.getElementById("ecoPrecioM2").disabled = porUnidad;
+  campoCostoImpresion.disabled = !porUnidad;
   actualizarUIExtras();
 }
 
@@ -125,8 +131,13 @@ function actualizarUIExtras() {
 
 function actualizarResumenEco() {
   const borrador = leerFormComoEco();
+  const cantidad = borrador.cantidadImpresiones || 0;
   document.getElementById("resumenM2Eco").textContent =
-    borrador.tipoTrabajo === "papel_bond" ? `${borrador.cantidadImpresiones || 0} imp.` : fmt(m2Eco(borrador));
+    borrador.tipoTrabajo === "papel_bond"
+      ? `${cantidad} imp.`
+      : borrador.tipoTrabajo === "dtf"
+      ? `${cantidad} (${fmt(m2Eco(borrador))} m²)`
+      : fmt(m2Eco(borrador));
   document.getElementById("resumenBaseEco").textContent = money(baseEco(borrador));
   document.getElementById("resumenClearCosto").textContent = money(costoClearEco(borrador));
   document.getElementById("resumenTransferCosto").textContent = money(costoTransferEco(borrador));
@@ -234,12 +245,12 @@ formEco.addEventListener("submit", async function (e) {
   const fechaInput = fechaEl.value;
   const tipoTrab = campoTipoTrabajo.value;
   const porM2 = tipoTrab === "stickers" || tipoTrab === "vinil_tornasol";
-  const esPapelBond = tipoTrab === "papel_bond";
+  const porUnidad = tipoTrab === "papel_bond" || tipoTrab === "dtf";
 
   let valido = true;
   valido = marcarCampo(clienteEl, !!cliente) && valido;
   valido = marcarCampo(fechaEl, !!fechaInput) && valido;
-  if (esPapelBond) {
+  if (porUnidad) {
     valido = marcarCampo(campoCantidad, Number(campoCantidad.value) >= 1) && valido;
     valido = marcarCampo(campoCostoImpresion, Number(campoCostoImpresion.value) >= 0) && valido;
   } else {

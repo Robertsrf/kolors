@@ -12,7 +12,7 @@ import {
   saldoImpresion,
   estaPagadaImpresion,
   TIPO_IMPRESION_LABEL,
-  m2Eco,
+  descripcionMedidaEco,
   totalEco,
   totalAbonadoEco,
   saldoEco,
@@ -98,8 +98,8 @@ function detalleItemEcoHtml(eco) {
     <div class="detalle-item neu-raised">
       <div class="detalle-item-top">
         <div>
-          <div class="detalle-item-titulo">${fmt(m2Eco(eco))} m²${eco.descripcion ? " · " + escapeHtml(eco.descripcion) : ""}</div>
-          <div class="detalle-item-sub">Pedido el ${fechaLegible(eco.fecha)} · ${fmt(eco.ancho)}×${fmt(eco.alto)} m</div>
+          <div class="detalle-item-titulo">${descripcionMedidaEco(eco)}${eco.descripcion ? " · " + escapeHtml(eco.descripcion) : ""}</div>
+          <div class="detalle-item-sub">Pedido el ${fechaLegible(eco.fecha)}</div>
         </div>
         <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
       </div>

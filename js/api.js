@@ -262,6 +262,29 @@ export async function guardarMetas(metas) {
   registrarLog("Sistema", "Actualizó las metas de producción");
 }
 
+// Registro histórico de metas. Si falta la migración, la app sigue funcionando
+// (el historial simplemente se muestra con las metas actuales).
+async function cargarMetasHistorial() {
+  const { data, error } = await supabase.from("metas_historial").select("*");
+  if (error) {
+    state.metasHistorial = [];
+    return;
+  }
+  state.metasHistorial = (data || []).map((row) => ({
+    periodo: row.periodo,
+    clave: row.clave,
+    metas: normalizarMetas(row.data),
+  }));
+}
+
+// Congela las metas vigentes para un período ya cerrado (una sola vez por período).
+export async function guardarSnapshotMetas(periodo, clave, metas) {
+  const { error } = await supabase.from("metas_historial").insert({ periodo, clave, data: metas });
+  if (error) return false;
+  state.metasHistorial.push({ periodo, clave, metas: normalizarMetas(metas) });
+  return true;
+}
+
 const CARGADORES = {
   pedidos: cargarPedidos,
   pedido_items: cargarPedidos,
@@ -274,6 +297,7 @@ const CARGADORES = {
   precios_config: cargarPrecios,
   tableros_config: cargarTablerosConfig,
   metas_config: cargarMetas,
+  metas_historial: cargarMetasHistorial,
 };
 
 export async function cargarTodo() {
@@ -285,6 +309,7 @@ export async function cargarTodo() {
     cargarPrecios(),
     cargarTablerosConfig(),
     cargarMetas(),
+    cargarMetasHistorial(),
   ]);
 }
 

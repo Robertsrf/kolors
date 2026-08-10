@@ -153,13 +153,12 @@ input:focus, select:focus, textarea:focus {
   box-shadow: var(--shadow-sm);
 }
 
-/* Cuerpo: contenido + columna derecha fija */
-.app-body { display: flex; align-items: flex-start; gap: 20px; max-width: 1680px; margin: 0 auto; }
-main { padding: 0 24px 40px; flex: 1; min-width: 0; } /* min-width:0 = deja que el tablero se desplace en vez de estirar */
+/* Cuerpo: contenido + columna derecha pegada al borde de la ventana */
+.app-body { display: flex; align-items: flex-start; gap: 20px; }
+main { padding: 0 24px 40px; flex: 1; min-width: 0; max-width: 1400px; } /* min-width:0 = deja que el tablero se desplace en vez de estirar */
 
-.rail-der { width: 250px; flex-shrink: 0; padding: 0 24px 40px 0; position: sticky; top: 16px; }
-.rail-card { padding: 12px; }
-.rail-card h3 { margin: 0 0 10px; font-size: 14px; }
+.rail-der { width: 250px; flex-shrink: 0; margin-left: auto; padding: 0 24px 40px 0; position: sticky; top: 16px; }
+.rail-card { padding: 10px; }
 .rail-img {
   display: block;
   width: 100%;
@@ -172,7 +171,7 @@ main { padding: 0 24px 40px; flex: 1; min-width: 0; } /* min-width:0 = deja que 
 /* En pantallas angostas el tablero manda: la columna se va al fondo, a lo ancho. */
 @media (max-width: 1200px) {
   .app-body { flex-direction: column; }
-  .rail-der { width: 100%; position: static; padding: 0 24px 40px; }
+  .rail-der { width: 100%; position: static; margin-left: 0; padding: 0 24px 40px; }
   .rail-card { max-width: 420px; margin: 0 auto; }
 }
 

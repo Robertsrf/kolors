@@ -127,6 +127,8 @@ export const state = {
   perdidas: [],
   precios: { secciones: [{ titulo: "Precios", filas: [] }] },
   notas: "",
+  // Listas personales del usuario que tiene la sesión abierta (nadie más las ve).
+  listas: [],
   mensajes: [],
   logs: [],
   fasesCamisas: FASES_CAMISAS_DEFECTO.map((f) => ({ ...f })),

@@ -1,6 +1,7 @@
-import { supabase } from "./supabaseClient.js";
 import { initAuth } from "./auth.js";
-import { cargarTodo, suscribirRealtime } from "./api.js";
+import { cargarTodo } from "./api.js";
+import { iniciarSync, detenerSync } from "./sync.js";
+import { reiniciarAvisoEtapaFinal } from "./ui/avisoEtapaFinal.js";
 import { render } from "./render.js";
 import { ajustarAltoTablero } from "./utils.js";
 import { setClienteSeleccionado, renderClientesGrid } from "./ui/clientes.js";
@@ -18,6 +19,7 @@ import "./ui/notificaciones.js";
 import "./ui/calendario.js";
 import "./ui/calculadora.js";
 import { initNotas } from "./ui/notas.js";
+import { initListas } from "./ui/listas.js";
 import { initChat } from "./ui/chat.js";
 import { initLog, renderLog } from "./ui/log.js";
 import "./ui/exportarPdf.js";
@@ -78,22 +80,21 @@ window.addEventListener("resize", () => {
 });
 
 // === AUTENTICACIÓN + CARGA INICIAL ===
-let canalRealtime = null;
-
 initAuth({
   onLogin: async (rol) => {
+    // Se parte de cero: lo que ya estaba entregado no genera avisos.
+    reiniciarAvisoEtapaFinal();
     await cargarTodo();
     render();
-    if (canalRealtime) supabase.removeChannel(canalRealtime);
-    canalRealtime = suscribirRealtime(render);
     initNotas();
+    initListas();
     initChat();
     initLog(rol);
+    // Tiempo real + repaso periódico + reconexión automática.
+    iniciarSync();
   },
   onLogout: () => {
-    if (canalRealtime) {
-      supabase.removeChannel(canalRealtime);
-      canalRealtime = null;
-    }
+    detenerSync();
+    reiniciarAvisoEtapaFinal();
   },
 });

@@ -58,6 +58,7 @@
       <button class="neu-btn icon" id="btnNotificaciones" title="Entregas próximas">🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
       <div class="notif-dropdown" id="notifDropdown"></div>
     </div>
+    <button class="neu-btn sync-estado conectando" id="syncEstado" title="Conectando con el servidor…">⏳ Conectando…</button>
     <span class="usuario-actual" id="usuarioActual"></span>
     <button class="neu-btn" id="btnLogout">Cerrar sesión</button>
   </div>
@@ -318,6 +319,7 @@
     <button type="button" class="fab-tool" id="btnCalendario" title="Calendario de entregas">📅</button>
     <button type="button" class="fab-tool" id="btnCalculadora" title="Calculadora">🧮</button>
     <button type="button" class="fab-tool" id="btnNotas" title="Notas compartidas">📝</button>
+    <button type="button" class="fab-tool" id="btnListas" title="Mis listas (solo tuyas)">📋</button>
     <button type="button" class="fab-tool" id="btnChat" title="Chat del equipo">💬<span class="notif-badge" id="chatBadge" style="display:none">0</span></button>
     <button type="button" class="fab-tool" id="btnPrecios" title="Precios">💲</button>
   </div>
@@ -353,6 +355,22 @@
   </div>
 </div>
 
+<!-- === AVISO: UNA TARJETA LLEGÓ A LA ÚLTIMA ETAPA ===
+     Le salta a todos los que tengan la app abierta. Solo se cierra con la ✕
+     (o con "Entendido"): no se cierra sola ni al hacer clic por fuera. -->
+<div class="modal-overlay aviso-etapa-overlay" id="modalAvisoEtapaOverlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <h2 id="avisoEtapaTitulo">🎉 Un pedido llegó a la última etapa</h2>
+      <button class="neu-btn icon" id="btnCerrarAvisoEtapa" title="Cerrar">✕</button>
+    </div>
+    <div class="aviso-etapa-lista" id="avisoEtapaLista"></div>
+    <div class="modal-footer">
+      <button type="button" class="neu-btn primary" id="btnEntendidoAvisoEtapa">Entendido</button>
+    </div>
+  </div>
+</div>
+
 <!-- === MODAL NOTAS COMPARTIDAS === -->
 <div class="modal-overlay panel-izq" id="modalNotasOverlay">
   <div class="modal panel-modal">
@@ -363,6 +381,45 @@
     <p class="abono-contexto">Bloc de notas del equipo. Todos ven y editan lo mismo; se guarda solo.</p>
     <textarea id="notasTexto" class="notas-texto" placeholder="Escribe aquí recados, pendientes, lista de compras..."></textarea>
     <div class="notas-estado" id="notasEstado"></div>
+  </div>
+</div>
+
+<!-- === MODAL MIS LISTAS (una por usuario, privadas) === -->
+<div class="modal-overlay panel-izq" id="modalListasOverlay">
+  <div class="modal panel-modal">
+    <div class="modal-header">
+      <h2>📋 Mis listas</h2>
+      <button class="neu-btn icon" id="btnCerrarListas">✕</button>
+    </div>
+
+    <!-- Vista 1: todas mis listas -->
+    <div class="listas-vista" id="listasVistaIndice">
+      <p class="abono-contexto">Para tu control personal: solo tú ves estas listas. Se guardan solas.</p>
+      <form class="listas-alta" id="formNuevaLista">
+        <input type="text" id="listaNuevaTitulo" placeholder="Nueva lista (ej: Camisas de hoy)" autocomplete="off" maxlength="80">
+        <button type="submit" class="neu-btn primary">Crear</button>
+      </form>
+      <div class="listas-indice" id="listasIndice"></div>
+    </div>
+
+    <!-- Vista 2: una lista abierta -->
+    <div class="listas-vista oculta" id="listasVistaDetalle">
+      <div class="lista-detalle-head">
+        <button type="button" class="neu-btn icon" id="btnVolverListas" title="Volver a mis listas">←</button>
+        <input type="text" id="listaTituloInput" class="lista-titulo-input" placeholder="Título de la lista" maxlength="80">
+        <button type="button" class="neu-btn icon danger" id="btnBorrarLista" title="Borrar esta lista">🗑️</button>
+      </div>
+      <form class="listas-alta" id="formNuevoItem">
+        <input type="text" id="itemNuevoTexto" placeholder="Agregar (ej: 5 camisas talla L)" autocomplete="off" maxlength="160">
+        <button type="submit" class="neu-btn primary">＋</button>
+      </form>
+      <div class="lista-progreso" id="listaProgreso"></div>
+      <div class="lista-items" id="listaItems"></div>
+      <div class="lista-detalle-pie">
+        <button type="button" class="neu-btn small" id="btnLimpiarTachados">Quitar los tachados</button>
+        <span class="notas-estado" id="listasEstado"></span>
+      </div>
+    </div>
   </div>
 </div>
 

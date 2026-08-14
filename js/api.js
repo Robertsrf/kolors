@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient.js";
 import { state, migrarPrecios, FASES_CAMISAS_DEFECTO, FASES_ECO_DEFECTO, normalizarMetas } from "./state.js";
 import { getUsuarioActual } from "./auth.js";
+import { registrarAutorEtapaFinal } from "./ui/avisoEtapaFinal.js";
 
 // ============================================================
 // LOG DE CAMBIOS
@@ -357,6 +358,57 @@ export function suscribirNotas(cb) {
 }
 
 // ============================================================
+// LISTAS PERSONALES
+//
+// Cada lista es de quien la creó: la base de datos (RLS) solo devuelve las
+// propias, así que aquí no hace falta filtrar por usuario.
+// ============================================================
+export async function cargarListas() {
+  const { data, error } = await supabase
+    .from("listas_personales")
+    .select("*")
+    .order("creado_at", { ascending: true });
+  if (error) throw error;
+  state.listas = (data || []).map(normalizarLista);
+  return state.listas;
+}
+
+function normalizarLista(row) {
+  return {
+    id: row.id,
+    titulo: row.titulo || "",
+    items: Array.isArray(row.items) ? row.items : [],
+  };
+}
+
+export async function crearLista(titulo) {
+  // usuario_id lo pone la base de datos (default auth.uid()).
+  const { data, error } = await supabase
+    .from("listas_personales")
+    .insert({ titulo })
+    .select()
+    .single();
+  if (error) throw error;
+  const lista = normalizarLista(data);
+  state.listas.push(lista);
+  return lista;
+}
+
+export async function guardarLista(id, { titulo, items }) {
+  const { error } = await supabase
+    .from("listas_personales")
+    .update({ titulo, items, actualizado_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function borrarLista(id) {
+  const { error } = await supabase.from("listas_personales").delete().eq("id", id);
+  if (error) throw error;
+  state.listas = state.listas.filter((l) => l.id !== id);
+}
+
+// ============================================================
 // CHAT DEL EQUIPO
 // ============================================================
 export async function cargarMensajes() {
@@ -388,8 +440,19 @@ export function suscribirChat(cb) {
 // ============================================================
 // TIEMPO REAL: cualquier cambio en cualquier tabla recarga esa
 // entidad y notifica para volver a pintar la pantalla.
+//
+// opciones:
+//   onEstado(status)    -> estado del canal ("SUBSCRIBED", "CHANNEL_ERROR"...)
+//                          para poder reconectar y mostrarlo en pantalla.
+//   onEtapaFinal(datos) -> aviso instantáneo de que una tarjeta llegó a la
+//                          última etapa (lo manda quien la movió).
 // ============================================================
-export function suscribirRealtime(onCambio) {
+export const EVENTO_ETAPA_FINAL = "etapa-final";
+
+let canalPrincipal = null;
+
+export function suscribirRealtime(onCambio, opciones = {}) {
+  const { onEstado, onEtapaFinal } = opciones;
   const pendientes = new Set();
   let timer = null;
 
@@ -409,8 +472,38 @@ export function suscribirRealtime(onCambio) {
   Object.keys(CARGADORES).forEach((tabla) => {
     canal.on("postgres_changes", { event: "*", schema: "public", table: tabla }, () => programarRefresco(tabla));
   });
-  canal.subscribe();
+  canal.on("broadcast", { event: EVENTO_ETAPA_FINAL }, ({ payload }) => {
+    if (onEtapaFinal) onEtapaFinal(payload || {});
+  });
+  canal.subscribe((status) => {
+    if (onEstado) onEstado(status);
+  });
+  canalPrincipal = canal;
   return canal;
+}
+
+export function olvidarCanalRealtime(canal) {
+  if (canalPrincipal === canal) canalPrincipal = null;
+}
+
+// Si la tarjeta acaba de caer en la última columna del tablero, se les avisa al
+// instante a los demás (y se recuerda aquí quién fue, porque el que manda el
+// aviso no recibe su propio mensaje).
+function avisarSiEsUltimaEtapa({ id, estado, fases, seccion, icono, cliente }) {
+  const ultima = fases && fases.length ? fases[fases.length - 1] : null;
+  if (!ultima || estado !== ultima.id) return;
+  const u = getUsuarioActual();
+  const datos = { id, cliente, seccion, icono, fase: ultima.nombre, autor: u ? u.nombre : "" };
+  registrarAutorEtapaFinal(id, datos.autor);
+  if (!canalPrincipal) return;
+  try {
+    Promise.resolve(canalPrincipal.send({ type: "broadcast", event: EVENTO_ETAPA_FINAL, payload: datos })).catch(
+      () => {}
+    );
+  } catch (e) {
+    // El aviso instantáneo es un extra: si falla, los demás igual lo verán
+    // cuando lleguen los datos nuevos.
+  }
 }
 
 // ============================================================
@@ -495,6 +588,14 @@ export async function actualizarFasePedido(id, estado) {
   // pendiente), avanzar de fase igual funciona; se ignora ese error.
   await supabase.from("pedidos").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
   registrarLog("Camisas", `Movió el pedido de "${p ? p.cliente.nombre : id}" a "${estado}"`);
+  avisarSiEsUltimaEtapa({
+    id,
+    estado,
+    fases: state.fasesCamisas,
+    seccion: "Tablero de camisas",
+    icono: "👕",
+    cliente: p ? p.cliente.nombre : "",
+  });
   await cargarPedidos();
 }
 
@@ -661,6 +762,14 @@ export async function actualizarFaseEco(id, estado) {
   await actualizarFila("eco_solvente", id, { estado });
   await supabase.from("eco_solvente").update({ fecha_estado: new Date().toISOString() }).eq("id", id);
   registrarLog("Eco Solvente", `Movió el pedido eco de "${e ? e.cliente : id}" a "${estado}"`);
+  avisarSiEsUltimaEtapa({
+    id,
+    estado,
+    fases: state.fasesEco,
+    seccion: "Eco Solvente",
+    icono: "🏳️",
+    cliente: e ? e.cliente : "",
+  });
   await cargarEcoSolvente();
 }
 

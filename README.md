@@ -26,6 +26,11 @@ Sigue estos pasos en orden. Solo hay que hacerlos la primera vez.
 > los archivos `supabase/migracion-*.sql` que todavía no hayas ejecutado (uno por
 > función nueva), igual que en el SQL Editor. Son seguros de correr una sola vez.
 
+> **⚠️ Importante para que todos vean los cambios al instante:** corre
+> `supabase/migracion-realtime.sql`. Revisa tabla por tabla que esté publicada en
+> tiempo real y activa las que falten (es la causa más común de "hice un cambio y
+> los demás no lo ven hasta recargar"). Se puede correr las veces que quieras.
+
 ### 3. Crear las 4 cuentas (una por rol / código)
 El acceso es por **código de 4 dígitos** (sin usuario). Cada código está ligado a
 una cuenta de Supabase con un correo fijo. La contraseña de cada cuenta es
@@ -116,10 +121,37 @@ archivo y se subirá todo a Supabase.
   un gráfico por meta (barras de lo logrado + línea de la meta, con ✅ en los
   períodos cumplidos) y el detalle período por período. Las metas de un período
   cerrado se congelan, así que cambiarlas hoy no reescribe el pasado.
+- **📋 Mis listas** (panel): listas de control **personales**. Cada quien crea las
+  suyas con un título ("Camisas de hoy") y va apuntando lo que trabaja ("5 camisas
+  talla L"); se tacha con un toque y una barra muestra cuánto llevas. Son privadas:
+  solo las ve quien las creó, ni siquiera el administrador. Se guardan solas y te
+  siguen aunque entres desde otro dispositivo. Necesita correr una vez
+  `supabase/migracion-listas-personales.sql`.
 - **💲 Precios** (botón flotante): tu tarifario de referencia.
 
 Cualquier cambio que haga una persona aparece automáticamente en las pantallas de
 las demás sin recargar.
+
+### Que todo llegue solo (sin recargar la página)
+
+- **🎉 Aviso de "última etapa"**: cuando una tarjeta llega a la **última columna**
+  de un tablero (Camisas o Eco Solvente) —la de Entregado, o como la hayas
+  renombrado— a **todos** los que tengan la app abierta les salta una ventanita
+  con el cliente, la sección y quién la movió. Se cierra con la **✕** (o con
+  "Entendido"); no se cierra sola ni al hacer clic por fuera. Si caen varias
+  seguidas, se van juntando en la misma lista. *Sublimación y Pérdidas no tienen
+  columnas/etapas, así que ahí no hay aviso.*
+- **Indicador de conexión** (arriba a la derecha, junto a tu nombre):
+  - 🟢 **En vivo**: los cambios de los demás llegan al momento.
+  - 🟡 **Reconectando…**: se cayó el canal en vivo (wifi, pestaña dormida...);
+    mientras tanto la app se refresca sola cada 15 segundos y sigue reintentando.
+  - 🔴 **Sin conexión**: no hay internet o el servidor no responde.
+  - Haciendo **clic en el indicador** se actualiza todo al instante.
+- Además, la app se refresca sola al **volver a la pestaña**, al **recuperar
+  internet** y cada minuto por si acaso. Los mensajes del chat, las notas y el log
+  entran en ese mismo repaso: ya no hace falta recargar para verlos.
+- Si aun así notas que los cambios tardan, corre en Supabase
+  `supabase/migracion-realtime.sql` (ver el paso 2 de la puesta en marcha).
 
 ---
 
@@ -136,6 +168,7 @@ js/
   state.js            Datos en memoria + cálculos (totales, saldos...)
   metasCalc.js        Metas: períodos, lo producido en cada uno y su comparación
   api.js              Leer/guardar en Supabase + tiempo real
+  sync.js             Mantiene la app al día: tiempo real, reconexión y repaso
   render.js           Redibuja la pantalla
   main.js             Arranque general y pestañas
   ui/                 Cada pantalla (tablero, sublimación, eco solvente, etc.)

@@ -5,6 +5,7 @@ import { supabase } from "../supabaseClient.js";
 
 let filtro = "";
 let canal = null;
+let puedeVerLog = false;
 
 function fechaHora(iso) {
   return new Date(iso).toLocaleString("es-VE", {
@@ -49,9 +50,22 @@ document.getElementById("buscadorLog").addEventListener("input", (e) => {
   renderLog();
 });
 
+// Red de seguridad por si el aviso en vivo del log no llegó.
+export async function refrescarLog() {
+  if (!puedeVerLog) return;
+  try {
+    await cargarLogs();
+    const activa = document.querySelector(".tab-btn.active");
+    if (activa && activa.dataset.tab === "log") renderLog();
+  } catch (e) {
+    // El log es informativo: si falla, no se molesta al usuario.
+  }
+}
+
 export async function initLog(rol) {
   // Solo admin y jefe pueden leer el log.
-  if (rol !== "admin" && rol !== "jefe") {
+  puedeVerLog = rol === "admin" || rol === "jefe";
+  if (!puedeVerLog) {
     state.logs = [];
     return;
   }

@@ -39,6 +39,17 @@ textarea.addEventListener("input", () => {
   }, 700);
 });
 
+// Red de seguridad por si el aviso en vivo de las notas no llegó.
+export async function refrescarNotas() {
+  try {
+    await cargarNotas();
+    // No pisar lo que el usuario está escribiendo ahora mismo.
+    if (document.activeElement !== textarea) textarea.value = state.notas || "";
+  } catch (e) {
+    // Sin notas disponibles (falta la migración): no se molesta al usuario.
+  }
+}
+
 export async function initNotas() {
   try {
     await cargarNotas();

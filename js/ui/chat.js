@@ -12,6 +12,9 @@ const badge = document.getElementById("chatBadge");
 
 let canal = null;
 let noLeidos = 0;
+// Mensajes que ya se contaron, para no volver a marcarlos como "nuevos" cuando
+// el chat se recarga completo (repaso periódico).
+let idsVistos = new Set();
 
 function horaCorta(iso) {
   const d = new Date(iso);
@@ -51,6 +54,37 @@ function actualizarBadge() {
   }
 }
 
+// Revisa qué mensajes son nuevos desde la última vez: si el chat está abierto se
+// repinta, y si no, se suma al globito rojo. Lo usan tanto el aviso en vivo como
+// el repaso periódico.
+function aplicarMensajes({ primeraVez = false } = {}) {
+  const yo = getUsuarioActual();
+  let nuevosDeOtros = 0;
+  state.mensajes.forEach((m) => {
+    if (idsVistos.has(m.id)) return;
+    idsVistos.add(m.id);
+    if (!primeraVez && !abierto() && (!yo || m.autor !== yo.nombre)) nuevosDeOtros++;
+  });
+  if (abierto()) {
+    noLeidos = 0;
+    renderMensajes();
+  } else {
+    noLeidos += nuevosDeOtros;
+  }
+  actualizarBadge();
+}
+
+// Vuelve a bajar el chat del servidor. Es la red de seguridad por si el aviso en
+// vivo no llegó (era lo que hacía que los mensajes "tardaran" hasta recargar).
+export async function refrescarChat() {
+  try {
+    await cargarMensajes();
+    aplicarMensajes();
+  } catch (e) {
+    // Sin chat disponible (falta la migración): no se molesta al usuario.
+  }
+}
+
 function abrir() {
   overlay.classList.add("active");
   noLeidos = 0;
@@ -82,24 +116,19 @@ form.addEventListener("submit", async (e) => {
 });
 
 export async function initChat() {
+  noLeidos = 0;
+  idsVistos = new Set();
   try {
     await cargarMensajes();
   } catch (e) {
     cont.innerHTML = `<div class="chat-vacio">No se pudo cargar el chat. ¿Corriste la migración de notas/chat?</div>`;
     return;
   }
+  aplicarMensajes({ primeraVez: true });
   renderMensajes();
   if (canal) {
     supabase.removeChannel(canal);
     canal = null;
   }
-  canal = suscribirChat((msg) => {
-    if (abierto()) {
-      renderMensajes();
-    } else {
-      const yo = getUsuarioActual();
-      if (!yo || msg.autor !== yo.nombre) noLeidos++;
-      actualizarBadge();
-    }
-  });
+  canal = suscribirChat(() => aplicarMensajes());
 }

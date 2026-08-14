@@ -9,6 +9,7 @@ import { renderStats } from "./ui/stats.js";
 import { refrescarNotificaciones } from "./ui/notificaciones.js";
 import { renderMetas } from "./ui/metas.js";
 import { renderHistorialMetas } from "./ui/historialMetas.js";
+import { revisarEtapaFinal } from "./ui/avisoEtapaFinal.js";
 
 function actualizarListaClientes() {
   const nombres = new Set();
@@ -29,6 +30,9 @@ function actualizarListaClientes() {
 }
 
 export function render() {
+  // Antes de pintar: ¿alguna tarjeta acaba de llegar a la última etapa? (venga
+  // el cambio de esta pantalla o de otro usuario).
+  revisarEtapaFinal();
   renderBoard();
   actualizarListaClientes();
   refrescarNotificaciones();

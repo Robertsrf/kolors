@@ -30,8 +30,14 @@ import {
   costoPvcEco,
   m2Perdida,
   totalPerdida,
+  TAMANOS_FOTO,
+  TAMANO_FOTO_LABEL,
+  fotosDeSesion,
+  totalFotosImpresas,
+  totalMontoFotos,
+  totalSesionFoto,
 } from "../state.js";
-import { money, fmt, statCard } from "../utils.js";
+import { money, fmt, fmtNum, statCard } from "../utils.js";
 
 export function renderStats() {
   const valorTotal = state.pedidos.reduce((s, p) => s + totalPedidoMonto(p), 0);
@@ -255,6 +261,60 @@ export function renderStats() {
     ["🧪 m² en pruebas de impresión", fmt(m2Pruebas) + " m²"],
     ["💸 Total perdido en $", money(totalPerdidas)],
   ].forEach(([label, value]) => statsPerdidas.appendChild(statCard(label, value)));
+
+  renderStatsFotos(meses);
+}
+
+// === Sesiones fotográficas ===
+function renderStatsFotos(meses) {
+  const sesiones = state.sesionesFoto;
+  const enEstudio = sesiones.filter((s) => s.lugar === "estudio").length;
+  const alAireLibre = sesiones.filter((s) => s.lugar === "aire_libre").length;
+  const conFotos = sesiones.filter((s) => totalFotosImpresas(s) > 0).length;
+
+  const ingresoSesiones = sesiones.reduce((t, s) => t + Number(s.valorSesion || 0), 0);
+  const ingresoFotos = sesiones.reduce((t, s) => t + totalMontoFotos(s), 0);
+  const fotosImpresas = sesiones.reduce((n, s) => n + totalFotosImpresas(s), 0);
+
+  const statsFotos = document.getElementById("statsFotos");
+  statsFotos.innerHTML = "";
+  [
+    ["📸 Sesiones fotográficas", fmtNum(sesiones.length)],
+    ["🏠 En el estudio", fmtNum(enEstudio)],
+    ["🌳 Al aire libre", fmtNum(alAireLibre)],
+    ["💵 Cobrado por sesiones", money(ingresoSesiones)],
+  ].forEach(([label, value]) => statsFotos.appendChild(statCard(label, value)));
+
+  const statsFotosImpresas = document.getElementById("statsFotosImpresas");
+  statsFotosImpresas.innerHTML = "";
+  [
+    ["🖼️ Fotos impresas", fmtNum(fotosImpresas)],
+    ["📦 Sesiones con fotos impresas", fmtNum(conFotos)],
+    ["💵 Cobrado por fotos impresas", money(ingresoFotos)],
+    ["💰 Total del área", money(ingresoSesiones + ingresoFotos)],
+  ].forEach(([label, value]) => statsFotosImpresas.appendChild(statCard(label, value)));
+
+  // Cuántas fotos se imprimieron de cada tamaño (solo los que tienen algo).
+  const porTamano = new Map();
+  sesiones.forEach((s) =>
+    fotosDeSesion(s).forEach((f) => {
+      const n = Number(f.cantidad) || 0;
+      if (n > 0) porTamano.set(f.tamano, (porTamano.get(f.tamano) || 0) + n);
+    })
+  );
+  const tamanosConDatos = TAMANOS_FOTO.filter((t) => porTamano.has(t));
+  renderChartFotosTamano(
+    tamanosConDatos.map((t) => TAMANO_FOTO_LABEL[t]),
+    tamanosConDatos.map((t) => porTamano.get(t))
+  );
+
+  renderChartFotosLugar(["🏠 Estudio", "🌳 Aire libre"], [enEstudio, alAireLibre]);
+  renderChartBarras(
+    "chartFotosMes",
+    meses.map(etiquetaMes),
+    dineroPorPeriodo(sesiones, (s) => s.fecha, totalSesionFoto, meses, claveMes),
+    "#f472b6"
+  );
 }
 
 // === GRÁFICOS (Chart.js) ===
@@ -419,6 +479,36 @@ function renderChartEcoCliente(labels, data) {
         x: { beginAtZero: true, grid: { color: "#eef0f8" } },
         y: { grid: { display: false } },
       },
+    },
+  });
+}
+
+function renderChartFotosTamano(labels, data) {
+  pintarChart("chartFotosTamano", {
+    type: "bar",
+    data: { labels, datasets: [{ label: "fotos", data, backgroundColor: "#f472b6", borderRadius: 8, maxBarThickness: 26 }] },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, grid: { color: "#eef0f8" }, ticks: { precision: 0 } },
+        y: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+function renderChartFotosLugar(labels, data) {
+  pintarChart("chartFotosLugar", {
+    type: "doughnut",
+    data: { labels, datasets: [{ data, backgroundColor: ["#7c5cff", "#34d399"], borderColor: "#ffffff", borderWidth: 3 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: { legend: { position: "bottom", labels: { usePointStyle: true, boxWidth: 8, padding: 14 } } },
     },
   });
 }

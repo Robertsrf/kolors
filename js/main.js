@@ -9,6 +9,9 @@ import { renderStats } from "./ui/stats.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
 import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
+import { renderSesionesFoto } from "./ui/sesionesFoto.js";
+import { aplicarHerramientasPorPestana } from "./ui/herramientas.js";
+import "./modales/sesionFoto.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
 import "./modales/fases.js";
@@ -33,7 +36,11 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     const tab = btn.dataset.tab;
     document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
     document.getElementById("section-" + tab).classList.add("active");
+    // Las herramientas de la izquierda (metas, calculadora, chat...) son del
+    // taller: en sesiones fotográficas no pintan nada y se esconden.
+    aplicarHerramientasPorPestana(tab);
     if (tab === "stats") renderStats();
+    if (tab === "fotos") renderSesionesFoto();
     if (tab === "impresiones") renderImpresionesList();
     if (tab === "ecosolvente") renderEcoBoard();
     if (tab === "perdidas") renderPerdidasList();

@@ -37,3 +37,11 @@ boton.addEventListener("click", () => {
   aplicar(oculto);
   guardarPreferencia(oculto);
 });
+
+// Pestañas que no tienen nada que ver con estas herramientas: el panel entero
+// (incluida la pestañita para mostrarlo) desaparece mientras se esté ahí.
+const SIN_HERRAMIENTAS = ["fotos"];
+
+export function aplicarHerramientasPorPestana(tab) {
+  document.body.classList.toggle("sin-herramientas", SIN_HERRAMIENTAS.includes(tab));
+}

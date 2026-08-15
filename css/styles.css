@@ -141,10 +141,20 @@ input:focus, select:focus, textarea:focus {
 .header-actions { display: flex; align-items: center; gap: 12px; }
 .usuario-actual { font-size: 12px; color: var(--text-soft); font-weight: 600; }
 
+/* Las pestañas van en grupos (trabajo / consulta / números / administración).
+   Un separador discreto entre grupos deja ver de un vistazo dónde está cada
+   cosa sin tener que leer los nombres. */
 .tabs {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+}
+.tabs-grupo { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tabs-grupo + .tabs-grupo { padding-left: 10px; border-left: 1.5px solid var(--border); }
+@media (max-width: 900px) {
+  /* Apretados en una pantalla chica, las rayas estorban más de lo que ayudan. */
+  .tabs-grupo + .tabs-grupo { padding-left: 0; border-left: none; }
 }
 .tab-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -161,6 +171,10 @@ input:focus, select:focus, textarea:focus {
    el contenido se corre y aprovecha ese espacio. */
 main { padding: 0 14px 40px 86px; flex: 1; min-width: 0; transition: padding-left .18s ease; }
 body.herramientas-ocultas main { padding-left: 30px; }
+/* En las pestañas donde el panel no aplica se va entero y el contenido ocupa
+   ese espacio (no queda ni la pestañita de mostrarlo). */
+body.sin-herramientas .tools-dock { display: none; }
+body.sin-herramientas main { padding-left: 30px; }
 
 .rail-der { width: 250px; flex-shrink: 0; padding: 0 20px 40px 0; position: sticky; top: 16px; }
 .rail-card { padding: 10px; }
@@ -563,8 +577,8 @@ label {
 .impresion-mid b { color: var(--text); }
 .impresion-extras { display: flex; flex-wrap: wrap; gap: 4px; }
 .impresion-extras .badge { background: var(--surface-alt); color: var(--text-soft); }
-.impresion-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-.impresion-actions .neu-btn { flex: 1; min-width: 34px; }
+.impresion-actions, .sesion-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.impresion-actions .neu-btn, .sesion-actions .neu-btn { flex: 1; min-width: 34px; }
 
 /* === CLIENTES / HISTORIAL === */
 .clientes-grid {
@@ -733,7 +747,9 @@ label {
 
 /* === PERMISOS POR ROL === */
 /* Jefe (solo lectura): se ocultan todos los controles de edición.
-   Además la base de datos rechaza cualquier escritura de esta cuenta. */
+   Además la base de datos rechaza cualquier escritura de esta cuenta.
+   EXCEPCIÓN: las sesiones fotográficas son su área y sí las puede manejar;
+   por eso sus tarjetas usan .sesion-actions y no .impresion-actions. */
 body.rol-jefe .card-actions,
 body.rol-jefe .impresion-actions,
 body.rol-jefe #btnNuevoPedido,
@@ -956,6 +972,48 @@ body:not(.rol-admin) #btnBorrarTodo {
 .cal-dia.tiene-vencido .cuenta { background: #ef4770; }
 .cal-dia-detalle { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .cal-dia-detalle h4 { margin: 0; font-size: 13px; }
+
+/* === SESIONES FOTOGRÁFICAS === */
+/* Calendario fijo a la izquierda y la lista a la derecha: se ve lo agendado y
+   el detalle a la vez, sin tener que ir y volver. */
+.fotos-layout { display: flex; align-items: flex-start; gap: 18px; }
+.fotos-calendario { width: 330px; flex-shrink: 0; padding: 16px; position: sticky; top: 16px; }
+.fotos-lista { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+@media (max-width: 1000px) {
+  .fotos-layout { flex-direction: column; }
+  .fotos-calendario { width: 100%; position: static; max-width: 420px; }
+}
+
+/* En este calendario cualquier día se puede tocar (para filtrar o agendar). */
+#fotoCalGrid .cal-dia:not(.vacio) { cursor: pointer; }
+#fotoCalGrid .cal-dia:not(.vacio):hover { background: #e2e6ff; }
+.cal-dia.elegido { border-color: var(--accent-2); box-shadow: 0 0 0 2px rgba(124,92,255,.3); }
+.cal-ayuda { font-size: 12px; color: var(--text-soft); line-height: 1.6; }
+.cal-ayuda .neu-btn { margin-top: 6px; }
+
+.badge.lugar-estudio { background: #ede9fe; color: #6d28d9; }
+.badge.lugar-aire_libre { background: #dcf7e3; color: #178a43; }
+
+.sesion-fotos {
+  margin-top: 10px;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.sesion-fotos b { font-size: 12.5px; }
+.sesion-fotos span { color: var(--text-soft); }
+.sesion-fotos.sin-fotos { color: var(--text-soft); font-weight: 600; }
+
+/* Línea de fotos impresas del formulario: tamaño, cuántas, precio y quitar. */
+.item-line.foto-line { grid-template-columns: 1.2fr .8fr 1.2fr auto; }
+@media (max-width: 820px) {
+  .item-line.foto-line { grid-template-columns: 1fr 1fr; }
+}
 
 /* === CALCULADORA === */
 .calc-display {

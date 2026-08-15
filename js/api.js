@@ -183,6 +183,21 @@ function perdidaFromRow(row) {
   };
 }
 
+function sesionFotoFromRow(row) {
+  return {
+    id: row.id,
+    nombre: row.nombre || "",
+    telefono: row.telefono || "",
+    fecha: row.fecha,
+    valorSesion: Number(row.valor_sesion || 0),
+    lugar: row.lugar || "estudio",
+    llevaFotos: !!row.lleva_fotos,
+    fotos: Array.isArray(row.fotos) ? row.fotos : [],
+    descripcion: row.descripcion || "",
+    creado: row.creado_at,
+  };
+}
+
 // ============================================================
 // CARGA INICIAL (todas las tablas)
 // ============================================================
@@ -228,6 +243,29 @@ async function cargarPerdidas() {
   const { data: rows, error } = await supabase.from("perdidas").select("*").order("fecha", { ascending: false });
   if (error) throw error;
   state.perdidas = (rows || []).map(perdidaFromRow);
+}
+
+// ¿El error es "esa tabla no existe"? (falta correr la migración)
+function esTablaFaltante(error) {
+  if (!error) return false;
+  const codigo = error.code || "";
+  return codigo === "42P01" || codigo === "PGRST205" || /does not exist|schema cache/i.test(error.message || "");
+}
+
+async function cargarSesionesFoto() {
+  const { data: rows, error } = await supabase.from("sesiones_foto").select("*").order("fecha", { ascending: false });
+  if (error) {
+    // Sin la migración corrida, el resto de la app tiene que seguir funcionando:
+    // la sección de fotos avisa sola de lo que falta.
+    if (esTablaFaltante(error)) {
+      state.sesionesFoto = [];
+      state.sesionesFotoFalta = true;
+      return;
+    }
+    throw error;
+  }
+  state.sesionesFotoFalta = false;
+  state.sesionesFoto = (rows || []).map(sesionFotoFromRow);
 }
 
 async function cargarPrecios() {
@@ -309,6 +347,7 @@ const CARGADORES = {
   impresiones: cargarImpresiones,
   eco_solvente: cargarEcoSolvente,
   perdidas: cargarPerdidas,
+  sesiones_foto: cargarSesionesFoto,
   pagos: async () => {
     await Promise.all([cargarPedidos(), cargarImpresiones(), cargarEcoSolvente()]);
   },
@@ -324,6 +363,7 @@ export async function cargarTodo() {
     cargarImpresiones(),
     cargarEcoSolvente(),
     cargarPerdidas(),
+    cargarSesionesFoto(),
     cargarPrecios(),
     cargarTablerosConfig(),
     cargarMetas(),
@@ -820,6 +860,44 @@ export async function eliminarPerdida(id) {
   if (error) throw error;
   registrarLog("Pérdidas", "Eliminó un registro de pérdida/prueba");
   await cargarPerdidas();
+}
+
+// ============================================================
+// SESIONES FOTOGRÁFICAS
+// ============================================================
+function sesionFotoToRow(datos) {
+  return {
+    nombre: datos.nombre,
+    telefono: datos.telefono || null,
+    fecha: datos.fecha,
+    valor_sesion: datos.valorSesion,
+    lugar: datos.lugar,
+    lleva_fotos: datos.llevaFotos,
+    fotos: datos.fotos || [],
+    descripcion: datos.descripcion || null,
+  };
+}
+
+export async function crearSesionFoto(datos) {
+  const { error } = await supabase.from("sesiones_foto").insert(sesionFotoToRow(datos));
+  if (error) throw error;
+  registrarLog("Sesiones fotográficas", `Agendó una sesión de ${datos.nombre}`);
+  await cargarSesionesFoto();
+}
+
+export async function actualizarSesionFoto(id, datos) {
+  const { error } = await supabase.from("sesiones_foto").update(sesionFotoToRow(datos)).eq("id", id);
+  if (error) throw error;
+  registrarLog("Sesiones fotográficas", `Editó la sesión de ${datos.nombre}`);
+  await cargarSesionesFoto();
+}
+
+export async function eliminarSesionFoto(id) {
+  const sesion = state.sesionesFoto.find((s) => s.id === id);
+  const { error } = await supabase.from("sesiones_foto").delete().eq("id", id);
+  if (error) throw error;
+  registrarLog("Sesiones fotográficas", `Eliminó la sesión${sesion ? " de " + sesion.nombre : ""}`);
+  await cargarSesionesFoto();
 }
 
 // ============================================================

@@ -41,17 +41,28 @@
     <img src="img/logo-kolors.png" alt="Kolors" class="logo-img">
     <span class="sub">Gestor de pedidos</span>
   </div>
+  <!-- Pestañas agrupadas por para qué sirven: primero dónde se trabaja, luego
+       lo que se consulta y de último los ajustes. El botón de crear ya no vive
+       aquí: cada pantalla tiene el suyo en su propia barra. -->
   <nav class="tabs">
-    <button class="neu-btn tab-btn active" data-tab="tablero">📋 Tablero</button>
-    <button class="neu-btn tab-btn" data-tab="impresiones">🖨️ Sublimación</button>
-    <button class="neu-btn tab-btn" data-tab="ecosolvente">🏳️ Eco Solvente</button>
-    <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
-    <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
-    <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
-    <button class="neu-btn tab-btn" data-tab="metashist">🏁 Historial de metas</button>
-    <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
-    <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
-    <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
+    <div class="tabs-grupo" title="Trabajo del día">
+      <button class="neu-btn tab-btn active" data-tab="tablero">📋 Tablero</button>
+      <button class="neu-btn tab-btn" data-tab="fotos">📸 Sesiones fotográficas</button>
+      <button class="neu-btn tab-btn" data-tab="impresiones">🖨️ Sublimación</button>
+      <button class="neu-btn tab-btn" data-tab="ecosolvente">🏳️ Eco Solvente</button>
+    </div>
+    <div class="tabs-grupo" title="Consulta">
+      <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
+      <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
+    </div>
+    <div class="tabs-grupo" title="Números">
+      <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
+      <button class="neu-btn tab-btn" data-tab="metashist">🏁 Historial de metas</button>
+    </div>
+    <div class="tabs-grupo" title="Administración">
+      <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
+      <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
+    </div>
   </nav>
   <div class="header-actions">
     <div class="notif-wrap">
@@ -80,8 +91,39 @@
         <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pagado">✔ Pagados</button>
       </div>
       <button type="button" class="neu-btn no-jefe" id="btnFasesCamisas" title="Configurar secciones del tablero">⚙️ Secciones</button>
+      <button class="neu-btn primary" id="btnNuevoPedido">➕ Nuevo pedido</button>
     </div>
     <div class="board" id="board"></div>
+  </section>
+
+  <!-- === SESIONES FOTOGRÁFICAS ===
+       Sección aparte del resto del taller: aquí el jefe sí puede crear y editar,
+       y el panel de herramientas de la izquierda se esconde (no aplica). -->
+  <section class="section" id="section-fotos">
+    <div class="board-toolbar">
+      <div class="search-wrap">
+        <input type="text" id="buscadorFotos" placeholder="🔎 Buscar por nombre o teléfono...">
+      </div>
+      <div class="filtro-pago-group" id="filtroFotos">
+        <button type="button" class="neu-btn filtro-pago-btn active" data-filtro="todas">Todas</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="proximas">📅 Próximas</button>
+        <button type="button" class="neu-btn filtro-pago-btn" data-filtro="pasadas">✔ Realizadas</button>
+      </div>
+      <button class="neu-btn primary" id="btnNuevaSesionFoto">➕ Agendar sesión</button>
+    </div>
+
+    <div class="fotos-layout">
+      <div class="fotos-calendario neu-raised">
+        <div class="cal-nav">
+          <button type="button" class="neu-btn icon" id="fotoCalPrev">◀</button>
+          <span id="fotoCalMesAnio"></span>
+          <button type="button" class="neu-btn icon" id="fotoCalNext">▶</button>
+        </div>
+        <div class="cal-grid" id="fotoCalGrid"></div>
+        <div class="cal-dia-detalle" id="fotoCalDiaDetalle"></div>
+      </div>
+      <div class="fotos-lista" id="fotosList"></div>
+    </div>
   </section>
 
   <!-- === SUBLIMACIÓN (impresiones) === -->
@@ -226,6 +268,24 @@
       <div class="stats-block neu-raised">
         <h3>💵 Producido en eco solvente por mes</h3>
         <div class="chart-wrap"><canvas id="chartEcoMes"></canvas></div>
+      </div>
+    </div>
+
+    <h2 class="stats-subtitle">📸 Sesiones fotográficas</h2>
+    <div class="stats-grid" id="statsFotos"></div>
+    <div class="stats-grid" id="statsFotosImpresas"></div>
+    <div class="charts-grid">
+      <div class="stats-block neu-raised">
+        <h3>🖼️ Fotos impresas por tamaño</h3>
+        <div class="chart-wrap"><canvas id="chartFotosTamano"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>📍 Sesiones por lugar</h3>
+        <div class="chart-wrap"><canvas id="chartFotosLugar"></canvas></div>
+      </div>
+      <div class="stats-block neu-raised">
+        <h3>💵 Sesiones fotográficas por mes</h3>
+        <div class="chart-wrap"><canvas id="chartFotosMes"></canvas></div>
       </div>
     </div>
 
@@ -911,6 +971,79 @@
       <div class="modal-footer">
         <button type="button" class="neu-btn" id="btnCancelarModalEco">Cancelar</button>
         <button type="submit" class="neu-btn primary">Guardar pedido eco solvente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- === MODAL AGENDAR / EDITAR SESIÓN FOTOGRÁFICA === -->
+<div class="modal-overlay" id="modalSesionFotoOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalSesionFotoTitulo">Agendar sesión fotográfica</h2>
+      <button class="neu-btn icon" id="btnCerrarModalSesionFoto">✕</button>
+    </div>
+
+    <form id="formSesionFoto" novalidate>
+      <input type="hidden" id="sesionFotoId">
+
+      <div class="form-row">
+        <div>
+          <label for="sesionFotoNombre">Nombre y apellido *</label>
+          <input type="text" id="sesionFotoNombre" placeholder="Ej: Ana Pérez" required>
+        </div>
+        <div>
+          <label for="sesionFotoTelefono">Número de teléfono</label>
+          <input type="tel" id="sesionFotoTelefono" placeholder="Ej: 0412-1234567">
+        </div>
+      </div>
+
+      <div class="form-row three">
+        <div>
+          <label for="sesionFotoFecha">Día de la sesión *</label>
+          <input type="date" id="sesionFotoFecha" required>
+        </div>
+        <div>
+          <label for="sesionFotoValor">Valor de la sesión ($) *</label>
+          <input type="number" id="sesionFotoValor" min="0" step="0.01" required>
+        </div>
+        <div>
+          <label for="sesionFotoLugar">¿Dónde es? *</label>
+          <select id="sesionFotoLugar" required>
+            <option value="estudio">🏠 En el estudio</option>
+            <option value="aire_libre">🌳 Al aire libre</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div style="grid-column: 1 / -1;">
+          <label for="sesionFotoDescripcion">Descripción de la sesión</label>
+          <textarea id="sesionFotoDescripcion" rows="3" placeholder="Ej: cumpleaños de 15, vestuario blanco, se necesitan globos..."></textarea>
+        </div>
+      </div>
+
+      <!-- Fotos impresas: el detalle solo aparece si la sesión las lleva. -->
+      <div class="extra-box neu-inset">
+        <div class="extra-box-header">
+          <input type="checkbox" id="sesionFotoLlevaFotos">
+          <label for="sesionFotoLlevaFotos" style="margin:0">🖼️ Lleva fotos impresas</label>
+        </div>
+        <div id="sesionFotoBloqueFotos" style="display:none">
+          <div id="fotosContainer"></div>
+          <button type="button" class="neu-btn small" id="btnAgregarFotoLinea">+ Agregar tamaño</button>
+        </div>
+      </div>
+
+      <div class="items-summary neu-inset">
+        <span>Fotos impresas: <b id="resumenFotosCantidad">0</b></span>
+        <span>Fotos: <b id="resumenFotosMonto">$0,00</b></span>
+        <span>Total de la sesión: <b id="resumenSesionTotal">$0,00</b></span>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="neu-btn" id="btnCancelarModalSesionFoto">Cancelar</button>
+        <button type="submit" class="neu-btn primary">Guardar</button>
       </div>
     </form>
   </div>

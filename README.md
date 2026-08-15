@@ -100,6 +100,15 @@ archivo y se subirá todo a Supabase.
   el código entra con su rol (admin, editor o solo lectura).
 - **📋 Tablero**: pedidos de camisa por fase (Pedido → Impresión → Sublimación →
   Costura → Entregado). Filtro de "Deben / Pagados".
+- **📸 Sesiones fotográficas**: al lado del tablero. Un calendario del mes muestra
+  lo agendado (toca un día para ver solo ese día, o para agendar ahí mismo) y al
+  lado va la lista con el detalle. De cada sesión se registra: nombre y apellido,
+  teléfono, día, valor de la sesión, si es **en el estudio o al aire libre**,
+  descripción, y si lleva **fotos impresas**: cuántas y a qué precio cada una, por
+  tamaño (4×6", 5×7", 8×10", 11×14", 16×20" y 20×24"). Es la única sección que el
+  **jefe sí puede modificar**. Mientras estás aquí, el panel de herramientas de la
+  izquierda desaparece: no tiene que ver con esta área. Necesita correr una vez
+  `supabase/migracion-sesiones-foto.sql`.
 - **🖨️ Sublimación**: impresiones para sublimar. El tipo "camisa" o "taller" solo
   registra m² (no cobra aparte); "otros" sí cobra.
 - **🏳️ Eco Solvente**: pendones y demás trabajos. Según el **tipo de trabajo**:
@@ -113,7 +122,9 @@ archivo y se subirá todo a Supabase.
 - **🗑️ Pérdidas**: material perdido y pruebas de impresión (m² y su costo).
 - **📇 Clientes**: cuánto debe cada cliente, desglosado por camisas, sublimación y
   eco solvente.
-- **📊 Estadísticas**: gráficos y totales de todo.
+- **📊 Estadísticas**: gráficos y totales de todo, incluido el bloque de
+  **sesiones fotográficas y fotos impresas** (cuántas sesiones, en estudio o al
+  aire libre, cuántas fotos se imprimieron de cada tamaño y cuánto se cobró).
 - **🎯 Metas** (panel): objetivos por semana y por mes (los fijan admin y jefe).
   Cuenta lo que llega a la fase final, en la semana y el mes en curso.
 - **🏁 Historial de metas**: cómo terminó cada semana y cada mes ya cerrado —

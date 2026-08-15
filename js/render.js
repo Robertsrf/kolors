@@ -4,6 +4,7 @@ import { renderBoard } from "./ui/tablero.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
 import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
+import { renderSesionesFoto } from "./ui/sesionesFoto.js";
 import { renderClientesGrid, abrirDetalleCliente, getClienteSeleccionado } from "./ui/clientes.js";
 import { renderStats } from "./ui/stats.js";
 import { refrescarNotificaciones } from "./ui/notificaciones.js";
@@ -44,6 +45,7 @@ export function render() {
   if (tab === "impresiones") renderImpresionesList();
   if (tab === "ecosolvente") renderEcoBoard();
   if (tab === "perdidas") renderPerdidasList();
+  if (tab === "fotos") renderSesionesFoto();
   if (tab === "clientes") {
     const sel = getClienteSeleccionado();
     if (sel) abrirDetalleCliente(sel);

@@ -16,6 +16,20 @@ export const TALLAS_ADULTO = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
 export const GENEROS = ["Niño", "Niña", "Dama", "Caballero", "Unisex"];
 export const NIVELES_PRECIO = [1, 2, 3, 4, 5, 6, 12];
 
+// === SESIONES FOTOGRÁFICAS ===
+// Tamaños de foto impresa, en pulgadas. El 8×10" es el más pedido; los demás
+// cubren desde la foto de billetera hasta el cuadro grande.
+export const TAMANOS_FOTO = ["4x6", "5x7", "8x10", "11x14", "16x20", "20x24"];
+export const TAMANO_FOTO_LABEL = {
+  "4x6": '4×6"',
+  "5x7": '5×7"',
+  "8x10": '8×10"',
+  "11x14": '11×14"',
+  "16x20": '16×20"',
+  "20x24": '20×24"',
+};
+export const LUGAR_SESION_LABEL = { estudio: "🏠 En el estudio", aire_libre: "🌳 Al aire libre" };
+
 export const TIPO_IMPRESION_LABEL = { camisa: "👕 Camisa", taller: "🧵 Taller", otros: "💵 Otros" };
 export const TIPO_PERDIDA_LABEL = { perdida: "🗑️ Pérdida", prueba: "🧪 Prueba" };
 export const REMATE_LABEL = { ninguno: "Sin remate", palos: "🪵 Palos", tubos: "🧵 Tubos" };
@@ -125,6 +139,9 @@ export const state = {
   impresiones: [],
   ecoSolvente: [],
   perdidas: [],
+  sesionesFoto: [],
+  // true cuando falta correr migracion-sesiones-foto.sql (la sección lo avisa).
+  sesionesFotoFalta: false,
   precios: { secciones: [{ titulo: "Precios", filas: [] }] },
   notas: "",
   // Listas personales del usuario que tiene la sesión abierta (nadie más las ve).
@@ -407,6 +424,22 @@ export function m2Perdida(p) {
 }
 export function totalPerdida(p) {
   return redondear2(m2Perdida(p) * Number(p.precioM2));
+}
+
+// === CÁLCULOS DERIVADOS · SESIONES FOTOGRÁFICAS ===
+// Las fotos impresas solo cuentan si la sesión las lleva: así, desmarcar la
+// casilla no borra lo que ya se había escrito, pero tampoco lo cobra.
+export function fotosDeSesion(s) {
+  return s.llevaFotos ? s.fotos || [] : [];
+}
+export function totalFotosImpresas(s) {
+  return fotosDeSesion(s).reduce((n, f) => n + (Number(f.cantidad) || 0), 0);
+}
+export function totalMontoFotos(s) {
+  return redondear2(fotosDeSesion(s).reduce((t, f) => t + (Number(f.cantidad) || 0) * (Number(f.precioUnitario) || 0), 0));
+}
+export function totalSesionFoto(s) {
+  return redondear2(Number(s.valorSesion || 0) + totalMontoFotos(s));
 }
 
 // === PRECIOS (tarjeta de referencia) ===

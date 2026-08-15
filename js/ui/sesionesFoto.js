@@ -175,7 +175,12 @@ function tarjetaSesion(s) {
 
 async function borrar(s) {
   if (!confirm(`¿Eliminar la sesión de ${s.nombre} del ${fechaLegible(s.fecha)}? Esta acción no se puede deshacer.`)) return;
-  await eliminarSesionFoto(s.id);
+  try {
+    await eliminarSesionFoto(s.id);
+  } catch (err) {
+    alert("No se pudo eliminar la sesión.\n\n" + err.message);
+    return;
+  }
   render();
 }
 

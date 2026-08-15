@@ -252,6 +252,22 @@ function esTablaFaltante(error) {
   return codigo === "42P01" || codigo === "PGRST205" || /does not exist|schema cache/i.test(error.message || "");
 }
 
+export const AVISO_FALTA_SESIONES_FOTO =
+  "Las sesiones fotográficas todavía no están preparadas en la base de datos.\n\n" +
+  "Hay que correr una vez el archivo supabase/migracion-sesiones-foto.sql en:\n" +
+  "Supabase → SQL Editor → New query → Run.\n\n" +
+  "Después recarga la página con Ctrl+F5.";
+
+// Un "no existe la tabla" en crudo no le dice nada a nadie: se cambia por la
+// instrucción de qué falta hacer.
+function traducirFaltaSesionesFoto(error) {
+  if (esTablaFaltante(error)) {
+    state.sesionesFotoFalta = true;
+    return new Error(AVISO_FALTA_SESIONES_FOTO);
+  }
+  return error;
+}
+
 async function cargarSesionesFoto() {
   const { data: rows, error } = await supabase.from("sesiones_foto").select("*").order("fecha", { ascending: false });
   if (error) {
@@ -880,14 +896,14 @@ function sesionFotoToRow(datos) {
 
 export async function crearSesionFoto(datos) {
   const { error } = await supabase.from("sesiones_foto").insert(sesionFotoToRow(datos));
-  if (error) throw error;
+  if (error) throw traducirFaltaSesionesFoto(error);
   registrarLog("Sesiones fotográficas", `Agendó una sesión de ${datos.nombre}`);
   await cargarSesionesFoto();
 }
 
 export async function actualizarSesionFoto(id, datos) {
   const { error } = await supabase.from("sesiones_foto").update(sesionFotoToRow(datos)).eq("id", id);
-  if (error) throw error;
+  if (error) throw traducirFaltaSesionesFoto(error);
   registrarLog("Sesiones fotográficas", `Editó la sesión de ${datos.nombre}`);
   await cargarSesionesFoto();
 }
@@ -895,7 +911,7 @@ export async function actualizarSesionFoto(id, datos) {
 export async function eliminarSesionFoto(id) {
   const sesion = state.sesionesFoto.find((s) => s.id === id);
   const { error } = await supabase.from("sesiones_foto").delete().eq("id", id);
-  if (error) throw error;
+  if (error) throw traducirFaltaSesionesFoto(error);
   registrarLog("Sesiones fotográficas", `Eliminó la sesión${sesion ? " de " + sesion.nombre : ""}`);
   await cargarSesionesFoto();
 }

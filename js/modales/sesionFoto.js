@@ -1,6 +1,6 @@
 import { state, TAMANOS_FOTO, TAMANO_FOTO_LABEL } from "../state.js";
 import { money, fmtNum, toInputDate, fechaInputToISO, marcarCampo, enfocarPrimerInvalido } from "../utils.js";
-import { crearSesionFoto, actualizarSesionFoto } from "../api.js";
+import { crearSesionFoto, actualizarSesionFoto, AVISO_FALTA_SESIONES_FOTO } from "../api.js";
 import { render } from "../render.js";
 
 const overlay = document.getElementById("modalSesionFotoOverlay");
@@ -97,7 +97,16 @@ document.getElementById("btnAgregarFotoLinea").addEventListener("click", () => {
 // ============================================================
 // ABRIR / CERRAR
 // ============================================================
+// Sin la tabla creada no tiene sentido dejar llenar el formulario: se avisa
+// antes de escribir nada, en vez de perderlo todo al guardar.
+function faltaLaTabla() {
+  if (!state.sesionesFotoFalta) return false;
+  alert(AVISO_FALTA_SESIONES_FOTO);
+  return true;
+}
+
 export function abrirModalNuevaSesionFoto(fechaSugerida) {
+  if (faltaLaTabla()) return;
   form.reset();
   document.getElementById("sesionFotoId").value = "";
   document.getElementById("sesionFotoFecha").value = fechaSugerida || toInputDate();
@@ -111,6 +120,7 @@ export function abrirModalNuevaSesionFoto(fechaSugerida) {
 }
 
 export function abrirModalEditarSesionFoto(id) {
+  if (faltaLaTabla()) return;
   const s = state.sesionesFoto.find((x) => x.id === id);
   if (!s) return;
   form.reset();
@@ -184,8 +194,15 @@ form.addEventListener("submit", async (e) => {
   };
 
   const idExistente = document.getElementById("sesionFotoId").value;
-  if (idExistente) await actualizarSesionFoto(idExistente, datos);
-  else await crearSesionFoto(datos);
+  // Si falla el guardado la ventana se queda abierta: lo que se escribió no se
+  // pierde y se puede reintentar.
+  try {
+    if (idExistente) await actualizarSesionFoto(idExistente, datos);
+    else await crearSesionFoto(datos);
+  } catch (err) {
+    alert("No se pudo guardar la sesión.\n\n" + err.message);
+    return;
+  }
 
   cerrar();
   render();

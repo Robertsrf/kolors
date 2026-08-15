@@ -11,6 +11,7 @@ import { renderEcoBoard } from "./ui/ecoSolvente.js";
 import { renderPerdidasList } from "./ui/perdidas.js";
 import { renderSesionesFoto } from "./ui/sesionesFoto.js";
 import { aplicarHerramientasPorPestana } from "./ui/herramientas.js";
+import { actualizarMenuSecciones } from "./ui/navegacion.js";
 import "./modales/sesionFoto.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
@@ -39,6 +40,7 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
     // Las herramientas de la izquierda (metas, calculadora, chat...) son del
     // taller: en sesiones fotográficas no pintan nada y se esconden.
     aplicarHerramientasPorPestana(tab);
+    actualizarMenuSecciones();
     if (tab === "stats") renderStats();
     if (tab === "fotos") renderSesionesFoto();
     if (tab === "impresiones") renderImpresionesList();

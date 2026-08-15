@@ -37,42 +37,57 @@
 <div class="app-shell hidden" id="appShell">
 
 <header class="app-header">
-  <div class="brand">
-    <img src="img/logo-kolors.png" alt="Kolors" class="logo-img">
-    <span class="sub">Gestor de pedidos</span>
+  <!-- Fila 1: identidad a la izquierda y las acciones de la sesión a la derecha.
+       Las notificaciones viven aquí arriba y siempre tienen toda la página por
+       debajo para desplegarse: nunca quedan cortadas. -->
+  <div class="header-top">
+    <div class="brand">
+      <img src="img/logo-kolors.png" alt="Kolors" class="logo-img">
+      <span class="sub">Gestor de pedidos</span>
+    </div>
+    <div class="header-actions">
+      <div class="notif-wrap">
+        <button class="neu-btn icon" id="btnNotificaciones" title="Entregas próximas">🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
+        <div class="notif-dropdown" id="notifDropdown"></div>
+      </div>
+      <button class="neu-btn sync-estado conectando" id="syncEstado" title="Conectando con el servidor…">⏳ Conectando…</button>
+      <span class="usuario-actual" id="usuarioActual"></span>
+      <button class="neu-btn" id="btnLogout">Cerrar sesión</button>
+    </div>
   </div>
-  <!-- Pestañas agrupadas por para qué sirven: primero dónde se trabaja, luego
-       lo que se consulta y de último los ajustes. El botón de crear ya no vive
-       aquí: cada pantalla tiene el suyo en su propia barra. -->
-  <nav class="tabs">
-    <div class="tabs-grupo" title="Trabajo del día">
-      <button class="neu-btn tab-btn active" data-tab="tablero">📋 Tablero</button>
-      <button class="neu-btn tab-btn" data-tab="fotos">📸 Sesiones fotográficas</button>
-      <button class="neu-btn tab-btn" data-tab="impresiones">🖨️ Sublimación</button>
-      <button class="neu-btn tab-btn" data-tab="ecosolvente">🏳️ Eco Solvente</button>
-    </div>
-    <div class="tabs-grupo" title="Consulta">
-      <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
-      <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
-    </div>
-    <div class="tabs-grupo" title="Números">
-      <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
-      <button class="neu-btn tab-btn" data-tab="metashist">🏁 Historial de metas</button>
-    </div>
-    <div class="tabs-grupo" title="Administración">
-      <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
-      <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
+
+  <!-- Fila 2: navegación centrada, en grupos según para qué sirve cada pestaña.
+       Si la pantalla no da para mostrarlas todas, se recogen en el botón
+       "☰ Secciones" en vez de amontonarse. -->
+  <nav class="tabs" id="tabsNav">
+    <button type="button" class="neu-btn tabs-toggle" id="btnMenuSecciones" aria-expanded="false" aria-controls="tabsLista">
+      <span id="tabsToggleTexto">☰ Secciones</span>
+    </button>
+    <div class="tabs-lista" id="tabsLista">
+      <div class="tabs-grupo">
+        <span class="tabs-grupo-titulo">Trabajo del día</span>
+        <button class="neu-btn tab-btn active" data-tab="tablero">📋 Tablero</button>
+        <button class="neu-btn tab-btn" data-tab="fotos">📸 Sesiones fotográficas</button>
+        <button class="neu-btn tab-btn" data-tab="impresiones">🖨️ Sublimación</button>
+        <button class="neu-btn tab-btn" data-tab="ecosolvente">🏳️ Eco Solvente</button>
+      </div>
+      <div class="tabs-grupo">
+        <span class="tabs-grupo-titulo">Consulta</span>
+        <button class="neu-btn tab-btn" data-tab="clientes">📇 Clientes</button>
+        <button class="neu-btn tab-btn" data-tab="perdidas">🗑️ Pérdidas</button>
+      </div>
+      <div class="tabs-grupo">
+        <span class="tabs-grupo-titulo">Números</span>
+        <button class="neu-btn tab-btn" data-tab="stats">📊 Estadísticas</button>
+        <button class="neu-btn tab-btn" data-tab="metashist">🏁 Historial de metas</button>
+      </div>
+      <div class="tabs-grupo">
+        <span class="tabs-grupo-titulo">Administración</span>
+        <button class="neu-btn tab-btn solo-admin-jefe" data-tab="log">📜 Log</button>
+        <button class="neu-btn tab-btn" data-tab="datos">⚙️ Datos</button>
+      </div>
     </div>
   </nav>
-  <div class="header-actions">
-    <div class="notif-wrap">
-      <button class="neu-btn icon" id="btnNotificaciones" title="Entregas próximas">🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span></button>
-      <div class="notif-dropdown" id="notifDropdown"></div>
-    </div>
-    <button class="neu-btn sync-estado conectando" id="syncEstado" title="Conectando con el servidor…">⏳ Conectando…</button>
-    <span class="usuario-actual" id="usuarioActual"></span>
-    <button class="neu-btn" id="btnLogout">Cerrar sesión</button>
-  </div>
 </header>
 
 <div class="app-body">

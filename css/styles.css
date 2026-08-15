@@ -111,13 +111,21 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* === LAYOUT === */
+/* La cabecera va en dos filas: arriba la sesión (logo + acciones) y debajo la
+   navegación centrada. Antes iba todo en una sola línea, y con diez pestañas
+   había que bajar el zoom para que cupiera. */
 .app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 24px 14px;
+}
+.header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 20px 24px;
 }
 .brand { display: flex; flex-direction: column; }
 .brand .logo-img { height: 34px; width: auto; max-width: 190px; object-fit: contain; }
@@ -146,15 +154,86 @@ input:focus, select:focus, textarea:focus {
    cosa sin tener que leer los nombres. */
 .tabs {
   display: flex;
+  justify-content: center;
+  position: relative;
+}
+.tabs-lista {
+  display: flex;
   gap: 8px;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
 }
-.tabs-grupo { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tabs-grupo { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; justify-content: center; }
 .tabs-grupo + .tabs-grupo { padding-left: 10px; border-left: 1.5px solid var(--border); }
-@media (max-width: 900px) {
-  /* Apretados en una pantalla chica, las rayas estorban más de lo que ayudan. */
-  .tabs-grupo + .tabs-grupo { padding-left: 0; border-left: none; }
+/* El nombre del grupo solo hace falta dentro del menú desplegable. */
+.tabs-grupo-titulo { display: none; }
+/* Las pestañas son navegación, no acciones: un pelo más compactas que el resto
+   de los botones para que las diez quepan sin bajar el zoom. */
+.tab-btn { padding: 9px 14px; font-size: 13.5px; }
+
+/* Botón que recoge las pestañas cuando la pantalla no da para mostrarlas. */
+.tabs-toggle { display: none; }
+
+/* En laptop (1366 es lo más común) las diez pestañas no caben con el tamaño
+   normal y se partían en dos filas dejando dos botones huérfanos abajo. Un
+   poco más apretadas entran todas en una sola línea. */
+@media (max-width: 1400px) {
+  .tab-btn { padding: 8px 11px; font-size: 12.5px; }
+  .tabs-lista { gap: 6px; }
+  .tabs-grupo { gap: 5px; }
+  .tabs-grupo + .tabs-grupo { padding-left: 7px; }
+}
+
+/* Por debajo de este ancho las diez pestañas ya no entran en una línea (medido:
+   necesitan ~1225 px). En vez de partirlas en dos filas dejando botones sueltos
+   abajo, se guardan enteras en el menú "☰". */
+@media (max-width: 1240px) {
+  .tabs-toggle { display: inline-flex; align-items: center; gap: 6px; }
+  .tabs-lista {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 70;
+    width: max-content;
+    max-width: min(92vw, 460px);
+    max-height: 70vh;
+    overflow-y: auto;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    box-shadow: 0 18px 44px rgba(51, 58, 77, .22);
+  }
+  .tabs-lista.abierto { display: flex; }
+  .tabs-grupo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding-left: 0;
+    border-left: none;
+  }
+  .tabs-grupo + .tabs-grupo {
+    padding-left: 0;
+    border-left: none;
+    padding-top: 12px;
+    border-top: 1.5px solid var(--border);
+  }
+  .tabs-grupo-titulo {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--text-soft);
+    padding: 0 4px 2px;
+  }
+  .tabs-lista .tab-btn { text-align: left; padding: 10px 14px; font-size: 14px; }
 }
 .tab-btn.active {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -802,7 +881,9 @@ body:not(.rol-admin) #btnBorrarTodo {
   border-radius: var(--radius);
   box-shadow: 0 18px 44px rgba(51,58,77,.22);
   padding: 10px;
-  z-index: 60;
+  /* Por encima del menú de secciones: si los dos están abiertos, el aviso de
+     entregas es lo que hay que poder leer. */
+  z-index: 80;
 }
 .notif-dropdown.visible { display: block; }
 .notif-titulo { font-size: 13px; font-weight: 800; margin: 4px 6px 10px; }

@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient.js";
+import { state } from "./state.js";
 import { cargarTodo, suscribirRealtime, olvidarCanalRealtime } from "./api.js";
 import { render } from "./render.js";
 import { refrescarChat } from "./ui/chat.js";
@@ -77,6 +78,31 @@ function hayArrastre() {
   return !!document.querySelector(".card.arrastrando");
 }
 
+// Huella de los datos que se ven en pantalla. Sirve para no repintar cuando el
+// repaso periódico no trajo nada nuevo: repintar mueve el tablero y molesta a
+// quien está leyendo. Lleva la fecha para que al cambiar el día se repinte y se
+// recalculen los "faltan X días" de las entregas.
+function firmaDatos() {
+  try {
+    return JSON.stringify([
+      new Date().toDateString(),
+      state.pedidos,
+      state.impresiones,
+      state.ecoSolvente,
+      state.perdidas,
+      state.sesionesFoto,
+      state.precios,
+      state.fasesCamisas,
+      state.fasesEco,
+      state.metas,
+      state.metasHistorial,
+    ]);
+  } catch {
+    // Ante la duda, repintar (es lo que se hacía siempre antes).
+    return null;
+  }
+}
+
 export async function refrescarAhora(motivo = "manual") {
   if (!activo || refrescando) return;
   if (motivo !== "manual") {
@@ -87,8 +113,12 @@ export async function refrescarAhora(motivo = "manual") {
   }
   refrescando = true;
   try {
+    const antes = firmaDatos();
     await cargarTodo();
-    render();
+    const despues = firmaDatos();
+    // Si nadie cambió nada, no se toca la pantalla: quien esté leyendo una
+    // tarjeta se queda exactamente donde está.
+    if (antes === null || despues === null || antes !== despues) render();
     if (vista === "sin-conexion") cambiarVista(canal ? "reconectando" : "conectando");
   } catch (e) {
     console.error("Kolors · no se pudo actualizar:", e);

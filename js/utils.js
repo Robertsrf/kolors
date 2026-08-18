@@ -139,3 +139,35 @@ export function renderHistorialAbonos(containerId, historial, onEliminar) {
     el.querySelectorAll(".abono-del").forEach((btn) => btn.addEventListener("click", () => onEliminar(historial[Number(btn.dataset.i)])));
   }
 }
+
+// ============================================================
+// CONSERVAR EL SITIO AL REPINTAR
+//
+// Repintar reemplaza el contenido, y el navegador manda cada zona con scroll de
+// vuelta al principio. Como la pantalla se refresca sola cuando alguien más
+// cambia algo, a quien estaba leyendo una tarjeta se le iba de la vista.
+//
+// Se anota dónde estaba cada zona antes de repintar y se devuelve al mismo
+// sitio después. Las zonas se marcan en el HTML con data-scroll="<clave>"; la
+// clave tiene que sobrevivir al repintado (por eso lleva el id de la fase y no
+// la posición de la columna, que cambia si se reordenan).
+// ============================================================
+export function capturarScroll() {
+  const zonas = {};
+  document.querySelectorAll("[data-scroll]").forEach((el) => {
+    zonas[el.dataset.scroll] = { top: el.scrollTop, left: el.scrollLeft };
+  });
+  return { pagina: window.scrollY, zonas };
+}
+
+export function restaurarScroll(estado) {
+  if (!estado) return;
+  document.querySelectorAll("[data-scroll]").forEach((el) => {
+    const z = estado.zonas[el.dataset.scroll];
+    if (!z) return;
+    // Si la zona se encogió, el navegador recorta solo al máximo posible.
+    if (z.top) el.scrollTop = z.top;
+    if (z.left) el.scrollLeft = z.left;
+  });
+  if (estado.pagina) window.scrollTo(0, estado.pagina);
+}

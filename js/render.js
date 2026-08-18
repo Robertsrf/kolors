@@ -1,5 +1,5 @@
 import { state } from "./state.js";
-import { escapeHtml } from "./utils.js";
+import { escapeHtml, capturarScroll, restaurarScroll } from "./utils.js";
 import { renderBoard } from "./ui/tablero.js";
 import { renderImpresionesList } from "./ui/impresiones.js";
 import { renderEcoBoard } from "./ui/ecoSolvente.js";
@@ -31,6 +31,11 @@ function actualizarListaClientes() {
 }
 
 export function render() {
+  // Dónde estaba mirando cada quien antes de repintar. La pantalla se refresca
+  // sola cuando otro usuario cambia algo: sin esto, a quien estaba leyendo una
+  // tarjeta se le iba de la vista cada vez.
+  const sitio = capturarScroll();
+
   // Antes de pintar: ¿alguna tarjeta acaba de llegar a la última etapa? (venga
   // el cambio de esta pantalla o de otro usuario).
   revisarEtapaFinal();
@@ -51,4 +56,6 @@ export function render() {
     if (sel) abrirDetalleCliente(sel);
     else renderClientesGrid();
   }
+
+  restaurarScroll(sitio);
 }

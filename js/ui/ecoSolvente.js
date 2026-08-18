@@ -76,6 +76,8 @@ export function renderEcoBoard() {
 
     const cardsWrap = document.createElement("div");
     cardsWrap.className = "cards";
+    // Clave estable para devolver esta columna a donde estaba tras repintar.
+    cardsWrap.dataset.scroll = "cards-eco-" + fase.id;
     if (enFase.length === 0) {
       cardsWrap.innerHTML = `<div class="empty-col">Sin pedidos</div>`;
     } else {

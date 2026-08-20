@@ -12,6 +12,7 @@ import { actualizarFasePedido, eliminarPedido as apiEliminarPedido } from "../ap
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
 import { abrirModalEditarPedido } from "../modales/pedido.js";
+import { responsablesHtml, activarResponsables } from "./responsables.js";
 
 let filtroTexto = "";
 let filtroPagoPedidos = "todos";
@@ -120,6 +121,7 @@ function renderCard(p) {
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>
+    ${responsablesHtml(p.responsables)}
     ${datoDestacadoHtml({ icono: "👕", valor: camisas, unidad: camisas === 1 ? "camisa" : "camisas", detalle: "" })}
     ${p.descripcion ? `<div class="impresion-desc">${escapeHtml(p.descripcion)}</div>` : ""}
     <div class="card-mid">
@@ -135,6 +137,7 @@ function renderCard(p) {
     </div>
   `;
 
+  activarResponsables(card, "pedido", p);
   card.querySelector('[data-action="retroceder"]').addEventListener("click", () => retrocederFase(p.id));
   card.querySelector('[data-action="avanzar"]').addEventListener("click", () => avanzarFase(p.id));
   card.querySelector('[data-action="abonar"]').addEventListener("click", () => abrirModalAbono("pedido", p.id));

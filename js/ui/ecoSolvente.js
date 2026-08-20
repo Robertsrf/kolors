@@ -18,6 +18,7 @@ import { actualizarFaseEco, eliminarEco as apiEliminarEco } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
 import { abrirModalEditarEco } from "../modales/eco.js";
+import { responsablesHtml, activarResponsables } from "./responsables.js";
 
 let filtroTextoEco = "";
 let filtroPagoEco = "todos";
@@ -142,6 +143,7 @@ function renderEcoCard(eco) {
       </div>
       <span class="badge ${pagado ? "pagado" : "debe"}">${pagado ? "✔ Pagado" : "⚠️ Debe " + money(saldo)}</span>
     </div>
+    ${responsablesHtml(eco.responsables)}
     ${datoDestacadoHtml(datoPrincipalEco(eco))}
     ${eco.descripcion ? `<div class="impresion-desc">${escapeHtml(eco.descripcion)}</div>` : ""}
     ${badgesExtras(eco)}
@@ -159,6 +161,7 @@ function renderEcoCard(eco) {
     </div>
   `;
 
+  activarResponsables(card, "eco_solvente", eco);
   card.querySelector('[data-action="retroceder"]').addEventListener("click", () => retrocederFaseEco(eco.id));
   card.querySelector('[data-action="avanzar"]').addEventListener("click", () => avanzarFaseEco(eco.id));
   card.querySelector('[data-action="abonar"]').addEventListener("click", () => abrirModalAbono("eco_solvente", eco.id));

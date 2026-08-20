@@ -100,6 +100,15 @@ archivo y se subirá todo a Supabase.
   el código entra con su rol (admin, editor o solo lectura).
 - **📋 Tablero**: pedidos de camisa por fase (Pedido → Impresión → Sublimación →
   Costura → Entregado). Filtro de "Deben / Pagados".
+- **👥 Quién lo hace** (círculos de colores): cada tarjeta del **Tablero**, de
+  **Sublimación** y de **Eco Solvente** lleva 4 círculos, uno por persona:
+  **Roberts** (rojo), **Dariana** (azul), **Adalkleiver** (verde) y **María**
+  (morado). Un clic lo enciende (esa persona está ejecutando la tarjeta) y otro
+  lo apaga; pueden estar **dos o más encendidos en la misma tarjeta**. Arriba de
+  cada sección va la leyenda de qué color es cada quien. El jefe los ve pero no
+  los cambia. Para agregar, quitar o renombrar gente (o cambiarle el color) se
+  edita la lista `RESPONSABLES` en `js/state.js`. Necesita correr una vez
+  `supabase/migracion-responsables.sql`.
 - **📸 Sesiones fotográficas**: al lado del tablero. Un calendario del mes muestra
   lo agendado (toca un día para ver solo ese día, o para agendar ahí mismo) y al
   lado va la lista con el detalle. De cada sesión se registra: nombre y apellido,

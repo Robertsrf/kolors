@@ -16,6 +16,31 @@ export const TALLAS_ADULTO = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
 export const GENEROS = ["Niño", "Niña", "Dama", "Caballero", "Unisex"];
 export const NIVELES_PRECIO = [1, 2, 3, 4, 5, 6, 12];
 
+// === QUIÉN EJECUTA CADA TARJETA ===
+// Los 4 círculos de colores que salen en cada tarjeta (camisas, sublimación y
+// eco solvente). Una tarjeta puede tener varios encendidos a la vez.
+// El orden de esta lista es el orden en que se pintan los círculos y la leyenda.
+// Para cambiar el equipo (agregar, quitar o renombrar) se edita SOLO aquí: el
+// "id" es lo que queda guardado en la base de datos, así que no se cambia.
+export const RESPONSABLES = [
+  { id: "roberts", nombre: "Roberts", inicial: "R", color: "#ef4444" },
+  { id: "dariana", nombre: "Dariana", inicial: "D", color: "#3b82f6" },
+  { id: "adalkleiver", nombre: "Adalkleiver", inicial: "A", color: "#22c55e" },
+  { id: "maria", nombre: "María", inicial: "M", color: "#a855f7" },
+];
+
+// Deja la lista guardada en algo confiable: solo ids conocidos, sin repetidos y
+// siempre en el orden de RESPONSABLES (así los círculos no bailan de sitio).
+export function normalizarResponsables(valor) {
+  if (!Array.isArray(valor)) return [];
+  const marcados = new Set(valor.filter((x) => typeof x === "string"));
+  return RESPONSABLES.filter((r) => marcados.has(r.id)).map((r) => r.id);
+}
+
+export function responsablePorId(id) {
+  return RESPONSABLES.find((r) => r.id === id) || null;
+}
+
 // === SESIONES FOTOGRÁFICAS ===
 // Tamaños de foto impresa, en pulgadas. El 8×10" es el más pedido; los demás
 // cubren desde la foto de billetera hasta el cuadro grande.

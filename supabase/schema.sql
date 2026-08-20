@@ -23,6 +23,8 @@ create table if not exists pedidos (
   fecha_estado timestamptz,
   aviso_dias int,
   abono numeric not null default 0,
+  -- quiénes están ejecutando la tarjeta: ["roberts", "maria"]  (los círculos de colores)
+  responsables jsonb not null default '[]'::jsonb,
   creado_at timestamptz not null default now()
 );
 
@@ -52,6 +54,7 @@ create table if not exists impresiones (
   fecha_inicio timestamptz,
   fecha_entrega timestamptz,
   aviso_dias int,
+  responsables jsonb not null default '[]'::jsonb,
   creado_at timestamptz not null default now()
 );
 
@@ -108,6 +111,8 @@ create table if not exists eco_solvente (
   pvc_modo text not null default 'ninguno',      -- 'ninguno' | 'fijo' | 'm2'
   pvc_costo numeric not null default 0,
   pvc_precio_m2 numeric not null default 0,
+
+  responsables jsonb not null default '[]'::jsonb,
 
   creado_at timestamptz not null default now()
 );

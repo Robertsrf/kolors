@@ -4,6 +4,7 @@ import { eliminarImpresion as apiEliminarImpresion } from "../api.js";
 import { render } from "../render.js";
 import { abrirModalAbono } from "../modales/abono.js";
 import { abrirModalEditarImpresion } from "../modales/impresion.js";
+import { responsablesHtml, activarResponsables } from "./responsables.js";
 
 let filtroTextoImpresiones = "";
 let filtroPagoImpresiones = "todos";
@@ -47,6 +48,7 @@ function renderImpresionCard(imp) {
       </div>
       <span class="badge tipo-${tipo}">${TIPO_IMPRESION_LABEL[tipo] || tipo}</span>
     </div>
+    ${responsablesHtml(imp.responsables)}
     ${datoDestacadoHtml({ icono: "📐", valor: fmt(m2), unidad: "m²", detalle: `${fmt(imp.ancho)}×${fmt(imp.alto)} m` })}
     ${imp.descripcion ? `<div class="impresion-desc">${escapeHtml(imp.descripcion)}</div>` : ""}
     <div class="impresion-mid">
@@ -60,6 +62,7 @@ function renderImpresionCard(imp) {
     </div>
   `;
 
+  activarResponsables(card, "impresion", imp);
   card.querySelector('[data-action="abonar"]').addEventListener("click", () => abrirModalAbono("impresion", imp.id));
   card.querySelector('[data-action="editar"]').addEventListener("click", () => abrirModalEditarImpresion(imp.id));
   card.querySelector('[data-action="eliminar"]').addEventListener("click", () => eliminarImpresion(imp.id));

@@ -1,5 +1,13 @@
 import { supabase } from "./supabaseClient.js";
-import { state, migrarPrecios, FASES_CAMISAS_DEFECTO, FASES_ECO_DEFECTO, normalizarMetas } from "./state.js";
+import {
+  state,
+  migrarPrecios,
+  FASES_CAMISAS_DEFECTO,
+  FASES_ECO_DEFECTO,
+  normalizarMetas,
+  normalizarResponsables,
+  responsablePorId,
+} from "./state.js";
 import { getUsuarioActual } from "./auth.js";
 import { registrarAutorEtapaFinal } from "./ui/avisoEtapaFinal.js";
 
@@ -97,6 +105,7 @@ function pedidoFromRow(row, items, pagos) {
     fechaEntrega: row.fecha_entrega || null,
     fechaEstado: row.fecha_estado || null,
     avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
+    responsables: normalizarResponsables(row.responsables),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -116,6 +125,7 @@ function impresionFromRow(row, pagos) {
     fechaInicio: row.fecha_inicio || null,
     fechaEntrega: row.fecha_entrega || null,
     avisoDias: row.aviso_dias == null ? null : Number(row.aviso_dias),
+    responsables: normalizarResponsables(row.responsables),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -165,6 +175,7 @@ function ecoFromRow(row, pagos) {
     pvcModo: row.pvc_modo || "ninguno",
     pvcCosto: Number(row.pvc_costo || 0),
     pvcPrecioM2: Number(row.pvc_precio_m2 || 0),
+    responsables: normalizarResponsables(row.responsables),
     pagos: (pagos || []).map(mapPagoRow),
     creado: row.creado_at,
   };
@@ -876,6 +887,72 @@ export async function eliminarPerdida(id) {
   if (error) throw error;
   registrarLog("Pérdidas", "Eliminó un registro de pérdida/prueba");
   await cargarPerdidas();
+}
+
+// ============================================================
+// RESPONSABLES DE CADA TARJETA (los círculos de colores)
+//
+// Camisas, sublimación y eco solvente guardan la misma lista de ids
+// (["roberts", "maria"]...), cada una en su tabla.
+// ============================================================
+const RESPONSABLES_POR_SECCION = {
+  pedido: { tabla: "pedidos", seccion: "Camisas", recargar: cargarPedidos, lista: () => state.pedidos },
+  impresion: { tabla: "impresiones", seccion: "Sublimación", recargar: cargarImpresiones, lista: () => state.impresiones },
+  eco_solvente: { tabla: "eco_solvente", seccion: "Eco Solvente", recargar: cargarEcoSolvente, lista: () => state.ecoSolvente },
+};
+
+export const AVISO_FALTA_RESPONSABLES =
+  "Los responsables (los círculos de colores) todavía no están preparados en la base de datos.\n\n" +
+  "Hay que correr una vez el archivo supabase/migracion-responsables.sql en:\n" +
+  "Supabase → SQL Editor → New query → Run.\n\n" +
+  "Después recarga la página con Ctrl+F5.";
+
+// ¿El error es "esa columna no existe"? (falta correr la migración)
+function esColumnaFaltante(error) {
+  if (!error) return false;
+  const codigo = error.code || "";
+  return codigo === "42703" || codigo === "PGRST204" || /column .* does not exist|schema cache/i.test(error.message || "");
+}
+
+function nombreDeLaTarjeta(tipo, fila) {
+  if (!fila) return "";
+  return tipo === "pedido" ? fila.cliente.nombre : fila.cliente || "";
+}
+
+/**
+ * Guarda quiénes están ejecutando una tarjeta.
+ * tipo: 'pedido' | 'impresion' | 'eco_solvente' · responsables: ["roberts", ...]
+ */
+export async function actualizarResponsables(tipo, id, responsables) {
+  const conf = RESPONSABLES_POR_SECCION[tipo];
+  if (!conf) return;
+  const lista = normalizarResponsables(responsables);
+  const { data, error } = await supabase
+    .from(conf.tabla)
+    .update({ responsables: lista })
+    .eq("id", id)
+    .select("id");
+  if (error) {
+    // Un "no existe la columna" en crudo no le dice nada a nadie: se cambia por
+    // la instrucción de qué falta hacer.
+    if (esColumnaFaltante(error)) throw new Error(AVISO_FALTA_RESPONSABLES);
+    throw error;
+  }
+  if (!data || !data.length) {
+    throw new Error(
+      "El cambio no se guardó: la base de datos no le permite editar a esta cuenta (row-level security), " +
+        "o el registro ya no existe. Revisa los permisos del usuario."
+    );
+  }
+  const fila = conf.lista().find((x) => x.id === id);
+  const nombres = lista.map((rid) => (responsablePorId(rid) || {}).nombre || rid);
+  registrarLog(
+    conf.seccion,
+    nombres.length
+      ? `Marcó a ${nombres.join(", ")} en la tarjeta de "${nombreDeLaTarjeta(tipo, fila)}"`
+      : `Quitó a todos los responsables de la tarjeta de "${nombreDeLaTarjeta(tipo, fila)}"`
+  );
+  await conf.recargar();
 }
 
 // ============================================================

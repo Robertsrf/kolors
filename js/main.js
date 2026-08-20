@@ -12,6 +12,7 @@ import { renderPerdidasList } from "./ui/perdidas.js";
 import { renderSesionesFoto } from "./ui/sesionesFoto.js";
 import { aplicarHerramientasPorPestana } from "./ui/herramientas.js";
 import { actualizarMenuSecciones } from "./ui/navegacion.js";
+import { initLeyendaResponsables } from "./ui/responsables.js";
 import "./modales/sesionFoto.js";
 import "./ui/datos.js";
 import "./modales/precios.js";
@@ -28,6 +29,10 @@ import { initChat } from "./ui/chat.js";
 import { initLog, renderLog } from "./ui/log.js";
 import "./ui/exportarPdf.js";
 import "./ui/herramientas.js";
+
+// La leyenda de los círculos de colores (quién ejecuta cada tarjeta) no cambia:
+// se pinta una sola vez al cargar la página.
+initLeyendaResponsables();
 
 // === TABS ===
 document.querySelectorAll(".tab-btn").forEach((btn) => {
